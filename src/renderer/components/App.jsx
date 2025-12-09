@@ -18,6 +18,8 @@ const emptySetting = {
   helmet_scripts_path: "",
   emme_python_path: "",
   basedata_path: "",
+  mode_dest_calibration_path: "",
+  municipality_calibration_path: "",
 }
 
 // vex-js imported globally in index.html, since we cannot access webpack config in electron-forge
@@ -87,6 +89,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     newSettings[index].emme_python_path = setting.emme_python_path;
     newSettings[index].basedata_path = setting.basedata_path;
     newSettings[index].project_name = setting.project_name;
+    newSettings[index].mode_dest_calibration_path = setting.mode_dest_calibration_path;
+    newSettings[index].municipality_calibration_path = setting.municipality_calibration_path;
     globalSettingsStore.current.set('settings', JSON.stringify(newSettings));
     globalSettingsStore.current.set('selected_settings_id', setting.id);
     return newSettings;
@@ -136,6 +140,14 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       basedata_path: selectedBaseSetting.basedata_path,
     });
   }
+
+  const setModeDestCalibrationPath = (newPath) => {
+    setSettingInHandling({ ...settingInHandling, mode_dest_calibration_path: cutUnvantedCharacters(newPath) });
+  };
+
+    const setMunicipalityCalibrationPath = (newPath) => {
+    setSettingInHandling({ ...settingInHandling, municipality_calibration_path: cutUnvantedCharacters(newPath) });
+  };
 
   function deleteSetting() {
     const settingIdForDelete = selectedSettingsId;
@@ -529,6 +541,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
           promptModelSystemDownload={_promptModelSystemDownload}
           saveSetting={saveSetting}
           selectBaseSettings={selectBaseSettings}
+          setModeDestCalibrationPath={setModeDestCalibrationPath}
+          setMunicipalityCalibrationPath={setMunicipalityCalibrationPath}
         />
       </div> }
       {/* Pop-up used instead of Alert, which messes with window focus and block */}
@@ -570,6 +584,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
           basedataPath={settingInHandling.basedata_path}
           signalProjectRunning={setProjectRunning}
           settingsId={settingInHandling.id}
+          modeDestCalibrationPath={settingInHandling.mode_dest_calibration_path}
+          municipalityCalibrationPath={settingInHandling.municipality_calibration_path}
           openCreateEmmeBank={_openCreateEmmeBank}
           addNewSetting={addNewSetting}
         />

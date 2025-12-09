@@ -11,7 +11,7 @@ const { ipcRenderer } = require('electron');
 
 const VlemProject = ({
   projectName, projectFolder, emmePythonPath, helmetScriptsPath, basedataPath,
-  signalProjectRunning, settingsId, openCreateEmmeBank, addNewSetting
+  signalProjectRunning, settingsId, modeDestCalibrationPath, municipalityCalibrationPath, openCreateEmmeBank, addNewSetting
 }) => {
   // VLEM Project -specific settings
   const [scenarios, setScenarios] = useState([]); // Scenarios under currently selected Project
@@ -524,10 +524,6 @@ const VlemProject = ({
     setRunningScenarioID(activeScenarioIDs[0]); // Disable controls
     setRunningScenarioIDsQueued(activeScenarioIDs.slice(1));
     signalProjectRunning(true); // Let App-component know too
-    /**
-     *  projectName, projectFolder, emmePythonPath, helmetScriptsPath, basedataPath, resultsPath,
-        signalProjectRunning, settingsId, openCreateEmmeBank, addNewSetting
-     */
     ipcRenderer.send(
       'message-from-ui-to-run-scenarios',
       scenariosToRun.map((s) => {
@@ -560,6 +556,8 @@ const VlemProject = ({
           log_level: 'DEBUG',
           end_assignment_only: end_assignment_only,
           costDataPath: costDataPath,
+          mode_dest_calibration_path: modeDestCalibrationPath,
+          municipality_calibration_path: municipalityCalibrationPath,
         }
       })
     );

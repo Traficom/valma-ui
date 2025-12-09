@@ -92,6 +92,8 @@ module.exports = {
           .concat(runParameters.stored_speed_assignment ? ["--stored-speed-assignment"]: [])
           .concat(runParameters.submodel ? ["--submodel", runParameters.submodel] : [])
           .concat(runParameters.freight_matrix_path && runParameters.freight_matrix_path != "" ? ["--freight-matrix-path", runParameters.freight_matrix_path] : [])
+          .concat(runParameters.mode_dest_calibration_path ? ["--mode-dest-calibration-path", runParameters.mode_dest_calibration_path] : [])
+          .concat(runParameters.municipality_calibration_path ? ["--municipality-calibration-path", runParameters.municipality_calibration_path] : [])
       });
 
     // Attach runtime handlers (stdout/stderr, process errors)
