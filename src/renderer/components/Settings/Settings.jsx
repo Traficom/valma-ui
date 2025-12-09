@@ -17,6 +17,8 @@ const Settings = ({
   promptModelSystemDownload,
   saveSetting,
   selectBaseSettings,
+  setModeDestCalibrationPath,
+  setMunicipalityCalibrationPath,
 }) => {
   const [selectedBaseSettings, setSelectedBaseSettings] = useState('');
 
@@ -182,6 +184,70 @@ const Settings = ({
             }}
           />
         </div>
+          <div className="Settings__dialog-input-group">
+          <span className="Settings__pseudo-label semi_bold">Kulkutapa- ja matkakohdevalinnan kalibrointitiedosto (.json)</span>
+          <span>
+          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.mode_dest_calibration_path ? " shorter" : "")} htmlFor="hidden-input-mode-dest-calibration-path" title={settings.mode_dest_calibration_path}>
+            {settings.mode_dest_calibration_path ? path.basename(settings.mode_dest_calibration_path) : "Valitse.."}
+          </label>
+           {settings.mode_dest_calibration_path &&
+            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-mode-dest-calibration-path" onClick={(e) => {
+                     setModeDestCalibrationPath("");
+              }}>
+            </label>
+           }
+           </span>
+          <input className="Settings__hidden-input"
+            id="hidden-input-mode-dest-calibration-path"
+            type="text"
+            onClick={() => {
+              dialog.showOpenDialog({
+                defaultPath: settings.mode_dest_calibration_path ? settings.mode_dest_calibration_path : (settings.basedata_path ? settings.basedata_path : settings.project_folder),
+                filters: [
+                  { name: 'Executable', extensions: ['json'] },
+                  { name: 'All Files', extensions: ['*'] }
+                ],
+                properties: ['openFile']
+              }).then((e) => {
+                if (!e.canceled) {
+                  setModeDestCalibrationPath(e.filePaths[0]);
+                }
+              })
+            }}
+          />
+        </div>
+        <div className="Settings__dialog-input-group">
+          <span className="Settings__pseudo-label semi_bold">Kunta-kunta-kalibroinnin tiedosto (.txt)</span>
+            <span>
+          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.municipality_calibration_path ? " shorter" : "")} htmlFor="hidden-input-municipality-calibration-path" title={settings.municipality_calibration_path}>
+            {settings.municipality_calibration_path ? path.basename(settings.municipality_calibration_path) : "Valitse.."}
+          </label>
+           {settings.municipality_calibration_path &&
+            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-municipality-calibration-path" onClick={(e) => {
+                     setMunicipalityCalibrationPath("");
+              }}>
+            </label>
+           }
+           </span>
+          <input className="Settings__hidden-input"
+            id="hidden-input-municipality-calibration-path"
+            type="text"
+            onClick={() => {
+              dialog.showOpenDialog({
+                defaultPath: settings.municipality_calibration_path ? settings.municipality_calibration_path : (settings.basedata_path ? settings.basedata_path : settings.project_folder),
+                filters: [
+                  { name: 'Executable', extensions: ['txt'] },
+                  { name: 'All Files', extensions: ['*'] }
+                ],
+                properties: ['openFile']
+              }).then((e) => {
+                if (!e.canceled) {
+                  setMunicipalityCalibrationPath(e.filePaths[0]);
+                }
+              })
+            }}
+          />
+        </div>
         <div className="Settings__scenarios-footer">
           <button
             className="Settings_btn"
@@ -198,7 +264,6 @@ const Settings = ({
           </button>
         </div>
       </div>
-
     </div>
   )
 };
