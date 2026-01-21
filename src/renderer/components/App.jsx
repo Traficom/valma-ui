@@ -17,9 +17,9 @@ const emptySetting = {
   project_folder: "",
   helmet_scripts_path: "",
   emme_python_path: "",
-  basedata_path: "",
-  mode_dest_calibration_path: "",
-  municipality_calibration_path: "",
+  base_data_folder: "",
+  mode_dest_calibration_file: "",
+  municipality_calibration_file: "",
 }
 
 // vex-js imported globally in index.html, since we cannot access webpack config in electron-forge
@@ -87,10 +87,10 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     newSettings[index].project_folder = setting.project_folder;
     newSettings[index].helmet_scripts_path = setting.helmet_scripts_path;
     newSettings[index].emme_python_path = setting.emme_python_path;
-    newSettings[index].basedata_path = setting.basedata_path;
+    newSettings[index].base_data_folder = setting.base_data_folder;
     newSettings[index].project_name = setting.project_name;
-    newSettings[index].mode_dest_calibration_path = setting.mode_dest_calibration_path;
-    newSettings[index].municipality_calibration_path = setting.municipality_calibration_path;
+    newSettings[index].mode_dest_calibration_file = setting.mode_dest_calibration_file;
+    newSettings[index].municipality_calibration_file = setting.municipality_calibration_file;
     globalSettingsStore.current.set('settings', JSON.stringify(newSettings));
     globalSettingsStore.current.set('selected_settings_id', setting.id);
     return newSettings;
@@ -137,16 +137,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       project_folder: selectedBaseSetting.project_folder,
       helmet_scripts_path: selectedBaseSetting.helmet_scripts_path,
       emme_python_path: selectedBaseSetting.emme_python_path,
-      basedata_path: selectedBaseSetting.basedata_path,
+      base_data_folder: selectedBaseSetting.base_data_folder,
     });
   }
 
-  const setModeDestCalibrationPath = (newPath) => {
-    setSettingInHandling({ ...settingInHandling, mode_dest_calibration_path: cutUnvantedCharacters(newPath) });
+  const setModeDestCalibrationFile = (newPath) => {
+    setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: cutUnvantedCharacters(newPath) });
   };
 
-    const setMunicipalityCalibrationPath = (newPath) => {
-    setSettingInHandling({ ...settingInHandling, municipality_calibration_path: cutUnvantedCharacters(newPath) });
+    const setMunicipalityCalibrationFile = (newPath) => {
+    setSettingInHandling({ ...settingInHandling, municipality_calibration_file: cutUnvantedCharacters(newPath) });
   };
 
   function deleteSetting() {
@@ -281,8 +281,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     runPipInstall(pipFilePath, pipRequirementsPath);
   };
 
-  const _setBasedataPath = (newPath) => {
-    setSettingInHandling({ ...settingInHandling, basedata_path: cutUnvantedCharacters(newPath) });
+  const _setBaseDataFolder= (newPath) => {
+    setSettingInHandling({ ...settingInHandling, base_data_folder: cutUnvantedCharacters(newPath) });
   };
 
   const _closeLoadingInfo = () => {
@@ -537,12 +537,12 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
           setProjectFolder={_setProjectFolder}
           setEMMEPythonPath={_setEMMEPythonPath}
           setHelmetScriptsPath={_setHelmetScriptsPath}
-          setBasedataPath={_setBasedataPath}
+          setBaseDataFolder={_setBaseDataFolder}
           promptModelSystemDownload={_promptModelSystemDownload}
           saveSetting={saveSetting}
           selectBaseSettings={selectBaseSettings}
-          setModeDestCalibrationPath={setModeDestCalibrationPath}
-          setMunicipalityCalibrationPath={setMunicipalityCalibrationPath}
+          setModeDestCalibrationFile={setModeDestCalibrationFile}
+          setMunicipalityCalibrationFile={setMunicipalityCalibrationFile}
         />
       </div> }
       {/* Pop-up used instead of Alert, which messes with window focus and block */}
@@ -581,11 +581,11 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
           projectFolder={settingInHandling.project_folder ? settingInHandling.project_folder : homedir}
           emmePythonPath={settingInHandling.emme_python_path}
           helmetScriptsPath={settingInHandling.helmet_scripts_path}
-          basedataPath={settingInHandling.basedata_path}
+          baseDataFolder={settingInHandling.base_data_folder}
           signalProjectRunning={setProjectRunning}
           settingsId={settingInHandling.id}
-          modeDestCalibrationPath={settingInHandling.mode_dest_calibration_path}
-          municipalityCalibrationPath={settingInHandling.municipality_calibration_path}
+          modeDestCalibrationFile={settingInHandling.mode_dest_calibration_file}
+          municipalityCalibrationFile={settingInHandling.municipality_calibration_file}
           openCreateEmmeBank={_openCreateEmmeBank}
           addNewSetting={addNewSetting}
         />

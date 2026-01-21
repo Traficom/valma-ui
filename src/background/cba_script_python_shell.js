@@ -27,7 +27,7 @@ module.exports = {
             projected_scenario,
             baseline_scenario_2,
             projected_scenario_2,
-            "--results-path", runParameters.results_path
+            "--results-path", runParameters.result_data_folder
         ]
       });
 

@@ -17,16 +17,16 @@ const SubScenarioRow = ({
     tooltipContent,
     projectFolder,
     parentScenarioIsRunOrSelectedForRunning,
-    parentScenarioResultsPath
+    parentScenarioResultDataFolder
 }) => {
 
     const scenarioLogFilePath = projectFolder + "\\" + subScenario.name + "\\" + subScenario.name + ".log";
 
-    const resultsExist = fs.existsSync(parentScenarioResultsPath);
+    const resultsExist = fs.existsSync(parentScenarioResultDataFolder);
     const scenarioLogExists = fs.existsSync(scenarioLogFilePath);
 
-    const openResultsFolder = () => {
-      shell.openPath(parentScenarioResultsPath);
+    const openResultDataFolder = () => {
+      shell.openPath(parentScenarioResultDataFolder);
     }
   
     const openLogFile = () => {
@@ -77,7 +77,7 @@ const SubScenarioRow = ({
           <td className="Table_space_after">
             {resultsExist && <div
               className={"Runtime__scenario-open-folder"}
-              onClick={e => openResultsFolder()}
+              onClick={e => openResultDataFolder()}
             >
               NÄYTÄ
             </div>}

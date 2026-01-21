@@ -17,7 +17,7 @@ const Runtime = ({
 
   const runningScenario = activeScenarios.filter((scenario) => scenario.id === runningScenarioID);
 
-  const getResultsPathFromLogfilePath = (logfilePath) => {
+  const getResultDataFolderFromLogfilePath = (logfilePath) => {
     console.log(logfilePath.replace(/\/[^\/]+$/, ''));
     return logfilePath.replace(/\/[^\/]+$/, '');
   }
@@ -34,7 +34,7 @@ const Runtime = ({
       runStatus.statusLogfilePath = logArgs.status['log'];
 
     if (logArgs.status.state === SCENARIO_STATUS_STATE.FINISHED) {
-      runStatus.statusReadyScenariosLogfiles = { name: logArgs.status.name, logfile: logArgs.status.log, resultsPath: getResultsPathFromLogfilePath(logArgs.status.log) }
+      runStatus.statusReadyScenariosLogfiles = { name: logArgs.status.name, logfile: logArgs.status.log, resultDataFolder: getResultDataFolderFromLogfilePath(logArgs.status.log) }
       runStatus.statusRunFinishTime = logArgs.time;
     }
 

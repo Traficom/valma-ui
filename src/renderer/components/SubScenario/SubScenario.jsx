@@ -62,13 +62,13 @@ const SubScenario = ({
                 <div>
                     <span className="SubScenario_label">Liikenteen hintadata</span>
                     <div className="SubScenario_input_with_reset">
-                    <label className="SubScenario_input" htmlFor="sub-cost-data-file-select" title={subScenarioEdit.costDataPath ? subScenarioEdit.costDataPath : "Cost data file"}>
-                        {subScenarioEdit.costDataPath ? path.basename(subScenarioEdit.costDataPath) : "Valitse.."}
+                    <label className="SubScenario_input" htmlFor="sub-cost-data-file-select" title={subScenarioEdit.cost_data_file ? subScenarioEdit.cost_data_file : "Cost data file"}>
+                        {subScenarioEdit.cost_data_file ? path.basename(subScenarioEdit.cost_data_file) : "Valitse.."}
                     </label>
-                    {subScenarioEdit.costDataPath &&
+                    {subScenarioEdit.cost_data_file &&
                             <span onClick={(event) => {
                                 event.preventDefault();
-                                handleChange({ ...subScenarioEdit, costDataPath: "" });
+                                handleChange({ ...subScenarioEdit, cost_data_file: "" });
                             }}>
                                 <ResetIcon />
                             </span>
@@ -79,7 +79,7 @@ const SubScenario = ({
                         type="text"
                         onClick={() => {
                             dialog.showOpenDialog({
-                                defaultPath: subScenarioEdit.costDataPath ? subScenarioEdit.costDataPath : subScenarioEdit.parentCostDataPath,
+                                defaultPath: subScenarioEdit.cost_data_file ? subScenarioEdit.cost_data_file : subScenarioEdit.parentCostDataFile,
                                 filters: [
                                     { name: 'Json', extensions: ['json'] },
                                     { name: 'All Files', extensions: ['*'] }
@@ -87,7 +87,7 @@ const SubScenario = ({
                                 properties: ['openFile']
                             }).then((e) => {
                                 if (!e.canceled) {
-                                    handleChange({ ...subScenarioEdit, costDataPath: e.filePaths[0] });
+                                    handleChange({ ...subScenarioEdit, cost_data_file: e.filePaths[0] });
                                 }
                             })
                         }}

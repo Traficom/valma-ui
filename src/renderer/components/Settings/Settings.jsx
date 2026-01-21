@@ -11,14 +11,14 @@ const Settings = ({
   setHelmetScriptsPath,
   dlHelmetScriptsVersion,
   isDownloadingHelmetScripts,
-  setBasedataPath,
+  setBaseDataFolder,
   setProjectName,
   cancel,
   promptModelSystemDownload,
   saveSetting,
   selectBaseSettings,
-  setModeDestCalibrationPath,
-  setMunicipalityCalibrationPath,
+  setModeDestCalibrationFile,
+  setMunicipalityCalibrationFile,
 }) => {
   const [selectedBaseSettings, setSelectedBaseSettings] = useState('');
 
@@ -166,19 +166,19 @@ const Settings = ({
         </div>
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">L&auml;ht&ouml;datan sis&auml;lt&auml;v&auml; kansio</span>
-          <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-basedata-path" title={settings.basedata_path}>
-            {settings.basedata_path ? path.basename(settings.basedata_path) : "Valitse.."}
+          <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-basedata-path" title={settings.base_data_folder}>
+            {settings.base_data_folder ? path.basename(settings.base_data_folder) : "Valitse.."}
           </label>
           <input className="Settings__hidden-input"
             id="hidden-input-basedata-path"
             type="text"
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: settings.basedata_path ? settings.basedata_path : settings.project_folder,
+                defaultPath: settings.base_data_folder ? settings.base_data_folder : settings.project_folder,
                 properties: ['openDirectory']
               }).then((e) => {
                 if (!e.canceled) {
-                  setBasedataPath(e.filePaths[0]);
+                  setBaseDataFolder(e.filePaths[0]);
                 }
               })
             }}
@@ -187,12 +187,12 @@ const Settings = ({
           <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">Kulkutapa- ja matkakohdevalinnan kalibrointitiedosto (.json)</span>
           <span>
-          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.mode_dest_calibration_path ? " shorter" : "")} htmlFor="hidden-input-mode-dest-calibration-path" title={settings.mode_dest_calibration_path}>
-            {settings.mode_dest_calibration_path ? path.basename(settings.mode_dest_calibration_path) : "Valitse.."}
+          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.mode_dest_calibration_file ? " shorter" : "")} htmlFor="hidden-input-mode-dest-calibration-path" title={settings.mode_dest_calibration_file}>
+            {settings.mode_dest_calibration_file ? path.basename(settings.mode_dest_calibration_file) : "Valitse.."}
           </label>
-           {settings.mode_dest_calibration_path &&
+           {settings.mode_dest_calibration_file &&
             <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-mode-dest-calibration-path" onClick={(e) => {
-                     setModeDestCalibrationPath("");
+                     setModeDestCalibrationFile("");
               }}>
             </label>
            }
@@ -202,7 +202,7 @@ const Settings = ({
             type="text"
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: settings.mode_dest_calibration_path ? settings.mode_dest_calibration_path : (settings.basedata_path ? settings.basedata_path : settings.project_folder),
+                defaultPath: settings.mode_dest_calibration_file ? settings.mode_dest_calibration_file : (settings.base_data_folder ? settings.base_data_folder : settings.project_folder),
                 filters: [
                   { name: 'Executable', extensions: ['json'] },
                   { name: 'All Files', extensions: ['*'] }
@@ -210,7 +210,7 @@ const Settings = ({
                 properties: ['openFile']
               }).then((e) => {
                 if (!e.canceled) {
-                  setModeDestCalibrationPath(e.filePaths[0]);
+                  setModeDestCalibrationFile(e.filePaths[0]);
                 }
               })
             }}
@@ -219,22 +219,22 @@ const Settings = ({
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">Kunta-kunta-kalibroinnin tiedosto (.txt)</span>
             <span>
-          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.municipality_calibration_path ? " shorter" : "")} htmlFor="hidden-input-municipality-calibration-path" title={settings.municipality_calibration_path}>
-            {settings.municipality_calibration_path ? path.basename(settings.municipality_calibration_path) : "Valitse.."}
+          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.municipality_calibration_file ? " shorter" : "")} htmlFor="hidden-input-municipality-calibration-file" title={settings.municipality_calibration_file}>
+            {settings.municipality_calibration_file ? path.basename(settings.municipality_calibration_file) : "Valitse.."}
           </label>
-           {settings.municipality_calibration_path &&
-            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-municipality-calibration-path" onClick={(e) => {
-                     setMunicipalityCalibrationPath("");
+           {settings.municipality_calibration_file &&
+            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-municipality-calibration-file" onClick={(e) => {
+                     setMunicipalityCalibrationFile("");
               }}>
             </label>
            }
            </span>
           <input className="Settings__hidden-input"
-            id="hidden-input-municipality-calibration-path"
+            id="hidden-input-municipality-calibration-file"
             type="text"
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: settings.municipality_calibration_path ? settings.municipality_calibration_path : (settings.basedata_path ? settings.basedata_path : settings.project_folder),
+                defaultPath: settings.municipality_calibration_file ? settings.municipality_calibration_file : (settings.base_data_folder ? settings.base_data_folder : settings.project_folder),
                 filters: [
                   { name: 'Executable', extensions: ['txt'] },
                   { name: 'All Files', extensions: ['*'] }
@@ -242,7 +242,7 @@ const Settings = ({
                 properties: ['openFile']
               }).then((e) => {
                 if (!e.canceled) {
-                  setMunicipalityCalibrationPath(e.filePaths[0]);
+                  setMunicipalityCalibrationFile(e.filePaths[0]);
                 }
               })
             }}

@@ -72,7 +72,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
     updateScenario({ ...scenario, storedSpeedAssignmentInputs: inputs })
   }
 
-  const basedataPath = scenario.overriddenProjectSettings.basedataPath ? scenario.overriddenProjectSettings.basedataPath : inheritedGlobalProjectSettings.basedataPath;
+  const baseDataFolder = scenario.overriddenProjectSettings.baseDataFolder ? scenario.overriddenProjectSettings.baseDataFolder : inheritedGlobalProjectSettings.baseDataFolder;
 
   //Open override settings by default if atleast one of the settings is overridden
   const [showOverrides, setShowOverrides] = useState(hasOverriddenSettings(scenario));
@@ -132,15 +132,15 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
       {/* Folder path to variable input data (input data with variables sent to EMME) */}
       <div className="Scenario__section">
         <span className="Scenario__pseudo-label">Sy&ouml;tt&ouml;tiedot</span>
-        <label className="Scenario__pseudo-file-select" htmlFor="data-folder-select" title={scenario.forecast_data_path}>
-          {scenario.forecast_data_path ? path.basename(scenario.forecast_data_path) : "Valitse.."}
+        <label className="Scenario__pseudo-file-select" htmlFor="data-folder-select" title={scenario.zone_data_file}>
+          {scenario.zone_data_file ? path.basename(scenario.zone_data_file) : "Valitse.."}
         </label>
         <input className="Scenario__hidden-input"
           id="data-folder-select"
           type="text"
           onClick={() => {
             dialog.showOpenDialog({
-              defaultPath: scenario.forecast_data_path ? scenario.forecast_data_path : projectFolder,
+              defaultPath: scenario.zone_data_file ? scenario.zone_data_file : projectFolder,
               filters: [
                 { name: 'GeoPackage', extensions: ['gpkg'] },
                 { name: 'All Files', extensions: ['*'] }
@@ -148,26 +148,26 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               properties: ['openFile']
             }).then((e) => {
               if (!e.canceled) {
-                updateScenario({ ...scenario, forecast_data_path: e.filePaths[0] });
+                updateScenario({ ...scenario, zone_data_file: e.filePaths[0] });
               }
             })
           }}
         />
-        {!scenario.forecast_data_path ? <span className="Scenario-error">{"Syöttötiedot on pakollinen tieto."}</span> : ""}
+        {!scenario.zone_data_file ? <span className="Scenario-error">{"Syöttötiedot on pakollinen tieto."}</span> : ""}
       </div>
 
       {/* File path to cost data */}
       <div className="Scenario__section">
         <span className="Scenario__pseudo-label">Liikenteen hintadata</span>
-        <label className="Scenario__pseudo-file-select" htmlFor="cost-data-file-select" title={scenario.costDataPath}>
-          {scenario.costDataPath ? path.basename(scenario.costDataPath) : "Valitse.."}
+        <label className="Scenario__pseudo-file-select" htmlFor="cost-data-file-select" title={scenario.cost_data_file}>
+          {scenario.cost_data_file ? path.basename(scenario.cost_data_file) : "Valitse.."}
         </label>
         <input className="Scenario__hidden-input"
           id="cost-data-file-select"
           type="text"
           onClick={() => {
             dialog.showOpenDialog({
-              defaultPath: scenario.costDataPath ? scenario.costDataPath : projectFolder,
+              defaultPath: scenario.cost_data_file ? scenario.cost_data_file : projectFolder,
               filters: [
                 { name: 'Json', extensions: ['json'] },
                 { name: 'All Files', extensions: ['*'] }
@@ -175,26 +175,26 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               properties: ['openFile']
             }).then((e) => {
               if (!e.canceled) {
-                updateScenario({ ...scenario, costDataPath: e.filePaths[0] });
+                updateScenario({ ...scenario, cost_data_file: e.filePaths[0] });
               }
             })
           }}
         />
-        {!scenario.costDataPath ? <span className="Scenario-error">{"Liikenteen hintadata on pakollinen tieto."}</span> : ""}
+        {!scenario.cost_data_file ? <span className="Scenario-error">{"Liikenteen hintadata on pakollinen tieto."}</span> : ""}
       </div>
 
        {/* Import and export data */}
       { isFreightScenario && <div className="Scenario__section">
         <span className="Scenario__pseudo-label">Vienti- ja tuontidata</span>
-        <label className="Scenario__pseudo-file-select" htmlFor="import-and-export-data-file-select" title={scenario.tradeDemandDataPath}>
-          {scenario.tradeDemandDataPath ? path.basename(scenario.tradeDemandDataPath) : "Valitse.."}
+        <label className="Scenario__pseudo-file-select" htmlFor="import-and-export-data-file-select" title={scenario.trade_demand_data_path}>
+          {scenario.trade_demand_data_path ? path.basename(scenario.trade_demand_data_path) : "Valitse.."}
         </label>
         <input className="Scenario__hidden-input"
           id="import-and-export-data-file-select"
           type="text"
           onClick={() => {
             dialog.showOpenDialog({
-              defaultPath: scenario.tradeDemandDataPath ? scenario.tradeDemandDataPath : projectFolder,
+              defaultPath: scenario.trade_demand_data_path ? scenario.trade_demand_data_path : projectFolder,
               filters: [
                 { name: 'OMX', extensions: ['omx'] },
                 { name: 'All Files', extensions: ['*'] }
@@ -202,12 +202,12 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               properties: ['openFile']
             }).then((e) => {
               if (!e.canceled) {
-                updateScenario({ ...scenario, tradeDemandDataPath: e.filePaths[0] });
+                updateScenario({ ...scenario, trade_demand_data_path: e.filePaths[0] });
               }
             })
           }}
         />
-        {!scenario.tradeDemandDataPath ? <span className="Scenario-error">{"Vienti- ja tuontidata on pakollinen tieto."}</span> : ""}
+        {!scenario.trade_demand_data_path ? <span className="Scenario-error">{"Vienti- ja tuontidata on pakollinen tieto."}</span> : ""}
       </div>}
 
       {/* Choice how to use long distance demand forecast */}
@@ -222,7 +222,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
           <input type="radio" value="path" name="long_dist_demand_forecast"
             checked={scenario.long_dist_demand_forecast == "path"}
             onChange={(e) => {
-              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: basedataPath });
+              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: baseDataFolder });
             }} /> Ota malliajon tuloskansiosta<br />
           <input id="long_dist_demand_forecast_path_input"
             className="Scenario__pseudo-file-select Scenario__inline"
@@ -234,7 +234,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
             placeholder={scenario.long_dist_demand_forecast == "path" ? scenario.long_dist_demand_forecast_path : "..."}
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: scenario.long_dist_demand_forecast_path ? scenario.long_dist_demand_forecast_path : basedataPath,
+                defaultPath: scenario.long_dist_demand_forecast_path ? scenario.long_dist_demand_forecast_path : baseDataFolder,
                 properties: ['openDirectory']
               }).then((e) => {
                 if (!e.canceled) {
@@ -305,7 +305,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
             checked={goodsTransportFreightMatrixSource == "path"}
             onChange={(e) => {
               setGoodsTransportFreightMatrixSource(e.target.value);
-              updateScenario({ ...scenario, freight_matrix_path: basedataPath });
+              updateScenario({ ...scenario, freight_matrix_path: baseDataFolder });
             }} /> Ota malliajon tuloskansiosta<br />
           <input id="freight_matrix_path_input"
             className="Scenario__pseudo-file-select Scenario__inline"
@@ -317,7 +317,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
             placeholder={goodsTransportFreightMatrixSource == "path" ? scenario.freight_matrix_path : "..."}
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: scenario.freight_matrix_path ? scenario.freight_matrix_path : basedataPath,
+                defaultPath: scenario.freight_matrix_path ? scenario.freight_matrix_path : baseDataFolder,
                 properties: ['openDirectory']
               }).then((e) => {
                 if (!e.canceled) {
@@ -543,29 +543,29 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               <div className="Scenario__section">
                 <label className="Scenario__pseudo-label Scenario__pseudo-label--inline project-override-setting">
                   <span className="inline-element override-setting">Lähtödatakansion polku</span>
-                  {scenario.overriddenProjectSettings.basedataPath &&
+                  {scenario.overriddenProjectSettings.baseDataFolder &&
                     <label className="inline-element override-reset-button" onClick={(event) => {
                       event.preventDefault();
-                      updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, basedataPath: null } });
+                      updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, baseDataFolder: null } });
                     }}>
                       <ResetIcon className="override-reset-icon" />
                     </label>
                   }
-                  <label className={classNames('Settings__pseudo-file-select', 'override-file-select-input', { 'override-is-default': scenario.overriddenProjectSettings.basedataPath ? false : true })} htmlFor="override-base-data-path" title={'Base data path'}>
-                    {scenario.overriddenProjectSettings.basedataPath ? scenario.overriddenProjectSettings.basedataPath : inheritedGlobalProjectSettings.basedataPath}
+                  <label className={classNames('Settings__pseudo-file-select', 'override-file-select-input', { 'override-is-default': scenario.overriddenProjectSettings.baseDataFolder ? false : true })} htmlFor="override-base-data-path" title={'Base data path'}>
+                    {scenario.overriddenProjectSettings.baseDataFolder ? scenario.overriddenProjectSettings.baseDataFolder : inheritedGlobalProjectSettings.baseDataFolder}
                   </label>
                   <input id="override-base-data-path"
                     className="override-input"
                     type="text"
                     hidden={true}
-                    placeholder={inheritedGlobalProjectSettings.basedataPath}
+                    placeholder={inheritedGlobalProjectSettings.baseDataFolder}
                     onClick={() => {
                       dialog.showOpenDialog({
-                        defaultPath: scenario.overriddenProjectSettings.basedataPath ? scenario.overriddenProjectSettings.basedataPath : inheritedGlobalProjectSettings.basedataPath,
+                        defaultPath: scenario.overriddenProjectSettings.baseDataFolder ? scenario.overriddenProjectSettings.baseDataFolder : inheritedGlobalProjectSettings.baseDataFolder,
                         properties: ['openDirectory']
                       }).then((e) => {
                         if (!e.canceled) {
-                          updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, basedataPath: e.filePaths[0] } });
+                          updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, baseDataFolder: e.filePaths[0] } });
                         }
                       })
                     }}
