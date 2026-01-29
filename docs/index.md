@@ -1,4 +1,4 @@
-# VLEM UI - Dokumentaatio
+# VALMA UI - Dokumentaatio
  
-VLEM projekti löytyy sivustolta:
-[https://github.com/Traficom/lem-model-system](https://github.com/Traficom/lem-model-system)
+VALMA projekti löytyy sivustolta:
+[https://github.com/Traficom/valma-model-system](https://github.com/Traficom/valma-model-system)

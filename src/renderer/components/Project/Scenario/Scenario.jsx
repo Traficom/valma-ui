@@ -112,7 +112,7 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
         {nameError ? <span className="Scenario-error">{nameError}</span> : ""}
       </div>
 
-      {/* Number of first EMME-scenario ID (of 4) - NOTE: EMME-scenario is different from HELMET-scenario (ie. this config) */}
+      {/* Number of first EMME-scenario ID (of 4) - NOTE: EMME-scenario is different from VALMA-scenario (ie. this config) */}
       <div className="Scenario__section">
         <label className="Scenario__pseudo-label"
           htmlFor="first-scenario-id">Liikenneverkon sis&auml;lt&auml;v&auml; Emme-skenaario</label>
@@ -511,29 +511,29 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               <div className="Scenario__section">
                 <label className="Scenario__pseudo-label Scenario__pseudo-label--inline">
                   <span className="inline-element override-setting">Lem-model-system</span>
-                  {scenario.overriddenProjectSettings.helmetScriptsPath &&
+                  {scenario.overriddenProjectSettings.valmaScriptsPath &&
                     <label className="inline-element override-reset-button" onClick={(event) => {
                       event.preventDefault();
-                      updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, helmetScriptsPath: null } });
+                      updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, valmaScriptsPath: null } });
                     }}>
                       <ResetIcon className="override-reset-icon" />
                     </label>
                   }
-                  <label className={classNames('Settings__pseudo-file-select', 'override-file-select-input', { 'override-is-default': scenario.overriddenProjectSettings.helmetScriptsPath ? false : true })} htmlFor="override-helmet-scripts-path" title={'Lem-model-system'}>
-                    {scenario.overriddenProjectSettings.helmetScriptsPath ? scenario.overriddenProjectSettings.helmetScriptsPath : inheritedGlobalProjectSettings.helmetScriptsPath}
+                  <label className={classNames('Settings__pseudo-file-select', 'override-file-select-input', { 'override-is-default': scenario.overriddenProjectSettings.valmaScriptsPath ? false : true })} htmlFor="override-valma-scripts-path" title={'Valma-model-system'}>
+                    {scenario.overriddenProjectSettings.valmaScriptsPath ? scenario.overriddenProjectSettings.valmaScriptsPath : inheritedGlobalProjectSettings.valmaScriptsPath}
                   </label>
-                  <input id="override-helmet-scripts-path"
+                  <input id="override-valma-scripts-path"
                     className="override-input"
                     type="text"
                     hidden={true}
-                    placeholder={inheritedGlobalProjectSettings.helmetScriptsPath}
+                    placeholder={inheritedGlobalProjectSettings.valmaScriptsPath}
                     onClick={() => {
                       dialog.showOpenDialog({
-                        defaultPath: scenario.overriddenProjectSettings.helmetScriptsPath ? scenario.overriddenProjectSettings.helmetScriptsPath : inheritedGlobalProjectSettings.helmetScriptsPath,
+                        defaultPath: scenario.overriddenProjectSettings.valmaScriptsPath ? scenario.overriddenProjectSettings.valmaScriptsPath : inheritedGlobalProjectSettings.valmaScriptsPath,
                         properties: ['openDirectory']
                       }).then((e) => {
                         if (!e.canceled) {
-                          updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, helmetScriptsPath: e.filePaths[0] } });
+                          updateScenario({ ...scenario, overriddenProjectSettings: { ...scenario.overriddenProjectSettings, valmaScriptsPath: e.filePaths[0] } });
                         }
                       })
                     }}

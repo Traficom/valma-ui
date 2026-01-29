@@ -15,7 +15,7 @@ const emptySetting = {
   id: "",
   project_name: "",
   project_folder: "",
-  helmet_scripts_path: "",
+  valma_scripts_path: "",
   emme_python_path: "",
   base_data_folder: "",
   mode_dest_calibration_file: "",
@@ -29,8 +29,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
   // Global settings
   const [isSettingsOpen, setSettingsOpen] = useState(false); // whether Settings -dialog is open
   const [isProjectRunning, setProjectRunning] = useState(false); // whether currently selected Project is running
-  const [isDownloadingHelmetScripts, setDownloadingHelmetScripts] = useState(false); // whether downloading "/Scripts" is in progress
-  const [dlHelmetScriptsVersion, setDlHelmetScriptsVersion] = useState(undefined); // which version is being downloaded
+  const [isDownloadingValmaScripts, setDownloadingValmaScripts] = useState(false); // whether downloading "/Scripts" is in progress
+  const [dlValmaScriptsVersion, setDlValmaScriptsVersion] = useState(undefined); // which version is being downloaded
   const [settingInHandling, setSettingInHandling] = useState({ ...emptySetting });
   const [projectSettings, setProjectSettings] = useState([]); // Project settings
   const [selectedSettingsId, setSelectedSettingsId] = useState(undefined); // Selected settings id
@@ -67,7 +67,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
 
   function openSettings(){
     setCreateEmmeBankModalOpen(false);
-    setDownloadingHelmetScripts(false);
+    setDownloadingValmaScripts(false);
     setSettingsOpen(true);
   }
 
@@ -85,7 +85,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     const index = prevState.map(s => s.id).indexOf(setting.id);
     const newSettings = [...prevState];
     newSettings[index].project_folder = setting.project_folder;
-    newSettings[index].helmet_scripts_path = setting.helmet_scripts_path;
+    newSettings[index].valma_scripts_path = setting.valma_scripts_path;
     newSettings[index].emme_python_path = setting.emme_python_path;
     newSettings[index].base_data_folder = setting.base_data_folder;
     newSettings[index].project_name = setting.project_name;
@@ -135,7 +135,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     setSettingInHandling({
       ...settingInHandling,
       project_folder: selectedBaseSetting.project_folder,
-      helmet_scripts_path: selectedBaseSetting.helmet_scripts_path,
+      valma_scripts_path: selectedBaseSetting.valma_scripts_path,
       emme_python_path: selectedBaseSetting.emme_python_path,
       base_data_folder: selectedBaseSetting.base_data_folder,
     });
@@ -260,7 +260,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
     setLoadingInfo('projektin luominen on kesken...');
   }
 
-  const _setHelmetScriptsPath = (newPath) => {
+  const _setValmaScriptsPath = (newPath) => {
     const pythonPath = settingInHandling.emme_python_path;
     const userGivenPath = cutUnvantedCharacters(newPath);
 
@@ -276,7 +276,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista:' + pipRequirementsPath);
       return;
     }
-    setSettingInHandling({ ...settingInHandling, helmet_scripts_path: cutUnvantedCharacters(userGivenPath) });
+    setSettingInHandling({ ...settingInHandling, valma_scripts_path: cutUnvantedCharacters(userGivenPath) });
     setInstallingPipInProgress();
     runPipInstall(pipFilePath, pipRequirementsPath);
   };
@@ -307,7 +307,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       return;
     }
     // If create_emme_project.py doesn't exist, alert.
-    const createEmmeScript = settingInHandling.helmet_scripts_path + "\\create_emme_project.py"
+    const createEmmeScript = settingInHandling.valma_scripts_path + "\\create_emme_project.py"
     if (!fs.existsSync(createEmmeScript)) {
       showError('create_emme_project.py -scriptiä ei löydy polusta ' + createEmmeScript);
       return;
@@ -324,7 +324,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       {
         project_folder: settingInHandling.project_folder,
         emme_python_path: settingInHandling.emme_python_path,
-        helmet_scripts_path: settingInHandling.helmet_scripts_path,
+        valma_scripts_path: settingInHandling.valma_scripts_path,
         submodel: submodel,
         number_of_emme_scenarios: numberOfEmmeScenarios,
         log_level: 'DEBUG',
@@ -342,7 +342,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       {
         project_folder: settingInHandling.project_folder,
         emme_python_path: settingInHandling.emme_python_path,
-        helmet_scripts_path: settingInHandling.helmet_scripts_path,
+        valma_scripts_path: settingInHandling.valma_scripts_path,
         project_name: settingInHandling.project_name,
       }
     );
@@ -369,8 +369,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
               return;
             }
             const now = new Date();
-            setDlHelmetScriptsVersion(data.version);
-            setDownloadingHelmetScripts(true);
+            setDlValmaScriptsVersion(data.version);
+            setDownloadingValmaScripts(true);
             ipcRenderer.send(
               'message-from-ui-to-download-model-scripts',
               {
@@ -400,30 +400,30 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       setSettingInHandling(settingInHandlingFromStore);
       const pythonPath = settingInHandlingFromStore.emme_python_path;
 
-      setSettingInHandling({ ...settingInHandlingFromStore, helmet_scripts_path: newPathFromDownload });
+      setSettingInHandling({ ...settingInHandlingFromStore, valma_scripts_path: newPathFromDownload });
 
       const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
       if (pipFilePath == '') {
         const errorMessage  = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
         showError(errorMessage + '. Tarkista Emme Python - asetus.');
-        setDownloadingHelmetScripts(false);
+        setDownloadingValmaScripts(false);
         return;
       }
 
       const pipRequirementsPath = path.join(newPathFromDownload, "requirements.txt");
       if (!fs.existsSync(pipRequirementsPath)) {
         showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista: ' + pipRequirementsPath);
-        setDownloadingHelmetScripts(false);
+        setDownloadingValmaScripts(false);
         return;
       }
 
       setInstallingPipInProgress();
       runPipInstall(pipFilePath, pipRequirementsPath);
     } else {
-      setSettingInHandling({ ...emptySetting, helmet_scripts_path: newPathFromDownload });
+      setSettingInHandling({ ...emptySetting, valma_scripts_path: newPathFromDownload });
       openSettings();
     };
-    setDownloadingHelmetScripts(false);
+    setDownloadingValmaScripts(false);
   };
 
   const onCreatingEmmeBankReady = (event, error) => {
@@ -530,13 +530,13 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
         <Settings
           settings={settingInHandling}
           settingsList={projectSettings}
-          dlHelmetScriptsVersion={dlHelmetScriptsVersion}
-          isDownloadingHelmetScripts={isDownloadingHelmetScripts}
+          dlValmaScriptsVersion={dlValmaScriptsVersion}
+          isDownloadingValmaScripts={isDownloadingValmaScripts}
           cancel={cancel}
           setProjectName={_setProjectName}
           setProjectFolder={_setProjectFolder}
           setEMMEPythonPath={_setEMMEPythonPath}
-          setHelmetScriptsPath={_setHelmetScriptsPath}
+          setValmaScriptsPath={_setValmaScriptsPath}
           setBaseDataFolder={_setBaseDataFolder}
           promptModelSystemDownload={_promptModelSystemDownload}
           saveSetting={saveSetting}
@@ -572,7 +572,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
       <div className="App__header">
         <span className="App__header-title">VALMA</span>
         &nbsp;
-        <a className="header-documentation-link" target="_blank" onClick={() => shell.openExternal("https://hsldevcom.github.io/helmet-docs/")}></a>
+        <a className="header-documentation-link" target="_blank" onClick={() => shell.openExternal("https://github.com/Traficom/valma-docs")}></a>
       </div>
       {/* VLEM Project -specific content, including runtime- & per-scenario-settings */}
       <div className="App__body">
@@ -580,7 +580,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }) => {
           projectName={settingInHandling.project_name}
           projectFolder={settingInHandling.project_folder ? settingInHandling.project_folder : homedir}
           emmePythonPath={settingInHandling.emme_python_path}
-          helmetScriptsPath={settingInHandling.helmet_scripts_path}
+          valmaScriptsPath={settingInHandling.valma_scripts_path}
           baseDataFolder={settingInHandling.base_data_folder}
           signalProjectRunning={setProjectRunning}
           settingsId={settingInHandling.id}

@@ -30,7 +30,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $RELEASE = gh api repos/Traficom/lem-ui/releases --paginate | jq -r 'sort_by(.created_at) | last'
+          $RELEASE = gh api repos/Traficom/valma-ui/releases --paginate | jq -r 'sort_by(.created_at) | last'
           if (-not $RELEASE) {
                 Write-Host "No release found"
                 exit 1

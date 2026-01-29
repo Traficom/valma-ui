@@ -12,7 +12,7 @@ module.exports = {
     // Previously, buildIdentidier was either 'prod' or 'beta'. Now, it is always 'prod'.
     buildIdentifier: 'prod',
     packagerConfig: {
-        appBundleId: fromBuildIdentifier({ prod: 'fi.traficom.lem.ui', beta: 'fi.traficom.beta.lem.ui' }),
+        appBundleId: fromBuildIdentifier({ prod: 'fi.traficom.valma.ui', beta: 'fi.traficom.beta.valma.ui' }),
         icon: "./appicons/icons/win/favicon.ico"
     },
     makers: [
@@ -21,9 +21,6 @@ module.exports = {
             config: {
                 name: "lem",
                 authors: "Traficom, Helsingin Seudun Liikenne -kuntayhtyma",
-                // iconUrl: "https://raw.githubusercontent.com/HSLdevcom/helmet-ui/e3714d944c62c6ba4b8ed1ce8ac57fcbecaf0f13/helmet.ico",
-                // loadingGif: '',
-                // setupIcon: 'helmet.ico',
             }
         },
         {
@@ -40,7 +37,7 @@ module.exports = {
             config: {
                 repository: {
                     owner: 'Traficom',
-                    name: 'lem-ui'
+                    name: 'valma-ui'
                 },
                 draft: true,
                 prerelease: false,

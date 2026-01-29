@@ -12,9 +12,9 @@ module.exports = {
       return;
     }
 
-    // Start model-system's lem_validate_inputfiles.py in shell with EMME's python interpreter
+    // Start model-system's validate_inputfiles.py in shell with EMME's python interpreter
     worker = new ps.PythonShell(
-      `${allRunParameters[0].helmet_scripts_path}/validate_inputfiles.py`,
+      `${allRunParameters[0].valma_scripts_path}/validate_inputfiles.py`,
       {
         mode: 'json',
         pythonPath: allRunParameters[0].emme_python_path,
@@ -55,7 +55,7 @@ module.exports = {
     return worker;
   },
 
-  runLemEntrypointPythonShell: function (worker, runParameters, onEndCallback) {
+  runModelSystemEntrypointPythonShell: function (worker, runParameters, onEndCallback) {
 
     // Make sure worker isn't overridden (and if so, abort the run)
     if (worker) {
@@ -64,9 +64,9 @@ module.exports = {
     }
 
     let longDistDemandForecast = getLongDistDemandForecast(runParameters.scenarioType, runParameters.long_dist_demand_forecast,  runParameters.long_dist_demand_forecast_path);
-    // Start lem-model-system's valma_travel.py in shell with EMME's python interpreter
+    // Start valma-model-system's valma_travel.py in shell with EMME's python interpreter
     worker = new ps.PythonShell(
-      `${runParameters.helmet_scripts_path}/valma_travel.py`,
+      `${runParameters.valma_scripts_path}/valma_travel.py`,
       {
         mode: 'json',
         pythonPath: runParameters.emme_python_path,
@@ -114,7 +114,7 @@ module.exports = {
     return worker;
   },
 
-  runFreightLemEntrypointPythonShell: function (worker, runParameters, onEndCallback) {
+  runModelSystemFreightEntrypointPythonShell: function (worker, runParameters, onEndCallback) {
 
     // Make sure worker isn't overridden (and if so, abort the run)
     if (worker) {
@@ -124,7 +124,7 @@ module.exports = {
 
     // Start lem-model-system's valma_freight.py in shell with EMME's python interpreter
     worker = new ps.PythonShell(
-      `${runParameters.helmet_scripts_path}/valma_freight.py`,
+      `${runParameters.valma_scripts_path}/valma_freight.py`,
       {
         mode: 'json',
         pythonPath: runParameters.emme_python_path,

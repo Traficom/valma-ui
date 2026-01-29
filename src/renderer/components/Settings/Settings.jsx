@@ -8,9 +8,9 @@ const Settings = ({
   settingsList,
   setProjectFolder,
   setEMMEPythonPath,
-  setHelmetScriptsPath,
-  dlHelmetScriptsVersion,
-  isDownloadingHelmetScripts,
+  setValmaScriptsPath,
+  dlValmaScriptsVersion,
+  isDownloadingValmaScripts,
   setBaseDataFolder,
   setProjectName,
   cancel,
@@ -135,25 +135,25 @@ const Settings = ({
         </div>
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">valma model system</span>
-          {isDownloadingHelmetScripts ?
+          {isDownloadingValmaScripts ?
             <span className="Settings__pseudo-file-select bg_plus">
-              Downloading model-system {dlHelmetScriptsVersion === 'main' ? 'latest' : dlHelmetScriptsVersion}. . .
+              Downloading model-system {dlValmaScriptsVersion === 'main' ? 'latest' : dlValmaScriptsVersion}. . .
             </span>
             :
-            <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-helmet-scripts-path" title={settings.helmet_scripts_path}>
-              {settings.helmet_scripts_path ? path.basename(settings.helmet_scripts_path) : "Valitse.."}
+            <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-valma-scripts-path" title={settings.valma_scripts_path}>
+              {settings.valma_scripts_path ? path.basename(settings.valma_scripts_path) : "Valitse.."}
             </label>
           }
           <input className="Settings__hidden-input"
-            id="hidden-input-helmet-scripts-path"
+            id="hidden-input-valma-scripts-path"
             type="text"
             onClick={() => {
               dialog.showOpenDialog({
-                defaultPath: settings.helmet_scripts_path ? settings.helmet_scripts_path : settings.project_folder,
+                defaultPath: settings.valma_scripts_path ? settings.valma_scripts_path : settings.project_folder,
                 properties: ['openDirectory']
               }).then((e) => {
                 if (!e.canceled) {
-                  setHelmetScriptsPath(e.filePaths[0]);
+                  setValmaScriptsPath(e.filePaths[0]);
                 }
               })
             }}

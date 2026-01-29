@@ -10,7 +10,7 @@ const { ipcRenderer } = require('electron');
 // vex-js imported globally in index.html, since we cannot access webpack config in electron-forge
 
 const VlemProject = ({
-  projectName, projectFolder, emmePythonPath, helmetScriptsPath, baseDataFolder,
+  projectName, projectFolder, emmePythonPath, valmaScriptsPath, baseDataFolder,
   signalProjectRunning, settingsId, modeDestCalibrationFile, municipalityCalibrationFile, openCreateEmmeBank, addNewSetting
 }) => {
   // VLEM Project -specific settings
@@ -172,7 +172,7 @@ const VlemProject = ({
       overriddenProjectSettings: {
         projectFolder: null,
         emmePythonPath: null,
-        helmetScriptsPath: null,
+        valmaScriptsPath: null,
         baseDataFolder: null,
       },
       runStatus: {
@@ -484,8 +484,8 @@ const VlemProject = ({
       alert("Python -sijaintia ei ole asetettu!");
       return;
     }
-    if (!helmetScriptsPath) {
-      alert("VLEM Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
+    if (!valmaScriptsPath) {
+      alert("VALMA Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
     if (!baseDataFolder) {
@@ -550,7 +550,7 @@ const VlemProject = ({
           first_scenario_id: first_scenario_id,
           emme_project_file: emme_entry_point_file_path,
           emme_python_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.emmePythonPath, emmePythonPath),
-          helmet_scripts_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.helmetScriptsPath, helmetScriptsPath),
+          valma_scripts_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.valmaScriptsPath, valmaScriptsPath),
           base_data_folder: base_data_folder,
           result_data_folder: result_data_folder,
           log_level: 'DEBUG',
@@ -585,8 +585,8 @@ const VlemProject = ({
       alert("Python -sijaintia ei ole asetettu!");
       return;
     }
-    if (!helmetScriptsPath) {
-      alert("VLEM Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
+    if (!valmaScriptsPath) {
+      alert("VALMA Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
 
@@ -616,7 +616,7 @@ const VlemProject = ({
         ...cbaOptions,
         emme_project_path: projectFolder,
         emme_python_path: emmePythonPath,
-        helmet_scripts_path: helmetScriptsPath,
+        valma_scripts_path: valmaScriptsPath,
         result_data_folder: projectFolder,
       });
   };
@@ -769,7 +769,7 @@ const VlemProject = ({
                 inheritedGlobalProjectSettings={{
                   projectFolder,
                   emmePythonPath,
-                  helmetScriptsPath,
+                  valmaScriptsPath,
                   baseDataFolder
                 }}
               />

@@ -5,7 +5,7 @@
     <title>Hidden process-running window</title>
     <script type="text/javascript">
       const {ipcRenderer} = require('electron');
-      const {runLemEntrypointPythonShell, runInputValidationPythonShell, runFreightLemEntrypointPythonShell} = require('./lem_entrypoint_python_shell');
+      const {runModelSystemEntrypointPythonShell, runInputValidationPythonShell, runModelSystemFreightEntrypointPythonShell} = require('./lem_entrypoint_python_shell');
 
       const sendLoggableEvent = (message) => {
         ipcRenderer.send('loggable-ui-event-from-worker', {
@@ -41,8 +41,8 @@
           queuedRunParams = queuedRunParams.slice(1);
           sendLoggableEvent(`Running scenario "${nextRunParams.name}. Scenario type: "${nextRunParams.scenarioType}"`);
           worker = nextRunParams.scenarioType && nextRunParams.scenarioType == 'goods_transport' ?
-          runFreightLemEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams)) :
-              runLemEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams));
+          runModelSystemFreightEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams)) :
+              runModelSystemEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams));
         } else {
           // Notify UI that all scenarios completed
           ipcRenderer.send('message-from-worker-all-scenarios-complete', {completedScenarioId: completedRunParams.id});
@@ -63,8 +63,8 @@
             queuedRunParams = args.slice(1);
             sendLoggableEvent(`Running scenario "${initialRunParams.name}. Scenario type: "${initialRunParams.scenarioType}"`);
             worker = initialRunParams.scenarioType && initialRunParams.scenarioType == 'goods_transport' ?
-            runFreightLemEntrypointPythonShell(worker, initialRunParams, () => onScenarioComplete(initialRunParams)):
-              runLemEntrypointPythonShell(worker, initialRunParams, () => onScenarioComplete(initialRunParams));
+            runModelSystemFreightEntrypointPythonShell(worker, initialRunParams, () => onScenarioComplete(initialRunParams)):
+              runModelSystemEntrypointPythonShell(worker, initialRunParams, () => onScenarioComplete(initialRunParams));
           };
           // Run validation -> entrypoint
           worker = runInputValidationPythonShell(worker, args, onValidationComplete);
