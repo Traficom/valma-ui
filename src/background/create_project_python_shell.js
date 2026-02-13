@@ -14,7 +14,7 @@ module.exports = {
       alert("Worker already in progress."); // Should never occur
       return;
     }
-    const createProjectScript = runParameters.helmet_scripts_path + "\\create_emme_project.py"
+    const createProjectScript = runParameters.valma_scripts_path + "\\create_emme_project.py"
     // Start create_emmebank.py
     worker = new ps.PythonShell(
       createProjectScript,

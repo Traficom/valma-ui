@@ -96,7 +96,7 @@ const RunStatus = ({isScenarioRunning, statusIterationsTotal, statusIterationsCo
             </button>
             &nbsp;
             <button className="Status__finished-scenario-logfile-link"
-              onClick={() => statusReadyScenariosLogfiles.resultsPath[1] !== undefined ? shell.openPath(statusReadyScenariosLogfiles.resultsPath) : ''}
+              onClick={() => statusReadyScenariosLogfiles.resultDataFolder[1] !== undefined ? shell.openPath(statusReadyScenariosLogfiles.resultDataFolder) : ''}
             >
               Tulokset
             </button>

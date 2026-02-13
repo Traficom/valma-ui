@@ -10,8 +10,8 @@ const { ipcRenderer } = require('electron');
 // vex-js imported globally in index.html, since we cannot access webpack config in electron-forge
 
 const VlemProject = ({
-  projectName, projectFolder, emmePythonPath, helmetScriptsPath, basedataPath,
-  signalProjectRunning, settingsId, modeDestCalibrationPath, municipalityCalibrationPath, openCreateEmmeBank, addNewSetting
+  projectName, projectFolder, emmePythonPath, valmaScriptsPath, baseDataFolder,
+  signalProjectRunning, settingsId, modeDestCalibrationFile, municipalityCalibrationFile, openCreateEmmeBank, addNewSetting
 }) => {
   // VLEM Project -specific settings
   const [scenarios, setScenarios] = useState([]); // Scenarios under currently selected Project
@@ -158,8 +158,8 @@ const VlemProject = ({
       scenarioType: scenarioType,
       name: newScenarioName,
       first_scenario_id: 1,
-      forecast_data_path: null,
-      costDataPath: null,
+      zone_data_file: null,
+      cost_data_file: null,
       delete_strategy_files: true,
       separate_emme_scenarios: false,
       save_matrices_in_emme: false,
@@ -172,8 +172,8 @@ const VlemProject = ({
       overriddenProjectSettings: {
         projectFolder: null,
         emmePythonPath: null,
-        helmetScriptsPath: null,
-        basedataPath: null,
+        valmaScriptsPath: null,
+        baseDataFolder: null,
       },
       runStatus: {
         statusIterationsTotal: null,
@@ -257,8 +257,8 @@ const VlemProject = ({
       name: "",
       emmeScenarioNumber: 1,
       parentScenarioName: parentScenario.name,
-      costDataPath: "",
-      parentCostDataPath: parentScenario.costDataPath,
+      cost_data_file: "",
+      parentCostDataFile: parentScenario.cost_data_file,
       runStatus: {
         statusIterationsTotal: null,
         statusIterationsCurrent: 0,
@@ -318,7 +318,7 @@ const VlemProject = ({
       parentScenarioId: `${subScenario.parentScenarioId}`,
       name: `${subScenario.name + "_2"}`,
       emmeScenarioNumber: `${subScenario.emmeScenarioNumber}`,
-      costDataPath: `${subScenario.costDataPath}`,
+      cost_data_file: `${subScenario.cost_data_file}`,
       lastRun: "",
       runSuccess: false,
       runStatus: {
@@ -391,7 +391,7 @@ const VlemProject = ({
     const newSubScenarios = [...parentScenario.subScenarios];
     newSubScenarios[index].name = `${subScenarioEdit.name}`;
     newSubScenarios[index].emmeScenarioNumber = `${subScenarioEdit.emmeScenarioNumber}`;
-    newSubScenarios[index].costDataPath = `${subScenarioEdit.costDataPath}`;
+    newSubScenarios[index].cost_data_file = `${subScenarioEdit.cost_data_file}`;
     parentScenario.subScenarios = [...newSubScenarios];
     _updateScenario(parentScenario);
   }
@@ -404,7 +404,7 @@ const VlemProject = ({
       parentScenarioId: `${subScenarioEdit.parentScenarioId}`,
       name: `${subScenarioEdit.name}`,
       emmeScenarioNumber: `${subScenarioEdit.emmeScenarioNumber}`,
-      costDataPath: `${subScenarioEdit.costDataPath}`,
+      cost_data_file: `${subScenarioEdit.cost_data_file}`,
       lastRun: "",
       runSuccess: false,
       runStatus: subScenarioEdit.runStatus
@@ -484,11 +484,11 @@ const VlemProject = ({
       alert("Python -sijaintia ei ole asetettu!");
       return;
     }
-    if (!helmetScriptsPath) {
-      alert("VLEM Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
+    if (!valmaScriptsPath) {
+      alert("VALMA Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
-    if (!basedataPath) {
+    if (!baseDataFolder) {
       alert("L\u00E4ht\u00F6datan kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
@@ -498,15 +498,15 @@ const VlemProject = ({
       const scenarioId = resolveScenarioId(scenario);
       const store = configStores.current[scenarioId];
       const iterations = store.get('iterations');
-      if (!store.get('forecast_data_path')) {
-        alert(`Syöttötietoja ei ole valittu skenaariossa "${scenario.name}"`);
+      if (!store.get('zone_data_file')) {
+        alert(`Syöttötietoja (zone_data_file) ei ole valittu skenaariossa "${scenario.name}"`);
         return;
       }
       if (iterations < 1 || iterations > 99) {
         alert(`Aseta iteraatiot väliltä 1 - 99 skenaariossa "${scenario.name}"`);
         return;
       }
-      if (!store.get('costDataPath') && !scenario.costDataPath) {
+      if (!store.get('cost_data_file') && !scenario.cost_data_file) {
         alert(`Liikenteen hintadata-tiedostoa ei ole valittu skenaariossa "${scenario.name}"`);
         return;
       }
@@ -534,13 +534,13 @@ const VlemProject = ({
         const id = subScenario ? subScenario.id : resolveScenarioId(scenario);
         const first_scenario_id = subScenario ? subScenario.emmeScenarioNumber : scenario.first_scenario_id;
         const end_assignment_only = subScenario ? true : scenario.end_assignment_only
-        const costDataPath = subScenario && subScenario.costDataPath ? subScenario.costDataPath : scenario.costDataPath;
+        const cost_data_file = subScenario && subScenario.cost_data_file ? subScenario.cost_data_file : scenario.cost_data_file;
 
         const emme_project_path = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
         const emme_entry_point_file_path = emme_project_path + `\\${projectName}\\${projectName}.emp`
-        const scenario_results_path = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
+        const result_data_folder = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
         // when running subScenario, base data path is parents result path
-        const scenario_base_data_path = subScenario ? scenario_results_path + `\\${scenario.name}\\` : determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.basedataPath, basedataPath);
+        const base_data_folder = subScenario ? result_data_folder + `\\${scenario.name}\\` : determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.baseDataFolder, baseDataFolder);
 
         // Run parameters per each run (enrich with global settings' paths to EMME python & VLEM model system
         return {
@@ -548,16 +548,16 @@ const VlemProject = ({
           id: id,
           name: name,
           first_scenario_id: first_scenario_id,
-          emme_project_path: emme_entry_point_file_path,
+          emme_project_file: emme_entry_point_file_path,
           emme_python_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.emmePythonPath, emmePythonPath),
-          helmet_scripts_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.helmetScriptsPath, helmetScriptsPath),
-          base_data_folder_path: scenario_base_data_path,
-          results_data_folder_path: scenario_results_path,
+          valma_scripts_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.valmaScriptsPath, valmaScriptsPath),
+          base_data_folder: base_data_folder,
+          result_data_folder: result_data_folder,
           log_level: 'DEBUG',
           end_assignment_only: end_assignment_only,
-          costDataPath: costDataPath,
-          mode_dest_calibration_path: modeDestCalibrationPath,
-          municipality_calibration_path: municipalityCalibrationPath,
+          cost_data_file: cost_data_file,
+          mode_dest_calibration_file: modeDestCalibrationFile,
+          municipality_calibration_file: municipalityCalibrationFile,
         }
       })
     );
@@ -585,8 +585,8 @@ const VlemProject = ({
       alert("Python -sijaintia ei ole asetettu!");
       return;
     }
-    if (!helmetScriptsPath) {
-      alert("VLEM Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
+    if (!valmaScriptsPath) {
+      alert("VALMA Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
 
@@ -616,8 +616,8 @@ const VlemProject = ({
         ...cbaOptions,
         emme_project_path: projectFolder,
         emme_python_path: emmePythonPath,
-        helmet_scripts_path: helmetScriptsPath,
-        results_path: projectFolder,
+        valma_scripts_path: valmaScriptsPath,
+        result_data_folder: projectFolder,
       });
   };
 
@@ -769,8 +769,8 @@ const VlemProject = ({
                 inheritedGlobalProjectSettings={{
                   projectFolder,
                   emmePythonPath,
-                  helmetScriptsPath,
-                  basedataPath
+                  valmaScriptsPath,
+                  baseDataFolder
                 }}
               />
               :

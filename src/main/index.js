@@ -92,7 +92,7 @@ ipcMain.on('message-from-ui-to-download-model-scripts', (event, args) => {
   // Download model system repo (passed in args.url - may vary in future depending on tag/version)
   download(
     BrowserWindow.getFocusedWindow(),
-    `https://github.com/Traficom/lem-model-system/archive/${args.version}.zip`,
+    `https://github.com/Traficom/valma-model-system/archive/${args.version}.zip`,
     {
       directory: workDir
     }

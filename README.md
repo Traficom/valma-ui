@@ -1,9 +1,9 @@
 # VALMA UI
 
-![main](https://github.com/Traficom/lem-ui)
+![main](https://github.com/Traficom/valma-ui)
 
-VALMA UI is a desktop user interface for VALMA [model system](https://github.com/Traficom/lem-model-system).
-The Windows installer is found under [Releases](https://github.com/Traficom/lem-ui/releases).
+VALMA UI is a desktop user interface for VALMA [model system](https://github.com/Traficom/valma-model-system).
+The Windows installer is found under [Releases](https://github.com/Traficom/valma-ui/releases).
 
 If you wish to develop the UI, continue below.
 
@@ -15,7 +15,7 @@ and [Electron API](https://www.electronjs.org/docs/api) available within app)_, 
 - Git client
 - Node.js LTS & NPM
 - EMME 24.x.x _(Windows-only)_
-- _[optionally]_ [model-system](https://github.com/Traficom/lem-model-system) _(otherwise downloaded and auto-installed by the UI)_
+- _[optionally]_ [model-system](https://github.com/Traficom/valma-model-system) _(otherwise downloaded and auto-installed by the UI)_
 
 On Mac and Linux, [Wine](https://www.winehq.org/) and [Mono](https://www.mono-project.com/) are also required to make the app for Windows.
 
@@ -39,16 +39,16 @@ See also: [Electronforge.io](https://www.electronforge.io/)
 
 ## Version control
 
-[GitHub](https://github.com/Traficom/lem-ui) is used as the primary tool for version control and `main` branch is the main development line.
+[GitHub](https://github.com/Traficom/valma-ui) is used as the primary tool for version control and `main` branch is the main development line.
 All changes should be made in dedicated feature/bugfix branches, followed by a peer-review.
 Then, after all checks have passed, the branch may be merged in `main`.
 
 ## Continuous integration
 
-The application is built automatically by [GitHub Actions](https://github.com/HSLdevcom/helmet-ui/actions)
+The application is built automatically by [GitHub Actions](https://github.com/Traficom/valma-ui/actions)
 when changes are pushed in master branch or pull requests are opened.
 
-[Releases](https://github.com/Traficom/lem-ui/releases) are deployed automatically when changes are pushed in the `release` branch,
+[Releases](https://github.com/Traficom/valma-ui/releases) are deployed automatically when changes are pushed in the `release` branch,
 which should be updated with `master` only to make new releases.
 
 ## Publishing releases
@@ -67,9 +67,9 @@ to everyone. This allows testing the package and making final fixes to it before
 1. Merge `master` to `release` and push to remote
     - `$ git merge master`
     - `$ git push`
-1. Wait for [GitHub Actions](https://github.com/Traficom/lem-ui/actions) to build the
+1. Wait for [GitHub Actions](https://github.com/Traficom/valma-ui/actions) to build the
    application.
-1. Go to [releases page](https://github.com/HSLdevcom/helmet-ui/releases) page and **Edit** the
+1. Go to [releases page](https://github.com/Traficom/valma-ui/releases) page and **Edit** the
    newly created draft.
     1. Ensure the release name corresponds to version number
     1. Write a brief description (new features, changes, fixes etc)
