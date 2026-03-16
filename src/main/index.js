@@ -4,15 +4,11 @@ const path = require('path');
 const fs = require('fs');
 const del = require('del');
 const decompress = require('decompress');
-const Store = require('electron-store');
-
-// Handle breaking changes in electron-store-v7.0.0:
-// https://github.com/sindresorhus/electron-store/releases/tag/v7.0.0
+const Store = require('electron-store').default;
 Store.initRenderer();
 
 // @electron/remote/main must be initialized in the main process before it can be used from the renderer:
 require('@electron/remote/main').initialize();
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {app.quit();}
 
