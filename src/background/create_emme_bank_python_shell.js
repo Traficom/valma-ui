@@ -26,7 +26,7 @@ module.exports = {
         args: [
           "--log-level", runParameters.log_level || 'DEBUG',
           "--log-format", "JSON",
-          "--emme-path", runParameters.project_folder || '',
+          "--emme-project-file", runParameters.project_folder || '',
           "--submodel", runParameters.submodel || '',
           "--number-of-emme-scenarios", runParameters.number_of_emme_scenarios || '',
           "--project-name", runParameters.project_name || ''

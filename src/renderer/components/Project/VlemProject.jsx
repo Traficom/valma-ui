@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import Store from "electron-store";
+import Store from 'electron-store';
 import fs from "fs";
 import path from "path";
 import dayjs from 'dayjs';
