@@ -14,7 +14,7 @@ const ScenarioTooltip = ({
      let tooltipTypeSpecificProperties;
       switch (scenario.scenarioType) {
             case SCENARIO_TYPES.GOODS_TRANSPORT: tooltipTypeSpecificProperties =
-            ['trade_demand_data_path'];
+            ['trade_demand_file'];
             break;
             case SCENARIO_TYPES.PASSENGER_TRANSPORT: tooltipTypeSpecificProperties =
             ['iterations',
@@ -23,7 +23,7 @@ const ScenarioTooltip = ({
               'separate_emme_scenarios',
               'first_matrix_id',
               'first_scenario_id',
-              'trade_demand_data_path',
+              'trade_demand_file',
               'freight_matrix_path'
             ].concat(scenario.long_dist_demand_forecast_path ? ['long_dist_demand_forecast_path'] : ['long_dist_demand_forecast'])
             .concat(!scenario.stored_speed_assignment ? ['stored_speed_assignment'] : ['storedSpeedAssignmentInputs']);
@@ -55,7 +55,7 @@ const ScenarioTooltip = ({
     'cost_data_file'
   ];
 
-  const replacedTooltipHeadings = {trade_demand_data_path: 'trade-demand-data-path', 'storedSpeedAssignmentInputs': 'stored_speed_assignments'};
+  const replacedTooltipHeadings = {trade_demand_file: 'trade-demand-data-path', 'storedSpeedAssignmentInputs': 'stored_speed_assignments'};
 
   const filteredScenarioSettings = _.pickBy(
     scenario,

@@ -23,7 +23,7 @@ module.exports = {
         pythonPath: runParameters.emme_python_path,
         pythonOptions: ['-u'], // unbuffered
         args: [
-          "--emme-path", runParameters.project_folder || '',
+          "--emme-data-folder", runParameters.project_folder || '',
           "--project-name", runParameters.project_name || ''
         ]
       });

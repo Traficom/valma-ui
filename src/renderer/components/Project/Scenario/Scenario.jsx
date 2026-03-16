@@ -186,15 +186,15 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
        {/* Import and export data */}
       { isFreightScenario && <div className="Scenario__section">
         <span className="Scenario__pseudo-label">Vienti- ja tuontidata</span>
-        <label className="Scenario__pseudo-file-select" htmlFor="import-and-export-data-file-select" title={scenario.trade_demand_data_path}>
-          {scenario.trade_demand_data_path ? path.basename(scenario.trade_demand_data_path) : "Valitse.."}
+        <label className="Scenario__pseudo-file-select" htmlFor="import-and-export-data-file-select" title={scenario.trade_demand_file}>
+          {scenario.trade_demand_file ? path.basename(scenario.trade_demand_file) : "Valitse.."}
         </label>
         <input className="Scenario__hidden-input"
           id="import-and-export-data-file-select"
           type="text"
           onClick={() => {
             dialog.showOpenDialog({
-              defaultPath: scenario.trade_demand_data_path ? scenario.trade_demand_data_path : projectFolder,
+              defaultPath: scenario.trade_demand_file ? scenario.trade_demand_file : projectFolder,
               filters: [
                 { name: 'OMX', extensions: ['omx'] },
                 { name: 'All Files', extensions: ['*'] }
@@ -202,12 +202,12 @@ const Scenario = ({ scenario, updateScenario, closeScenario, existingOtherNames,
               properties: ['openFile']
             }).then((e) => {
               if (!e.canceled) {
-                updateScenario({ ...scenario, trade_demand_data_path: e.filePaths[0] });
+                updateScenario({ ...scenario, trade_demand_file: e.filePaths[0] });
               }
             })
           }}
         />
-        {!scenario.trade_demand_data_path ? <span className="Scenario-error">{"Vienti- ja tuontidata on pakollinen tieto."}</span> : ""}
+        {!scenario.trade_demand_file ? <span className="Scenario-error">{"Vienti- ja tuontidata on pakollinen tieto."}</span> : ""}
       </div>}
 
       {/* Choice how to use long distance demand forecast */}

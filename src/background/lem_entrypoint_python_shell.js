@@ -138,7 +138,7 @@ module.exports = {
           "--first-scenario-id", runParameters.first_scenario_id,
           "--cost-data-file", runParameters.cost_data_file,
           "--zone-data-file", runParameters.zone_data_file,
-          "--trade-demand-data-path", runParameters.trade_demand_data_path,
+          "--trade-demand-file", runParameters.trade_demand_file,
           "--first-matrix-id", (runParameters.first_matrix_id == null ? "100" : runParameters.first_matrix_id),
         ]
           .concat(runParameters.delete_strategy_files == true | runParameters.delete_strategy_files == null ? ["--del-strat-files"] : [])
