@@ -1,0 +1,1 @@
+export const STORED_SPEED_ASSIGNMENT_PREFIX: string = "SSA_";

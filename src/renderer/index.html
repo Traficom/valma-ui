@@ -1,84 +1,15 @@
+
 <!DOCTYPE html>
-<html lang="fi">
-<head>
-    <meta charset="UTF-8">
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VALMA</title>
-    <!-- HubSpot's vex-js for `prompt()` (not supported otherwise by Electron) -->
-    <script src="../../node_modules/vex-js/dist/js/vex.combined.min.js"></script>
-    <script>vex.defaultOptions.className = 'vex-theme-os'</script>
-    <link rel="stylesheet" href="../../node_modules/vex-js/dist/css/vex.css" />
-    <link rel="stylesheet" href="../../node_modules/vex-js/dist/css/vex-theme-os.css" />
-    <!-- Babel (standalone ver.) transpiler -->
-    <script src="../../node_modules/babel-standalone/babel.min.js"></script>
-    <!-- React components -->
-    <script type="text/babel" src="components/App.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/App.css">
-    <script type="text/babel" src="components/Settings/Settings.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Settings/Settings.css">
-    <script type="text/babel" src="components/Loading.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Loading.css">
-    <script type="text/babel" src="components/LemError.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/LemError.css">
-    <script type="text/babel" src="components/Project/VlemProject.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/VlemProject.css">
-    <script type="text/babel" src="components/Project/Scenario/Scenario.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/Scenario/Scenario.css">
-    <script type="text/babel" src="components/Project/Scenario/Submodels.js"></script>
-    <script type="text/babel" src="components/CreateEmmeBank/ProjectSubmodels.js"></script>
-    <script type="text/babel" src="components/Project/Runtime/Runtime.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/Runtime/Runtime.css">
-    <script type="text/babel" src="components/Project/Runtime/ScenariosToRun.jsx"></script>
-    <script type="text/babel" src="components/Project/Runtime/ScenarioTable/ScenarioTableRow.jsx"></script>
-    <script type="text/babel" src="components/Project/Runtime/ScenarioTable/SubScenarioRow.jsx"></script>
-    <script type="text/babel" src="components/Project/Runtime/ScenarioTable/ScenarioTooltip.jsx"></script>
-    <script type="text/babel" src="components/Project/Runtime/RunStatus/RunStatus.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/Runtime/RunStatus/RunStatus.css">
-    <script type="text/babel" src="components/CreateEmmeBank/CreateEmmeBank.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/CreateEmmeBank/CreateEmmeBank.css">
-    <script type="text/babel" src="components/SubScenario/SubScenario.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/SubScenario/SubScenario.css">
-    <script type="text/babel" src="components/Project/RunLog/RunLog.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/RunLog/RunLog.css">
-    <script type="text/babel" src="components/Project/CostBenefitAnalysis/CostBenefitAnalysis.jsx"></script>
-    <link rel="stylesheet" type="text/css" href="components/Project/CostBenefitAnalysis/CostBenefitAnalysis.css">
-    <script type="text/javascript">
-        // ipcRenderer is aliased, so that other <script> tag(s) won't crash on startup in "constant-already-set"
-        const {webFrame, ipcRenderer: aliasIpcRenderer} = require('electron');
-    </script>
-    <script type="text/babel" src="./icons/CopyIcon.jsx"></script>
-    <script type="text/babel" src="../enums.js"></script>
-    <script type="text/babel" src="../constants.js"></script>
-    <script type="text/babel" src="../background/getLongDistDemandForecast.js"></script>
-    <script type="text/babel" src="./icons/ResetIcon.jsx"></script>
-    <script type="text/babel" src="./icons/DocumentationIcon.jsx"></script>
-    <script type="text/babel" src="./icons/ArrowDown.jsx"></script>
-    <script type="text/babel" src="./icons/ArrowUp.jsx"></script>
-    <script type="text/babel" src="./icons/Check.jsx"></script>
-    <script type="text/babel" src="./icons/ErrorCircle.jsx"></script>
-    <script type="text/babel" src="./icons/Plus.jsx"></script>
-    <script type="text/babel" src="components/cutUnvantedCharacters.jsx"></script>
-</head>
-<body>
+  </head>
+  <body>
+    <div id="root"></div>
 
-<div id="root"></div>
-
-<!-- ReactDOM init point -->
-<script type="text/babel">
-  import React from 'react';
-  import ReactDOM from 'react-dom/client';
-  import {searchEMMEPython} from './search_emme_pythonpath';
-  import {version} from '../../package';
-  import versions from '../versions';
-
-  const root = ReactDOM.createRoot(document.getElementById("root"));
-
-  root.render(
-    <App
-      VLEMVersion={version}
-      versions={versions} // 3rd party dependencies' versions (EMME & EMME's custom python interpreter)
-      searchEMMEPython={searchEMMEPython}
-    />
-  );
-</script>
-</body>
+    <!-- ✅ Vite entry point -->
+    <script type="module" src="/main.tsx"></script>
+  </body>
 </html>

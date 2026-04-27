@@ -1,6 +1,6 @@
-const ps = require('python-shell');
-const {ipcRenderer} = require('electron');
-const path = require('path');
+
+import { PythonShell as ps } from 'python-shell';
+import { ipcRenderer } from 'electron';
 
 module.exports = {
   runCBAScriptPythonShell: function (worker, runParameters, onEndCallback) {

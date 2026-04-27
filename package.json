@@ -4,18 +4,21 @@
   "version": "1.1.0",
   "private": true,
   "description": "VALMA Model System UI",
-  "main": "src/main/index.js",
+  "main": "src/main/index.cjs",
   "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish"
+    "dev:renderer": "vite",
+    "dev:electron": "electron-forge start",
+    "start": "concurrently \"npm run dev:renderer\" \"npm run dev:electron\"",
+    "build:renderer": "vite build",
+    "make": "npm run build:renderer && electron-forge make",
+    "publish": "npm run build:renderer && electron-forge publish",
+    "package": "npm run build:renderer && electron-forge package"
   },
   "keywords": [],
   "author": "Traficom",
   "license": "EUPL-1.2",
   "config": {
-    "forge": "./forge-config.js"
+    "forge": "./forge-config.cjs"
   },
   "type": "commonjs",
   "dependencies": {
@@ -45,6 +48,13 @@
     "@electron-forge/maker-squirrel": "7.11.1",
     "@electron-forge/maker-zip": "7.11.1",
     "@electron-forge/publisher-github": "7.11.1",
-    "electron": "41.0.2"
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.1",
+    "concurrently": "^9.2.1",
+    "electron": "41.0.2",
+    "typescript": "^6.0.3",
+    "vite": "^8.0.10"
   }
 }
