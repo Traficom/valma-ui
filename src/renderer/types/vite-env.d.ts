@@ -4,8 +4,7 @@ declare global {
   interface Window {
     fsHelpers: {
       exists(path: string): boolean;
-      join(...parts: string[]): string;
-
+      join(a:string, b:string): string;
       readFileSync(path: string, encoding?: string): string;
       readdirSync(path: string): string[];
       unlinkSync(path: string): void;

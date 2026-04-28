@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './SubScenario.css';
 
-const { dialog } = require('electron').remote;
+import { openFileDialog } from '../Project/../Dialog'
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -49,8 +49,8 @@ const SubScenario: React.FC<SubScenarioProps> = ({
       ) !== undefined
     );
   };
-  
-  const path = window.api.path;
+
+  const path = (window as any).path;
   const [nameIsInvalid, setNameIsInvalid] = useState<boolean>(
     checkName(subScenarioEdit.name)
   );
@@ -110,28 +110,23 @@ const SubScenario: React.FC<SubScenarioProps> = ({
         <label>
           Liikenteen hintadata
           <button
-            onClick={() =>
-              dialog
-                .showOpenDialog({
-                  defaultPath: subScenarioEdit.cost_data_file
-                    ? subScenarioEdit.cost_data_file
-                    : subScenarioEdit.parentCostDataFile,
-                  filters: [
-                    { name: 'Json', extensions: ['json'] },
-                    { name: 'All Files', extensions: ['*'] },
-                  ],
-                  properties: ['openFile'],
-                })
-                .then(e => {
-                  if (!e.canceled) {
-                    handleChange({
-                      ...subScenarioEdit,
-                      cost_data_file: e.filePaths[0],
-                    });
-                  }
-                })
-            }
-          >
+            onClick={async () => {
+              const file = await openFileDialog(
+                subScenarioEdit.cost_data_file
+                  ? subScenarioEdit.cost_data_file
+                  : subScenarioEdit.parentCostDataFile,
+                [
+                  { name: 'Json', extensions: ['json'] },
+                  { name: 'All Files', extensions: ['*'] },
+                ],
+              );
+              if (file) {
+                handleChange({
+                  ...subScenarioEdit,
+                  cost_data_file: file
+                });
+              }
+            }}>
             {subScenarioEdit.cost_data_file
               ? path.basename(subScenarioEdit.cost_data_file)
               : 'Valitse..'}

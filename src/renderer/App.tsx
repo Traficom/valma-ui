@@ -3,18 +3,24 @@ import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 import { Tooltip } from 'react-tooltip';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { exec } from 'child_process';
 
 import VlemProject from './components/Project/VlemProject';
 import Settings from './components/Settings/Settings';
 import LemError from './components/LemError';
 import Loading from './components/Loading';
 import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
+import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
+import { ProjectSetting } from './components/Project/types/ProjectSetting';
 
 declare const vex: any;
 
 const homedir = (window as any).system.homedir();
+const path = (window as any).path;
+const fs = (window as any).fs;
+const pipInstall = (window as any).env.pipInstall;
 
-const emptySetting: any = {
+const emptySetting: ProjectSetting = {
   id: "",
   project_name: "",
   project_folder: "",
@@ -23,7 +29,7 @@ const emptySetting: any = {
   base_data_folder: "",
   mode_dest_calibration_file: "",
   municipality_calibration_file: "",
-};
+}
 
 const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   const [isSettingsOpen, setSettingsOpen] = useState(false);
@@ -42,7 +48,84 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
   const globalSettingsStore = useRef<any>((window as any).store);
 
-  // -------------------- helpers (mechanical translation) --------------------
+
+  function resolvePipFilePath(pythonDir: string): string {
+    const candidates = [
+      path.join(pythonDir, 'Scripts', 'pip.exe'),
+      path.join(pythonDir, 'pip.exe'),
+    ];
+    return candidates.find(fs.existsSync) ?? '';
+  }
+
+
+
+async function runPipInstall(
+  pipFilePath: string,
+  pipRequirementsPath: string
+) {
+  try {
+    setLoading(true);
+    setLoadingHeading('Tehdään PIP-asennusta');
+    setLoadingInfo('Asennus käynnissä…');
+
+    const { stdout, stderr } = await pipInstall(
+      pipFilePath,
+      pipRequirementsPath
+    );
+
+    if (stderr && stderr.length > 0) {
+      setLoadingInfo(
+        'PIP-asennus onnistui, mutta palautti viestin:\n' + stderr
+      );
+    } else {
+      setLoadingInfo('PIP-asennus onnistui');
+    }
+  } catch (err: any) {
+    setLoadingInfo(
+      'PIP-asennus epäonnistui. Sovellus saattaa toimia puutteellisesti.\n\n' +
+        err
+    );
+  }
+}
+
+
+function constructAndSaveNewSettingsState(
+  setting: ProjectSetting,
+  prev: ProjectSetting[]
+): ProjectSetting[] {
+  const idx = prev.findIndex(s => s.id === setting.id);
+  const next = [...prev];
+  next[idx] = setting;
+
+  globalSettingsStore.current.set('settings', next);
+  globalSettingsStore.current.set('selected_settings_id', setting.id);
+
+  return next;
+}
+
+
+function saveAutomaticallyFixedSetting(
+  fixed: ProjectSetting,
+  all: ProjectSetting[]
+) {
+  const updated = constructAndSaveNewSettingsState(fixed, all);
+  setProjectSettings(updated);
+  setSettingInHandling(fixed);
+  setSelectedSettingsId(fixed.id);
+}
+
+
+function setInstallingPipInProgress() {
+  setLoading(true);
+  setLoadingHeading('Tehdään PIP-asennusta');
+  setLoadingInfo('Asennus käynnissä…');
+}
+
+function setCreatingEmmeBankInProgress() {
+  setLoading(true);
+  setLoadingHeading('Luodaan Emme-projektia');
+  setLoadingInfo('Projektin luominen käynnissä…');
+}
 
   function findSetting(settings: any[], id: any) {
     if (settings && id) return settings.find(s => s.id === id);
@@ -60,7 +143,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setSelectedSettingsId(newId);
     setProjectSettings(prev => {
       const next = [...prev, { ...newSetting, id: newId }];
-      globalSettingsStore.current.set('settings', JSON.stringify(next));
+      globalSettingsStore.current.set('settings', next);
       globalSettingsStore.current.set('selected_settings_id', newId);
       return next;
     });
@@ -71,7 +154,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
       const idx = prev.map(s => s.id).indexOf(setting.id);
       const next = [...prev];
       next[idx] = { ...setting };
-      globalSettingsStore.current.set('settings', JSON.stringify(next));
+      globalSettingsStore.current.set('settings', next);
       globalSettingsStore.current.set('selected_settings_id', setting.id);
       return next;
     });
@@ -121,7 +204,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setProjectSettings(rest);
     setSelectedSettingsId(next.id);
     setSettingInHandling(next);
-    globalSettingsStore.current.set('settings', JSON.stringify(rest));
+    globalSettingsStore.current.set('settings', rest);
     globalSettingsStore.current.set('selected_settings_id', next.id);
     setSettingsOpen(false);
   }
@@ -148,7 +231,122 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setErrorInfo('');
   };
 
-  // -------------------- effects (behavior preserved) --------------------
+  function onCreatingEmmeBankReady(_: any, error: string) {
+  setLoadingInfo(
+    error?.length
+      ? `VIRHE:\n${error}`
+      : 'Emme-projekti luotu onnistuneesti'
+  );
+}
+
+
+function promptModelSystemDownload() {
+  fetch('https://api.github.com/repos/Traficom/lem-model-system/tags')
+    .then(r => r.json())
+    .then(tags => {
+      vex.dialog.open({
+        message: 'Valitse model-system versio:',
+        input: `
+          <select name="version">
+            ${tags.map((t: any) =>
+              `<option value="${t.name}">${t.name}</option>`
+            ).join('')}
+          </select>
+        `,
+        callback: (data: any) => {
+          if (!data) return;
+
+          const now = Date.now();
+          setDlValmaScriptsVersion(data.version);
+          setDownloadingValmaScripts(true);
+
+          (window as any).ipc.send(
+            'message-from-ui-to-download-model-scripts',
+            {
+              version: data.version,
+              destinationDir: homedir,
+              postfix: `dl-${now}`
+            }
+          );
+        }
+      });
+    });
+}
+
+ const onDownloadReady = (event, savePath) => {
+    const existingSettings = globalSettingsStore.current.get('settings');
+    const existingSelectedSettingId = globalSettingsStore.current.get('selected_settings_id');
+    const settingsAreDefined = existingSettings && existingSettings.length > 0 && existingSelectedSettingId;
+    const newPathFromDownload = cutUnvantedCharacters(savePath);
+
+    if (settingsAreDefined) {
+      const settingsArray = existingSettings;
+      let settingInHandlingFromStore = findSetting(settingsArray, existingSelectedSettingId);
+
+      setProjectSettings(settingsArray);
+      setSelectedSettingsId(existingSelectedSettingId);
+      setSettingInHandling(settingInHandlingFromStore);
+      const pythonPath = settingInHandlingFromStore.emme_python_path;
+
+      setSettingInHandling({ ...settingInHandlingFromStore, valma_scripts_path: newPathFromDownload });
+
+      const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
+      if (pipFilePath == '') {
+        const errorMessage  = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
+        showError(errorMessage + '. Tarkista Emme Python - asetus.');
+        setDownloadingValmaScripts(false);
+        return;
+      }
+
+      const pipRequirementsPath = path.join(newPathFromDownload, "requirements.txt");
+      if (!fs.existsSync(pipRequirementsPath)) {
+        showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista: ' + pipRequirementsPath);
+        setDownloadingValmaScripts(false);
+        return;
+      }
+
+      setInstallingPipInProgress();
+      runPipInstall(pipFilePath, pipRequirementsPath);
+    } else {
+      setSettingInHandling({ ...emptySetting, valma_scripts_path: newPathFromDownload });
+      openSettings();
+    };
+    setDownloadingValmaScripts(false);
+  };
+
+  useEffect(() => {
+  const loadConfig = async () => {
+    const store = (window as any).store;
+    const config = await store.get("config");
+    const settings = config?.settings;
+    const selectedSettingsId = config?.selected_settings_id;
+
+    console.log("MAARUUU");
+    console.log(settings);
+    console.log()
+
+    if(selectedSettingsId && settings){
+      setSettingInHandling(findSetting(projectSettings, selectedSettingsId));
+      setSelectedSettingsId(selectedSettingsId);
+      setProjectSettings(settings)
+    }
+  };
+
+  loadConfig();
+}, []);
+
+
+useEffect(() => {
+  const ipc = (window as any).ipc;
+
+  ipc.on('creating-emme-bank-completed', onCreatingEmmeBankReady);
+  ipc.on('download-ready', onDownloadReady);
+
+  return () => {
+    ipc.removeListener('creating-emme-bank-completed', onCreatingEmmeBankReady);
+    ipc.removeListener('download-ready', onDownloadReady);
+  };
+}, []);
 
   useEffect(() => {
     const existingSettings = globalSettingsStore.current.get('settings');
@@ -169,7 +367,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
         });
       }
     } else {
-      const arr = JSON.parse(existingSettings);
+      const arr = existingSettings;
       setProjectSettings(arr);
       setSelectedSettingsId(existingId);
       setSettingInHandling(findSetting(arr, existingId));
@@ -224,15 +422,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
       <div className="App__body">
         <VlemProject
-          projectName={settingInHandling?.project_name || ''}
-          projectFolder={settingInHandling?.project_folder || homedir}
-          emmePythonPath={settingInHandling?.emme_python_path || ''}
-          valmaScriptsPath={settingInHandling?.valma_scripts_path || ''}
-          baseDataFolder={settingInHandling?.base_data_folder || ''}
           signalProjectRunning={setProjectRunning}
-          settingsId={settingInHandling?.id || ''}
-          modeDestCalibrationFile={settingInHandling?.mode_dest_calibration_file || ''}
-          municipalityCalibrationFile={settingInHandling?.municipality_calibration_file || ''}
+          selectedSetting={settingInHandling}
           openCreateEmmeBank={() => setCreateEmmeBankModalOpen(true)}
           addNewSetting={addNewSetting}
         />

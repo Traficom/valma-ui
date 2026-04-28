@@ -2,29 +2,59 @@ export {};
 
 declare global {
   interface Window {
+    /** System helpers */
+    system: {
+      homedir(): string;
+    };
+
+    /** Simple key–value store */
     store: {
-      get<T = unknown>(key: string): T;
-      set<T = unknown>(key: string, value: T): void;
-      delete(key: string): void;
+      get<T = unknown>(key: string): Promise<T>;
+      set<T = unknown>(key: string, value: T): Promise<void>;
+      delete(key: string): Promise<void>;
     };
 
-    configStore: {
-      get<T = unknown>(id: string, key: string): T;
-      set<T = unknown>(id: string, key: string, value: T): void;
-      delete(id: string, key: string): void;
-    };
-
+    /** Electron shell helpers */
     electron: {
-      openExternal: (url: string) => Promise<void>;
-      openPath: (path: string) => Promise<string>;
+      openExternal(url: string): Promise<boolean>;
+      openPath(path: string): Promise<string>;
+      setMaxListeners: (amount: number) => Promise<number>;
     };
 
+    /** Filesystem helpers exposed from fsHelpers.cjs */
     fsHelpers: {
       exists(path: string): boolean;
-      join(...parts: string[]): string;
+      join(path: string): string;
+      readFileSync(
+        path: string,
+        options?: { encoding?: string | null; flag?: string }
+      ): Buffer | string;
+      readdirSync(path: string): string[];
+      unlinkSync(path: string): void;
+      renameSync(oldPath: string, newPath: string): void;
+      writeFileSync(file, data): void;
     };
 
-     dialog: {
+    /** OS path helpers */
+    path: {
+      join(...parts: string[]): string;
+      dirname(path: string): string;
+      basename(path: string): string;
+      extname(path: string): string;
+      resolve(...paths: string[]): string;
+    };
+
+    /** Environment helpers */
+    env: {
+      get(key: string): string | undefined;
+      pipInstall(
+        pipPath: string,
+        requirementsPath: string
+      ): Promise<unknown>;
+    };
+
+    /** File dialog helpers (via IPC) */
+    dialog: {
       showOpenDialog(
         options: Electron.OpenDialogOptions
       ): Promise<Electron.OpenDialogReturnValue>;
@@ -33,7 +63,13 @@ declare global {
         options: Electron.SaveDialogOptions
       ): Promise<Electron.SaveDialogReturnValue>;
     };
-	
+
+    /** File-related helpers */
+    files: {
+      openFileDialog(args?: unknown): Promise<unknown>;
+    };
+
+    /** IPC helpers */
     ipc: {
       send(channel: string, data?: unknown): void;
       invoke<T = unknown>(channel: string, data?: unknown): Promise<T>;
@@ -41,7 +77,10 @@ declare global {
         channel: string,
         callback: (...args: unknown[]) => void
       ): () => void;
+      removeListener(
+        channel: string,
+        listener: (...args: unknown[]) => void
+      ): void;
     };
-
   }
 }

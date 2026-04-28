@@ -8,6 +8,14 @@ export default defineConfig({
   build: {
     outDir: path.resolve(__dirname, '../../dist/renderer'),
     emptyOutDir: true,
+    rollupOptions: {
+      external: [
+        'electron',
+        'electron-store',
+        'fs',
+        'path'
+      ]
+    }
   },
   server: {
     open: false,

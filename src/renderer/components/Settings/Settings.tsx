@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileFilter } from 'electron';
+import { openFileDialog, openFolderDialog } from '../Project/Dialog'
 import './Settings.css';
 import { searchEMMEPython } from './../../search_emme_pythonpath';
 import versions from '../../../versions';
@@ -59,6 +59,7 @@ const Settings: React.FC<SettingsProps> = ({
 }) => {
   const [selectedBaseSettings, setSelectedBaseSettings] = useState<string>('');
   const fsHelpers = window.fsHelpers;
+  const path = (window as any).path;
 
   const handleSelectBaseSettings = (settingsId: string) => {
     setSelectedBaseSettings(settingsId);
@@ -77,29 +78,7 @@ const Settings: React.FC<SettingsProps> = ({
     saveSetting();
   };
 
-const path = window.api.path;
-const windowFileDialog = window.api.openFileDialog;
 
-const openFolderDialog = async (inputPath?: string) => {
-  const defaultPath =
-    inputPath && path.extname(inputPath)
-      ? path.dirname(inputPath)
-      : inputPath;
-
-  const result = await windowFileDialog({
-    defaultPath,
-    properties: ['openDirectory'],
-  });
-
-  return result.canceled ? null : result.filePaths[0];
-};
-
-
-
-const openFileDialog = async (path: string, filters: FileFilter[]) => {
-  const result = await windowFileDialog({ defaultPath: path, properties: ['openFile'], filters: filters});
-  return result.canceled ? null : result.filePaths[0];
-}
 
   return (
   <div className="Settings">
@@ -140,7 +119,7 @@ const openFileDialog = async (path: string, filters: FileFilter[]) => {
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">Projektikansio</span>
           <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-project-folder" title={settings.project_folder}>
-            {settings.project_folder ? settings.project_folder : "Valitse.."}
+            {settings.project_folder ? path.basename(settings.project_folder) : "Valitse.."}
           </label>
           <input className="Settings__hidden-input"
             id="hidden-input-project-folder"
@@ -150,7 +129,7 @@ const openFileDialog = async (path: string, filters: FileFilter[]) => {
                   settings.project_folder || ''
                 );
                 if (folder) {
-                  setProjectFolder(path.dirname(folder));
+                  setProjectFolder(folder);
                 }
               }}
           />
@@ -171,7 +150,6 @@ const openFileDialog = async (path: string, filters: FileFilter[]) => {
                   { name: 'All Files', extensions: ['*'] },
                  ],
               );
-
               if (file) {
                 setEMMEPythonPath(file);
               }
@@ -223,21 +201,20 @@ const openFileDialog = async (path: string, filters: FileFilter[]) => {
           </button>
         </div>
         <div className="Settings__dialog-input-group">
-          <span className="Settings__pseudo-label semi_bold">L&auml;ht&ouml;datan sis&auml;lt&auml;v&auml; kansio</span>
+          <span className="Settings__pseudo-label semi_bold">Lähtödatan sisältävä kansio</span>
           <label className="Settings__pseudo-file-select bg_plus" htmlFor="hidden-input-basedata-path" title={settings.base_data_folder}>
             {settings.base_data_folder ? path.basename(settings.base_data_folder) : "Valitse.."}
           </label>
           <input className="Settings__hidden-input"
             id="hidden-input-basedata-path"
             type="text"
-            onClick={() => {
-              openFolderDialog(
-              settings.base_data_folder ? settings.base_data_folder : settings.project_folder
-              ).then((e) => {
-                if (!e.canceled) {
-                  setBaseDataFolder(e.filePaths[0]);
-                }
-              })
+            onClick={async () => {
+              const folder = await openFolderDialog(
+                settings.base_data_folder ? settings.base_data_folder : settings.project_folder
+              );
+              if (folder) {
+                setBaseDataFolder(folder);
+              }
             }}
           />
         </div>

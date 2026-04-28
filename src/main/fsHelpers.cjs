@@ -3,11 +3,12 @@ const fs = require('fs');
 const path = require('path');
 
 const exists = (filePath) => fs.existsSync(filePath);
-const join = (...parts) => path.join(...parts);
-const readFileSync = (filePath, enc = 'utf8') =>
-  fs.readFileSync(filePath, enc);
+const join = (a, b) => path.join(a, b);
+const readFileSync = (filePath, enc = 'utf8') => fs.readFileSync(filePath, enc);
 const readdirSync = (dirPath) => fs.readdirSync(dirPath);
 const unlinkSync = (filePath) => fs.unlinkSync(filePath);
+const renameSync = (oldPath, newPath) => fs.renameSync(oldPath, newPath);
+const writeFileSync = (file, data) => fs.writeFileSync(file, data);
 
 module.exports = {
   exists,
@@ -15,4 +16,6 @@ module.exports = {
   readFileSync,
   readdirSync,
   unlinkSync,
+  renameSync,
+  writeFileSync
 };

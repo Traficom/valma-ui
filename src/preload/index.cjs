@@ -1,5 +1,5 @@
 
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, shell } = require('electron');
 
 const os = require('os');
 const fs = require('fs');
@@ -14,17 +14,11 @@ contextBridge.exposeInMainWorld('system', {
 contextBridge.exposeInMainWorld('store', {
   get: (key) => ipcRenderer.invoke('store:get', key),
   set: (key, value) => ipcRenderer.invoke('store:set', { key, value }),
+  delete: (key) => ipcRenderer.invoke('store:delete', key),
 });
 
-
-contextBridge.exposeInMainWorld('api', {
-  openFileDialog: () => ipcRenderer.invoke('open-file-dialog'),
-  path: {
-    basename: (p) => path.basename(p),
-    dirname: (p) => path.dirname(p),
-    extname: (p) => path.extname(p),
-    resolve: (p) => path.resolve(p)
-  },
+contextBridge.exposeInMainWorld('files', {
+  openFileDialog: (args) => ipcRenderer.invoke('open-file-dialog', args),
 });
 
 
@@ -32,35 +26,32 @@ contextBridge.exposeInMainWorld('path', {
   join: (...args) => path.join(...args),
   dirname: (p) => path.dirname(p),
   basename: (p) => path.basename(p),
+  extname: (p) => path.extname(p),
   resolve: (...args) => path.resolve(...args),
 });
 
 
 contextBridge.exposeInMainWorld('env', {
   get: (key) => process.env[key],
+  pipInstall: (pipPath, requirementsPath) =>
+    ipcRenderer.invoke('pip-install', pipPath, requirementsPath),
 });
 
-
-contextBridge.exposeInMainWorld('configStore', {
-  get: (id, key) => ipcRenderer.invoke('configStore:get', { id, key }),
-  set: (id, key, value) =>
-    ipcRenderer.invoke('configStore:set', { id, key, value }),
-  delete: (id, key) =>
-    ipcRenderer.invoke('configStore:delete', { id, key }),
-});
 
 contextBridge.exposeInMainWorld('electron', {
   openExternal: (url) => shell.openExternal(url),
   openPath: (path) => shell.openPath(path),
+  setMaxListeners: (amount) => ipcRenderer.setMaxListeners(amount),
 });
 
 contextBridge.exposeInMainWorld('fsHelpers', {
-  exists: fsHelpers.exists,
-  join: fsHelpers.join,
-  readFileSync: fsHelpers.readFileSync,
-  readdirSync: fsHelpers.readdirSync,
-  unlinkSync: fsHelpers.unlinkSync,
-  renameSync: fsHelpers.renameSync,
+  exists: (p) => fsHelpers.exists(p),
+  join: (a, b) => path.join(a, b),
+  readFileSync: (p) =>  fsHelpers.readFileSync(p),
+  readdirSync: (p) =>  fsHelpers.readdirSync (p),
+  unlinkSync: (p) =>  fsHelpers.unlinkSync(p),
+  renameSync: (p) =>  fsHelpers.renameSync(p),
+  writeFileSync: (a, b) =>  fsHelpers.writeFileSync(a, b),
 });
 
 contextBridge.exposeInMainWorld('dialog', {
@@ -78,4 +69,5 @@ contextBridge.exposeInMainWorld('ipc', {
     ipcRenderer.on(channel, listener);
     return () => ipcRenderer.removeListener(channel, listener);
   },
+  removeListener: (channel, listener) => ipcRenderer.removeListener(channel, listener),
 });

@@ -1,134 +1,116 @@
 import React from 'react';
-import './CostBenefitAnalysis.css';
-
-/* ------------------------------------------------------------------ */
-/* Types                                                              */
-/* ------------------------------------------------------------------ */
-
-interface CbaOptions {
-  baseline_scenario_path?: string;
-  projected_scenario_path?: string;
-  baseline_scenario_2_path?: string;
-  projected_scenario_2_path?: string;
-}
+import path from "path";
+import { CbaOptions } from '../Project/types/CbaOptions'
+import { openFileDialog, openFolderDialog } from '../Project/Dialog'
 
 interface CostBenefitAnalysisProps {
   projectFolder: string;
-  cbaOptions: CbaOptions;
-  setCbaOptions: (updater: (prev: CbaOptions) => CbaOptions) => void;
-  runCbaScript: () => void;
+  runCbaScript: (cbaOptions: CbaOptions) => void;
 }
-
-/* ------------------------------------------------------------------ */
 
 const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
   projectFolder,
-  cbaOptions,
-  setCbaOptions,
-  runCbaScript,
+  runCbaScript
 }) => {
-  const selectDirectory = (key: keyof CbaOptions) => {
-    window.dialog
-      .showOpenDialog({
-        defaultPath: projectFolder,
-        properties: ['openDirectory'],
-      })
-      .then((e: any) => {
-        if (!e.canceled) {
-          const targetPath = e.filePaths[0];
-          setCbaOptions(prev => ({
-            ...prev,
-            [key]: targetPath,
-          }));
-        }
-      });
+
+  let cbaOptions: CbaOptions = {
+    baseline_scenario_path: "",
+    projected_scenario_path: "",
+    baseline_scenario_2_path: "",
+    projected_scenario_2_path: ""
   };
 
   return (
-    <div className="CostBenefitAnalysis">
-      <h2>Skenaariovertailu</h2>
-
-      <table>
+    <div className="CBA">
+      <div className="CBA__heading">Skenaariovertailu</div>
+      <table className="CBA__choices">
         <tbody>
           <tr>
-            {/* Baseline scenario */}
+            {/* Baseline scenario results folder */}
             <td>
-              Vertailuvaihtoehto{' '}
-              <button
-                onClick={() =>
-                  selectDirectory('baseline_scenario_path')
-                }
-              >
-                {cbaOptions.baseline_scenario_path
-                  ? window.api.path.basename(
-                      cbaOptions.baseline_scenario_path
-                    )
-                  : 'Valitse..'}
-              </button>
+              <span className="CBA__pseudo-label">Vertailuvaihtoehto</span>
+              <label className="CBA__pseudo-file-select" htmlFor="baseline-scenario-results-folder-select" title={cbaOptions.baseline_scenario_path}>
+                {cbaOptions.baseline_scenario_path ? path.basename(cbaOptions.baseline_scenario_path) : "Valitse.."}
+              </label>
+              <input className="CBA__hidden-input"
+                id="baseline-scenario-results-folder-select"
+                type="text"
+                onClick={async () => {
+                  const folder = await openFolderDialog(
+                    projectFolder
+                  );
+                  if (folder) {
+                    cbaOptions.baseline_scenario_path = folder;
+                  }
+                }}
+              />
             </td>
-
-            {/* Projected scenario */}
+            {/* Projected scenario results folder */}
             <td>
-              Hankevaihtoehto{' '}
-              <button
-                onClick={() =>
-                  selectDirectory('projected_scenario_path')
-                }
-              >
-                {cbaOptions.projected_scenario_path
-                  ? window.api.path.basename(
-                      cbaOptions.projected_scenario_path
-                    )
-                  : 'Valitse..'}
-              </button>
+              <span className="CBA__pseudo-label">Hankevaihtoehto</span>
+              <label className="CBA__pseudo-file-select" htmlFor="projected-scenario-results-folder-select" title={cbaOptions.projected_scenario_path}>
+                {cbaOptions.projected_scenario_path ? path.basename(cbaOptions.projected_scenario_path) : "Valitse.."}
+              </label>
+              <input className="CBA__hidden-input"
+                id="projected-scenario-results-folder-select"
+                type="text"
+                 onClick={async () => {
+                  const folder = await openFolderDialog(
+                    projectFolder
+                  );
+                  if (folder) {
+                    cbaOptions.projected_scenario_path = folder;
+                  }
+                }}
+              />
             </td>
           </tr>
-
           <tr>
-            {/* Baseline scenario year 2 */}
+            {/* Baseline scenario 2 results folder */}
             <td>
-              Vertailuvaihtoehto vuosi 2 (valinnainen){' '}
-              <button
-                onClick={() =>
-                  selectDirectory(
-                    'baseline_scenario_2_path'
-                  )
-                }
-              >
-                {cbaOptions.baseline_scenario_2_path
-                  ? window.api.path.basename(
-                      cbaOptions.baseline_scenario_2_path
-                    )
-                  : 'Valitse..'}
-              </button>
+              <span className="CBA__pseudo-label">Vertailuvaihtoehto vuosi 2 (valinnainen)</span>
+              <label className="CBA__pseudo-file-select" htmlFor="baseline-scenario-2-results-folder-select" title={cbaOptions.baseline_scenario_2_path}>
+                {cbaOptions.baseline_scenario_2_path ? path.basename(cbaOptions.baseline_scenario_2_path) : "Valitse.."}
+              </label>
+              <input className="CBA__hidden-input"
+                id="baseline-scenario-2-results-folder-select"
+                type="text"
+                onClick={async () => {
+                  const folder = await openFolderDialog(
+                    projectFolder
+                  );
+                  if (folder) {
+                    cbaOptions.baseline_scenario_2_path = folder;
+                  }
+                }}
+              />
             </td>
-
-            {/* Projected scenario year 2 */}
+            {/* Projected scenario 2 results folder */}
             <td>
-              Hankevaihtoehto vuosi 2 (valinnainen){' '}
-              <button
-                onClick={() =>
-                  selectDirectory(
-                    'projected_scenario_2_path'
-                  )
-                }
-              >
-                {cbaOptions.projected_scenario_2_path
-                  ? window.api.path.basename(
-                      cbaOptions.projected_scenario_2_path
-                    )
-                  : 'Valitse..'}
-              </button>
+              <span className="CBA__pseudo-label">Hankevaihtoehto vuosi 2 (valinnainen)</span>
+              <label className="CBA__pseudo-file-select" htmlFor="projected-scenario-2-results-folder-select" title={cbaOptions.projected_scenario_2_path}>
+                {cbaOptions.projected_scenario_2_path ? path.basename(cbaOptions.projected_scenario_2_path) : "Valitse.."}
+              </label>
+              <input className="CBA__hidden-input"
+                id="projected-scenario-2-results-folder-select"
+                type="text"
+                onClick={async () => {
+                  const folder = await openFolderDialog(
+                    projectFolder
+                  );
+                  if (folder) {
+                    cbaOptions.projected_scenario_2_path = folder;
+                  }
+                }}
+              />
             </td>
           </tr>
         </tbody>
       </table>
-
-      <button onClick={runCbaScript}>
-        Aja skenaariovertailu
-      </button>
-    </div>
-  );
+      <div className="CBA__run">
+        <button onClick={(e) => { runCbaScript(cbaOptions) }}>Aja skenaariovertailu</button>
+      </div>
+    </div>);
 };
 
 export default CostBenefitAnalysis;

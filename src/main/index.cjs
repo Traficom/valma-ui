@@ -1,11 +1,11 @@
 
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { exec } = require('child_process');
 const { download } = require('electron-dl');
 const { deleteAsync: del } = require('del');
 const decompress = require('decompress');
 
 const store = require('./store.cjs');
-const configStore = require('./configStores.cjs');
 const fsHelpers = require('./fsHelpers.cjs');
 
 const squirrelStartup = require('electron-squirrel-startup');
@@ -122,21 +122,28 @@ ipcMain.handle('open-file-dialog', async (_event, options) => {
 });
 
 
-// Store APIs
-ipcMain.handle('store:get', (_e, key) => store.get(key));
-ipcMain.handle('store:set', (_e, { key, value }) =>
-  store.set(key, value)
+ipcMain.handle(
+  'pip-install',
+  async (_event, pipPath, requirementsPath) => {
+    return new Promise<{ stdout, stderr }>((resolve, reject) => {
+      exec(
+        `"${pipPath}" install --user -r "${requirementsPath}"`,
+        (error, stdout, stderr) => {
+          if (error) {
+            reject(error.message);
+          } else {
+            resolve({ stdout, stderr });
+          }
+        }
+      );
+    });
+  }
 );
 
-ipcMain.handle('configStore:get', (_e, { id, key }) =>
-  configStore.get(id, key)
-);
-ipcMain.handle('configStore:set', (_e, { id, key, value }) =>
-  configStore.set(id, key, value)
-);
-ipcMain.handle('configStore:delete', (_e, { id, key }) =>
-  configStore.delete(id, key)
-);
+// Store APIs
+ipcMain.handle('store:get', (_e, { key }) => store.get(key));
+ipcMain.handle('store:set', (_e, { key, value }) => store.set(key, value));
+ipcMain.handle('store:delete', (_e, { key }) => store.delete(key));
 
 // Relay messages
 ipcMain.on('message-from-ui-to-run-scenarios', (_e, args) =>
