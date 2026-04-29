@@ -11,6 +11,7 @@ import { CbaOptions } from '../Project/types/CbaOptions'
 import SubScenario from './SubScenario/SubScenario';
 import RunLog from './RunLog/RunLog'
 import { SubScenarioData } from './types/SubScenarioData';
+import './VlemProject.css';
 
 
 // ---------------- globals ----------------
@@ -136,8 +137,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
           );
         }
       });
-      console.log(projectFolder);
-      console.log(foundScenarios);
       setScenarios(foundScenarios);
       setOpenScenarioID(null);
       setSubScenarioEdit(null);

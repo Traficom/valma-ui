@@ -9,6 +9,7 @@ export interface ScenarioData {
   first_scenario_id: number;
   iterations: number;
   last_run?: string,
+  run_success?: boolean,
 
   submodel: string;
 

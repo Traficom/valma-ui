@@ -18,6 +18,7 @@
     --white-basic: #ffffff;
     --light-yellow: #FFFBE5;
     --pale-yellow: #fcfaf2;
+    min-width: 900px;
 }
 
 body {
@@ -25,7 +26,7 @@ body {
     padding: 0;
     position: relative;
     background: var(--white-basic);
-    font-size: 15px;
+    font-size: 11pt;
     font-family: open_sans_medium, sans-serif;
 }
 

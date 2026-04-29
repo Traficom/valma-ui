@@ -1,6 +1,6 @@
 import React from 'react';
 
-const CopyIcon: React.FC = () => {
+export default function CopyIcon () {
   return (
     <svg
       fill="#026273"
@@ -21,5 +21,3 @@ const CopyIcon: React.FC = () => {
     </svg>
   );
 };
-
-export default CopyIcon;

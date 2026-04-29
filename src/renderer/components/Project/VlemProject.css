@@ -1,18 +1,12 @@
 .Project {
-    position: relative;
+   position: relative;
 }
- /*
-.Project__runtime {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-}
- */
+
 .Project__selected-details {
     position: absolute;
     top: 130px;
     right: 20px;
     left: 635px;
 }
+  
+

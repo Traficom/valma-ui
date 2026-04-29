@@ -43,6 +43,7 @@ interface ReadyScenarioLogfiles {
 }
 
 interface RunStatusProps {
+  id: string;
   isScenarioRunning: boolean;
 
   statusIterationsTotal: number;

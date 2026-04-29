@@ -1,8 +1,13 @@
 import React from 'react';
 
-const ResetIcon: React.FC = () => {
+
+type ResetIconProps = {
+  className?: string
+}
+
+const ResetIcon: React.FC<ResetIconProps> = ({ className }) => {
   return (
-    <svg
+      <svg className={className}
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 283.46 283.46"
       width="20"

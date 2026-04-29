@@ -47,6 +47,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   const [isCreateEmmeBankModalOpen, setCreateEmmeBankModalOpen] = useState(false);
 
   const globalSettingsStore = useRef<any>((window as any).store);
+  const ipc = (window as any).ipc;
 
 
   function resolvePipFilePath(pythonDir: string): string {
@@ -59,73 +60,73 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
 
 
-async function runPipInstall(
-  pipFilePath: string,
-  pipRequirementsPath: string
-) {
-  try {
+  async function runPipInstall(
+    pipFilePath: string,
+    pipRequirementsPath: string
+  ) {
+    try {
+      setLoading(true);
+      setLoadingHeading('Tehdään PIP-asennusta');
+      setLoadingInfo('Asennus käynnissä…');
+
+      const { stdout, stderr } = await pipInstall(
+        pipFilePath,
+        pipRequirementsPath
+      );
+
+      if (stderr && stderr.length > 0) {
+        setLoadingInfo(
+          'PIP-asennus onnistui, mutta palautti viestin:\n' + stderr
+        );
+      } else {
+        setLoadingInfo('PIP-asennus onnistui');
+      }
+    } catch (err: any) {
+      setLoadingInfo(
+        'PIP-asennus epäonnistui. Sovellus saattaa toimia puutteellisesti.\n\n' +
+        err
+      );
+    }
+  }
+
+
+  function constructAndSaveNewSettingsState(
+    setting: ProjectSetting,
+    prev: ProjectSetting[]
+  ): ProjectSetting[] {
+    const idx = prev.findIndex(s => s.id === setting.id);
+    const next = [...prev];
+    next[idx] = setting;
+
+    globalSettingsStore.current.set('settings', next);
+    globalSettingsStore.current.set('selected_settings_id', setting.id);
+
+    return next;
+  }
+
+
+  function saveAutomaticallyFixedSetting(
+    fixed: ProjectSetting,
+    all: ProjectSetting[]
+  ) {
+    const updated = constructAndSaveNewSettingsState(fixed, all);
+    setProjectSettings(updated);
+    setSettingInHandling(fixed);
+    setSelectedSettingsId(fixed.id);
+  }
+
+
+  function setInstallingPipInProgress() {
     setLoading(true);
     setLoadingHeading('Tehdään PIP-asennusta');
     setLoadingInfo('Asennus käynnissä…');
-
-    const { stdout, stderr } = await pipInstall(
-      pipFilePath,
-      pipRequirementsPath
-    );
-
-    if (stderr && stderr.length > 0) {
-      setLoadingInfo(
-        'PIP-asennus onnistui, mutta palautti viestin:\n' + stderr
-      );
-    } else {
-      setLoadingInfo('PIP-asennus onnistui');
-    }
-  } catch (err: any) {
-    setLoadingInfo(
-      'PIP-asennus epäonnistui. Sovellus saattaa toimia puutteellisesti.\n\n' +
-        err
-    );
   }
-}
 
-
-function constructAndSaveNewSettingsState(
-  setting: ProjectSetting,
-  prev: ProjectSetting[]
-): ProjectSetting[] {
-  const idx = prev.findIndex(s => s.id === setting.id);
-  const next = [...prev];
-  next[idx] = setting;
-
-  globalSettingsStore.current.set('settings', next);
-  globalSettingsStore.current.set('selected_settings_id', setting.id);
-
-  return next;
-}
-
-
-function saveAutomaticallyFixedSetting(
-  fixed: ProjectSetting,
-  all: ProjectSetting[]
-) {
-  const updated = constructAndSaveNewSettingsState(fixed, all);
-  setProjectSettings(updated);
-  setSettingInHandling(fixed);
-  setSelectedSettingsId(fixed.id);
-}
-
-
-function setInstallingPipInProgress() {
-  setLoading(true);
-  setLoadingHeading('Tehdään PIP-asennusta');
-  setLoadingInfo('Asennus käynnissä…');
-}
-
-function setCreatingEmmeBankInProgress() {
-  setLoading(true);
-  setLoadingHeading('Luodaan Emme-projektia');
-  setLoadingInfo('Projektin luominen käynnissä…');
-}
+  function setCreatingEmmeBankInProgress() {
+    setLoading(true);
+    setLoadingHeading('Luodaan Emme-projektia');
+    setLoadingInfo('Projektin luominen käynnissä…');
+  }
 
   function findSetting(settings: any[], id: any) {
     if (settings && id) return settings.find(s => s.id === id);
@@ -164,7 +165,7 @@ function setCreatingEmmeBankInProgress() {
     if (settingInHandling.id === "") saveNewSetting({ ...settingInHandling });
     else saveSettingChanges({ ...settingInHandling });
 
-    (window as any).ipc.send('message-from-ui-to-create-project', {
+    ipc.send('message-from-ui-to-create-project', {
       project_folder: settingInHandling.project_folder,
       emme_python_path: settingInHandling.emme_python_path,
       valma_scripts_path: settingInHandling.valma_scripts_path,
@@ -196,6 +197,12 @@ function setCreatingEmmeBankInProgress() {
 
   const handleEditSetting = () => {
     if (selectedSettingsId) openSettings();
+  };
+
+  const closeLoadingInfo = () => {
+    setLoading(false);
+    setLoadingInfo('');
+    setLoadingHeading('');
   };
 
   function deleteSetting() {
@@ -232,48 +239,114 @@ function setCreatingEmmeBankInProgress() {
   };
 
   function onCreatingEmmeBankReady(_: any, error: string) {
-  setLoadingInfo(
-    error?.length
-      ? `VIRHE:\n${error}`
-      : 'Emme-projekti luotu onnistuneesti'
-  );
-}
+    setLoadingInfo(
+      error?.length
+        ? `VIRHE:\n${error}`
+        : 'Emme-projekti luotu onnistuneesti'
+    );
+  }
 
 
-function promptModelSystemDownload() {
-  fetch('https://api.github.com/repos/Traficom/lem-model-system/tags')
-    .then(r => r.json())
-    .then(tags => {
-      vex.dialog.open({
-        message: 'Valitse model-system versio:',
-        input: `
+  function promptModelSystemDownload() {
+    fetch('https://api.github.com/repos/Traficom/lem-model-system/tags')
+      .then(r => r.json())
+      .then(tags => {
+        vex.dialog.open({
+          message: 'Valitse model-system versio:',
+          input: `
           <select name="version">
             ${tags.map((t: any) =>
-              `<option value="${t.name}">${t.name}</option>`
-            ).join('')}
+            `<option value="${t.name}">${t.name}</option>`
+          ).join('')}
           </select>
         `,
-        callback: (data: any) => {
-          if (!data) return;
+          callback: (data: any) => {
+            if (!data) return;
 
-          const now = Date.now();
-          setDlValmaScriptsVersion(data.version);
-          setDownloadingValmaScripts(true);
+            const now = Date.now();
+            setDlValmaScriptsVersion(data.version);
+            setDownloadingValmaScripts(true);
 
-          (window as any).ipc.send(
-            'message-from-ui-to-download-model-scripts',
-            {
-              version: data.version,
-              destinationDir: homedir,
-              postfix: `dl-${now}`
-            }
-          );
-        }
+            ipc.send(
+              'message-from-ui-to-download-model-scripts',
+              {
+                version: data.version,
+                destinationDir: homedir,
+                postfix: `dl-${now}`
+              }
+            );
+          }
+        });
       });
-    });
-}
+  }
 
- const onDownloadReady = (event, savePath) => {
+  const getPropertyForDisplayString = (settingProperty) => {
+    const [key, value] = settingProperty;
+
+    if (typeof value === 'string') {
+      const trimmedStringValue = value.length > 30 ? "..." + value.substring(value.length - 30) : value;
+      return `${key} : ${trimmedStringValue}`
+    }
+
+    return `${key} : ${value}`;
+  };
+
+  const settingsTooltipContent = (settingInHandling) => {
+    return settingInHandling ? ( <div key="settings_tooltip_body">
+      <h3>Projektin asetukset:</h3>
+      {settingInHandling != undefined && settingInHandling.id != "" ? (
+        <div>{
+          Object.entries(settingInHandling).map(settingProperty => {
+            return (
+              <p key={"prop_" + settingProperty}>
+                { getPropertyForDisplayString(settingProperty) }
+              </p>);
+          })}</div>
+      ) : <p></p>}
+    </div>):(<p></p>);
+  };
+
+ const closeCreateEmmeBank = () => {
+    setCreateEmmeBankModalOpen(false);
+    closeError();
+  };
+
+  const createEmmeBank = (submodel, numberOfEmmeScenarios, separateEmmeScenarios) => {
+    if (!fs.existsSync(settingInHandling.project_folder)) {
+      showError('Tarkista projektikansio ' + settingInHandling.project_folder);
+      return;
+    }
+    // If create_emme_project.py doesn't exist, alert.
+    const createEmmeScript = settingInHandling.valma_scripts_path + "\\create_emme_project.py"
+    if (!fs.existsSync(createEmmeScript)) {
+      showError('create_emme_project.py -scriptiä ei löydy polusta ' + createEmmeScript);
+      return;
+    }
+
+    if (!fs.existsSync(settingInHandling.emme_python_path)) {
+      showError('Pythonia ei löydy polusta ' + settingInHandling.emme_python_path);
+      return;
+    }
+    setCreatingEmmeBankInProgress();
+
+    ipc.send(
+      'message-from-ui-to-create-emme-bank',
+      {
+        project_folder: settingInHandling.project_folder,
+        emme_python_path: settingInHandling.emme_python_path,
+        valma_scripts_path: settingInHandling.valma_scripts_path,
+        submodel: submodel,
+        number_of_emme_scenarios: numberOfEmmeScenarios,
+        log_level: 'DEBUG',
+        project_name: settingInHandling.project_name,
+        separate_emme_scenarios: separateEmmeScenarios
+      }
+    );
+
+    setCreateEmmeBankModalOpen(false);
+  };
+
+  const onDownloadReady = (event, savePath) => {
     const existingSettings = globalSettingsStore.current.get('settings');
     const existingSelectedSettingId = globalSettingsStore.current.get('selected_settings_id');
     const settingsAreDefined = existingSettings && existingSettings.length > 0 && existingSelectedSettingId;
@@ -292,7 +365,7 @@ function promptModelSystemDownload() {
 
       const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
       if (pipFilePath == '') {
-        const errorMessage  = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
+        const errorMessage = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
         showError(errorMessage + '. Tarkista Emme Python - asetus.');
         setDownloadingValmaScripts(false);
         return;
@@ -315,38 +388,34 @@ function promptModelSystemDownload() {
   };
 
   useEffect(() => {
-  const loadConfig = async () => {
-    const store = (window as any).store;
-    const config = await store.get("config");
-    const settings = config?.settings;
-    const selectedSettingsId = config?.selected_settings_id;
+    const loadConfig = async () => {
+      const store = (window as any).store;
+      const config = await store.get("config");
+      const settings = config?.settings;
+      const selectedSettingsId = config?.selected_settings_id;
 
-    console.log("TESTING");
-    console.log(settings);
-    console.log()
+      if (selectedSettingsId && settings) {
+        setSettingInHandling(findSetting(projectSettings, selectedSettingsId));
+        setSelectedSettingsId(selectedSettingsId);
+        setProjectSettings(settings)
+      }
+    };
 
-    if(selectedSettingsId && settings){
-      setSettingInHandling(findSetting(projectSettings, selectedSettingsId));
-      setSelectedSettingsId(selectedSettingsId);
-      setProjectSettings(settings)
-    }
-  };
-
-  loadConfig();
-}, []);
+    loadConfig();
+  }, []);
 
 
-useEffect(() => {
-  const ipc = (window as any).ipc;
+  useEffect(() => {
+    const ipc = (window as any).ipc;
 
-  ipc.on('creating-emme-bank-completed', onCreatingEmmeBankReady);
-  ipc.on('download-ready', onDownloadReady);
+    ipc.on('creating-emme-bank-completed', onCreatingEmmeBankReady);
+    ipc.on('download-ready', onDownloadReady);
 
-  return () => {
-    ipc.removeListener('creating-emme-bank-completed', onCreatingEmmeBankReady);
-    ipc.removeListener('download-ready', onDownloadReady);
-  };
-}, []);
+    return () => {
+      ipc.removeListener('creating-emme-bank-completed', onCreatingEmmeBankReady);
+      ipc.removeListener('download-ready', onDownloadReady);
+    };
+  }, []);
 
   useEffect(() => {
     const existingSettings = globalSettingsStore.current.get('settings');
@@ -374,57 +443,66 @@ useEffect(() => {
     }
   }, []);
 
+
   // -------------------- render (unchanged structure) --------------------
 
   return (
     <div className={"App" + (isProjectRunning ? " App--busy" : "")}>
-      {isSettingsOpen && (
-        <div className="App__settings">
-          <Settings
-            settings={settingInHandling}
-            settingsList={projectSettings}
-            dlValmaScriptsVersion={dlValmaScriptsVersion}
-            isDownloadingValmaScripts={isDownloadingValmaScripts}
-            cancel={cancel}
-            setProjectName={(v: string) => setSettingInHandling({ ...settingInHandling, project_name: v })}
-            setProjectFolder={(v: string) => setSettingInHandling({ ...settingInHandling, project_folder: v })}
-            setEMMEPythonPath={(v: string) => setSettingInHandling({ ...settingInHandling, emme_python_path: v })}
-            setValmaScriptsPath={(v: string) => setSettingInHandling({ ...settingInHandling, valma_scripts_path: v })}
-            setBaseDataFolder={(v: string) => setSettingInHandling({ ...settingInHandling, base_data_folder: v })}
-            saveSetting={saveSetting}
-            selectBaseSettings={(id: any) => setSettingInHandling(findSetting(projectSettings, id))}
-            setModeDestCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: v })}
-            setMunicipalityCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, municipality_calibration_file: v })}
-            promptModelSystemDownload={() => (window as any).ipc.send('message-from-ui-to-download-model-scripts')}
+      {/* Pop-up global settings dialog with overlay behind it */}
+      {isSettingsOpen && <div className="App__settings">
+        <Settings
+          settings={settingInHandling}
+          settingsList={projectSettings}
+          dlValmaScriptsVersion={dlValmaScriptsVersion}
+          isDownloadingValmaScripts={isDownloadingValmaScripts}
+          cancel={cancel}
+          setProjectName={(v: string) => setSettingInHandling({ ...settingInHandling, project_name: v })}
+          setProjectFolder={(v: string) => setSettingInHandling({ ...settingInHandling, project_folder: v })}
+          setEMMEPythonPath={(v: string) => setSettingInHandling({ ...settingInHandling, emme_python_path: v })}
+          setValmaScriptsPath={(v: string) => setSettingInHandling({ ...settingInHandling, valma_scripts_path: v })}
+          setBaseDataFolder={(v: string) => setSettingInHandling({ ...settingInHandling, base_data_folder: v })}
+          promptModelSystemDownload={promptModelSystemDownload}
+          saveSetting={saveSetting}
+          selectBaseSettings={(id: any) => setSettingInHandling(findSetting(projectSettings, id))}
+          setModeDestCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: v })}
+          setMunicipalityCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, municipality_calibration_file: v })}
+        />
+      </div>}
+      {/* Pop-up used instead of Alert, which messes with window focus and block */}
+      {errorShown && <LemError
+        info={errorInfo}
+        close={closeError}
+      />}
+      {/* Pop-up global loading dialog */}
+      {isLoading &&
+        <div className="App__loading">
+          <Loading
+            heading={loadingHeading}
+            info={loadingInfo}
+            close={closeLoadingInfo}
           />
         </div>
-      )}
-
-      {errorShown && <LemError info={errorInfo} close={closeError} />}
-
-      {isLoading && (
-        <div className="App__loading">
-          <Loading heading={loadingHeading} info={loadingInfo} close={() => setLoading(false)} />
-        </div>
-      )}
+      }
 
       <div className="App__CreateEmmeBank" style={{ display: isCreateEmmeBankModalOpen ? "block" : "none" }}>
         <CreateEmmeBank
-          createProject={(...args: any[]) => (window as any).ipc.send('message-from-ui-to-create-emme-bank', args)}
-          handleCancel={() => setCreateEmmeBankModalOpen(false)}
+          createProject={createEmmeBank}
+          handleCancel={closeCreateEmmeBank}
         />
       </div>
 
+      {/* UI title bar, app-version, etc. */}
       <div className="App__header">
         <span className="App__header-title">VALMA</span>
+        &nbsp;
         <a onClick={() => (window as any).electron.openExternal("https://github.com/Traficom/valma-docs")} />
       </div>
-
+      {/* VLEM Project -specific content, including runtime- & per-scenario-settings */}
       <div className="App__body">
         <VlemProject
-          signalProjectRunning={setProjectRunning}
           selectedSetting={settingInHandling}
           openCreateEmmeBank={() => setCreateEmmeBankModalOpen(true)}
+          signalProjectRunning={setProjectRunning}
           addNewSetting={addNewSetting}
         />
       </div>
@@ -432,34 +510,47 @@ useEffect(() => {
       <div className="App__settings-menu">
         <ul>
           <li>
-            <select
-              value={selectedSettingsId}
-              disabled={isSettingsOpen || isProjectRunning}
-              onChange={e => selectSetting((e.target as HTMLSelectElement).value)}
-            >
-              {projectSettings.map(s => (
-                <option key={s.id} value={s.id}>{s.project_name}</option>
-              ))}
-            </select>
+            <div className="App__settings_select">
+              <select value={selectedSettingsId} disabled={isSettingsOpen || isProjectRunning} onChange={e => selectSetting(e.target.value)}>
+                {projectSettings && projectSettings.map((setting) =>
+                  <option key={setting.id} value={setting.id}>{setting.project_name}</option>)
+                }
+              </select>
+            </div>
           </li>
           <li>
-            <div
-              className={!selectedSettingsId ? "settings_disabled App__open-settings" : "App__open-settings"}
-              onClick={handleEditSetting}
-            />
+            <div className="App__settings_modify">
+              <div
+                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__open-settings" : "App__open-settings"}
+                id="settings-tooltip-anchor"
+                data-tooltip-id="settings-tooltip"
+                data-tooltip-html={renderToStaticMarkup(settingsTooltipContent(settingInHandling))}
+                data-tooltip-delay-show={150}
+                style={{ display: isSettingsOpen || isProjectRunning ? "none" : "block" }}
+                onClick={(e) => handleEditSetting()}
+              > 
+              {settingInHandling && settingInHandling.id && (<Tooltip anchorSelect="#settings-tooltip-anchor" key={"tooltip_" + settingInHandling.id} place={"bottom"} id="settings-tooltip"
+                style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000" }} />)
+              }
+              </div>
+            </div>
           </li>
           <li>
-            <div
-              className={!selectedSettingsId ? "settings_disabled App__delete_setting" : "App__delete_setting"}
-              onClick={handleDeleteSetting}
-            />
+            <div className="App__settings_modify">
+              <div
+                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__delete_setting" : "App__delete_setting"}
+                onClick={e =>
+                  handleDeleteSetting()
+                }
+              ></div>
+            </div>
           </li>
         </ul>
-      </div>
 
-      <div className="footer">
-        <span className="App__header-version">Versio {`${VLEMVersion}`}</span>
+
+
       </div>
+      <div className="footer"><span className="App__header-version">Versio {`${VLEMVersion}`}</span></div>
     </div>
   );
 };

@@ -3,21 +3,12 @@ import { openFileDialog, openFolderDialog } from '../Project/Dialog'
 import './Settings.css';
 import { searchEMMEPython } from './../../search_emme_pythonpath';
 import versions from '../../../versions';
+import {ProjectSetting} from '../Project/types/ProjectSetting';
+
 /* ----------------------------- Types ----------------------------- */
 
-interface ProjectSetting {
-  id: string;
-  project_name: string;
-  project_folder: string;
-  valma_scripts_path: string;
-  emme_python_path: string;
-  base_data_folder: string;
-  mode_dest_calibration_file: string;
-  municipality_calibration_file: string;
-}
-
 interface SettingsProps {
-  settings: ProjectSetting;
+  settings?: ProjectSetting;
   settingsList: ProjectSetting[];
 
   setProjectFolder: (path: string) => void;

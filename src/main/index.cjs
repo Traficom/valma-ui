@@ -37,6 +37,7 @@ function createUI() {
     fullscreen: false,
     autoHideMenuBar: true,
     webPreferences: {
+      zoomFactor: 1,
       preload: fsHelpers.join(__dirname, '../preload/index.cjs'),
       contextIsolation: true,
       sandbox: false,

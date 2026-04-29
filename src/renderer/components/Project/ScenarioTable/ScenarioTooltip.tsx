@@ -2,6 +2,8 @@ import React, { Fragment } from 'react';
 import _ from 'lodash';
 
 import { SCENARIO_TYPES } from '../../../../enums';
+import { ScenarioData } from '../types/ScenarioData';
+import { SubScenarioData } from '../types/SubScenarioData';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -19,46 +21,9 @@ interface OverriddenProjectSettings {
   baseDataFolder?: string | null;
 }
 
-interface ScenarioData {
-  id: string;
-  name: string;
-  scenarioType: string;
-
-  zone_data_file?: string;
-  cost_data_file?: string;
-  trade_demand_file?: string;
-  freight_matrix_path?: string;
-
-  iterations?: number;
-  end_assignment_only?: boolean;
-  save_matrices_in_emme?: boolean;
-  separate_emme_scenarios?: boolean;
-  first_matrix_id?: number;
-  first_scenario_id?: number;
-
-  long_dist_demand_forecast?: string;
-  long_dist_demand_forecast_path?: string;
-
-  stored_speed_assignment?: boolean;
-  storedSpeedAssignmentInputs?: StoredSpeedAssignmentInput[];
-
-  delete_strategy_files?: boolean;
-
-  submodel?: string;
-
-  overriddenProjectSettings: OverriddenProjectSettings;
-}
-
-interface SubScenario {
-  id: string;
-  name: string;
-  cost_data_file?: string;
-  emmeScenarioNumber?: number;
-}
-
 interface ScenarioTooltipProps {
   scenario: ScenarioData;
-  subScenario?: SubScenario;
+  subScenario?: SubScenarioData;
 }
 
 /* ------------------------------------------------------------------ */
@@ -218,7 +183,7 @@ const ScenarioTooltip: React.FC<ScenarioTooltipProps> = ({
   /* ---------------------------- Render ----------------------------- */
 
   return (
-    <div key={`tooltip_body_${tooltipId}`}>
+    <div key={"tooltip_wrapper_" + tooltipId }>
       {Object.entries(filteredScenarioSettings).map(property => {
         if (property[0] === 'overriddenProjectSettings') {
           const overridden = property[1] as OverriddenProjectSettings;

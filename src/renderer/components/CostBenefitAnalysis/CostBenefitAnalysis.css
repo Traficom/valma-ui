@@ -50,7 +50,6 @@
     border-radius: 5px;
     margin-top: 4px;
     margin-right: 10px;
-    cursor: pointer;
     /* Overflowing file/dir names show as "First part..." */
     white-space: nowrap;
     overflow: hidden;

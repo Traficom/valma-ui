@@ -1,38 +1,32 @@
 import React from 'react';
-import { Tooltip } from 'react-tooltip';
 import { renderToStaticMarkup } from 'react-dom/server';
+import CopyIcon from '../../../icons/CopyIcon';
+import Check from '../../../icons/Check';
+import ErrorCircle from '../../../icons/ErrorCircle';
+import { JSX } from 'react/jsx-runtime';
+import { ScenarioData } from '../types/ScenarioData';
+import { SubScenarioData } from '../types/SubScenarioData';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
 
-interface SubScenario {
-  id: string;
-  name: string;
-  lastRun?: string;
-  runSuccess?: boolean;
-}
-
-interface ScenarioData {
-  id: string;
-  name: string;
-}
 
 interface SubScenarioRowProps {
   scenarioData: ScenarioData;
-  subScenario: SubScenario;
+  subScenario: SubScenarioData;
 
   runningScenarioID?: string;
   openScenarioID?: string;
 
   scenarioIDsToRun: string[];
 
-  handleClickScenarioToActive: (subScenario: SubScenario) => void;
-  duplicateSubScenario: (subScenario: SubScenario) => void;
-  modifySubScenario: (subScenario: SubScenario) => void;
-  deleteSubScenario: (subScenario: SubScenario) => void;
+  handleClickScenarioToActive: (id: string) => void;
+  duplicateSubScenario: (subScenario: SubScenarioData) => void;
+  modifySubScenario: (subScenario: SubScenarioData) => void;
+  deleteSubScenario: (subScenario: SubScenarioData) => void;
 
-  tooltipContent: (scenario: ScenarioData, subScenario: SubScenario) => JSX.Element;
+  tooltipContent: string;
 
   projectFolder: string;
   parentScenarioIsRunOrSelectedForRunning: boolean;
@@ -54,18 +48,15 @@ const SubScenarioRow: React.FC<SubScenarioRowProps> = ({
   duplicateSubScenario,
   modifySubScenario,
   deleteSubScenario,
-
   tooltipContent,
   projectFolder,
   parentScenarioIsRunOrSelectedForRunning,
   parentScenarioResultDataFolder,
 }) => {
   const scenarioLogFilePath = window.fsHelpers.join(
-    projectFolder,
-    subScenario.name,
+    projectFolder + subScenario.name,
     `${subScenario.name}.log`
   );
-
   const resultsExist = window.fsHelpers.exists(parentScenarioResultDataFolder);
   const scenarioLogExists = window.fsHelpers.exists(scenarioLogFilePath);
 
@@ -80,70 +71,80 @@ const SubScenarioRow: React.FC<SubScenarioRowProps> = ({
   };
 
   return (
-    <tr
-      className="SubScenarioRow"
-      onClick={() => handleClickScenarioToActive(subScenario)}
-    >
+    <tr id="my-sub-tooltip-anchor" className="Runtime__sub_scenario" key={"tooltip_wrapper_" + subScenario.id}>
       <td>
-        {subScenario.name
-          ? subScenario.name
-          : `Unnamed project (${subScenario.id})`}
-      </td>
-
-      <td>
-        {resultsExist && subScenario.lastRun && subScenario.lastRun}
-      </td>
-
-      <td>
-        {resultsExist && scenarioLogExists && (
-          <button onClick={openLogFile}>
-            {subScenario.runSuccess ? 'OK' : 'LOG'}
-          </button>
-        )}
-      </td>
-
-      <td>
-        {resultsExist && (
-          <button onClick={openResultDataFolder}>NÄYTÄ</button>
-        )}
-      </td>
-
-      <td>
-        <button onClick={() => duplicateSubScenario(subScenario)}>
-          KOPIOI
-        </button>
-      </td>
-
-      <td>
-        <button
-          disabled={!!runningScenarioID}
-          onClick={() =>
-            !runningScenarioID && modifySubScenario(subScenario)
+        <input
+          className={
+            "Runtime__scenario-activate-checkbox" +
+            (scenarioIDsToRun.includes(subScenario.id)
+              ? " Runtime__scenario-activate-checkbox--active"
+              : "")
           }
-        >
-          MUOKKAA
-        </button>
+          type="checkbox"
+          checked={scenarioIDsToRun.includes(subScenario.id)}
+          disabled={!parentScenarioIsRunOrSelectedForRunning || runningScenarioID == subScenario.id}
+          onChange={e => handleClickScenarioToActive(subScenario.id)}
+        />
       </td>
-
+      <td data-tooltip-id="scenario-tooltip"
+        data-tooltip-html={tooltipContent}
+        data-tooltip-delay-show={150}
+        data-tooltip-hidden={openScenarioID !== null}>
+        <div>
+          <span className="Runtime__sub_scenario-name">
+            {subScenario.name
+              ? subScenario.name
+              : `Unnamed project (${subScenario.id})`}
+          </span>
+        </div>
+      </td>
+      <td data-tooltip-id="scenario-tooltip"
+        data-tooltip-html={tooltipContent}
+        data-tooltip-delay-show={150}
+        data-tooltip-hidden={openScenarioID !== null}>
+        <div className="Runtime__sub_scenario-type"></div>
+      </td>
+      <td className="Table_space_after">{resultsExist && subScenario.last_run && <span className="Runtime__scenario-name">
+        {subScenario.last_run}
+      </span>} </td>
+      <td>{resultsExist && scenarioLogExists && (
+        <div onClick={e => openLogFile()}>{subScenario.runSuccess ? <Check /> : <ErrorCircle />}</div>
+      )}</td>
+      <td className="Table_space_after">
+        {resultsExist && <div
+          className={"Runtime__scenario-open-folder"}
+          onClick={e => openResultDataFolder()}
+        >
+          NÄYTÄ
+        </div>}
+      </td>
+      <td className="Table_space_after">
+      </td>
       <td>
-        <button
-          disabled={!!runningScenarioID}
-          onClick={() =>
-            !runningScenarioID && deleteSubScenario(subScenario)
-          }
+        <div
+          className={"Runtime__scenario-clone"}
+          onClick={e => duplicateSubScenario(subScenario)}
         >
-          POISTA
-        </button>
-      </td>
+          <CopyIcon />
+        </div>
+        <div
+          className={
+            "Runtime__scenario-open-config"
+          }
+          onClick={e =>
+            runningScenarioID ? undefined : modifySubScenario(subScenario)
+          }
+        ></div>
 
-      <Tooltip
-        anchorSelect={`#subscenario-${subScenario.id}`}
-        html={renderToStaticMarkup(
-          tooltipContent(scenarioData, subScenario)
-        )}
-      />
+        <div
+          className={"Runtime__scenario-delete"}
+          onClick={e =>
+            runningScenarioID ? undefined : deleteSubScenario(subScenario)
+          }
+        ></div>
+      </td>
     </tr>
   );
-};
+}
 
 export default SubScenarioRow;

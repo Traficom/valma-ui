@@ -1,9 +1,14 @@
-import React, { JSX } from 'react';
-import { Tooltip } from 'react-tooltip';
+import React, { Fragment, JSX, useMemo } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SCENARIO_TYPES } from '../../../../enums';
 import SubScenarioRow from './SubScenarioRow';
+import CopyIcon from '../../../icons/CopyIcon';
+import Check from '../../../icons/Check';
+import ErrorCircle from '../../../icons/ErrorCircle';
+import Plus from '../../../icons/Plus';
+import ScenarioTooltip from '../ScenarioTable/ScenarioTooltip';
+import { ScenarioData } from '../types/ScenarioData';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -18,17 +23,6 @@ interface SubScenario {
   name: string;
 }
 
-interface ScenarioData {
-  id: string;
-  name: string;
-  scenarioType: string;
-
-  last_run?: string;
-  run_success?: boolean;
-
-  overriddenProjectSettings?: OverriddenProjectSettings;
-  subScenarios?: SubScenario[];
-}
 
 interface ScenarioTableRowProps {
   scenarioData: ScenarioData;
@@ -38,12 +32,10 @@ interface ScenarioTableRowProps {
   scenarioIDsToRun: string[];
 
   handleClickScenarioToActive: (id: string) => void;
-  duplicateScenario: (scenario: string) => void;
+  duplicateScenario: (id: string) => void;
   handleClickCreateSubScenario: (id: string) => void;
   setOpenScenarioID: (id: string) => void;
   deleteScenario: (scenario: ScenarioData) => void;
-
-  tooltipContent: (scenario: ScenarioData, subScenario?: SubScenario) => JSX.Element;
 
   projectFolder: string;
 
@@ -65,8 +57,6 @@ const ScenarioTableRow: React.FC<ScenarioTableRowProps> = ({
   handleClickCreateSubScenario,
   setOpenScenarioID,
   deleteScenario,
-
-  tooltipContent,
   projectFolder,
 
   duplicateSubScenario,
@@ -113,106 +103,150 @@ const ScenarioTableRow: React.FC<ScenarioTableRowProps> = ({
     }
   })();
 
-  return (
-    <>
-      <tr
-        className="ScenarioTableRow"
-        onClick={() => handleClickScenarioToActive(scenarioData.id)}
-      >
-        <td>
-          {scenarioData.name
-            ? scenarioData.name
-            : `Unnamed project (${scenarioData.id})`}
-        </td>
 
-        <td>{scenarioTypeLabel}</td>
-
-        <td>{resultsExist && scenarioData.last_run}</td>
-
-        <td>
-          {resultsExist && scenarioLogExists && (
-            <button onClick={openLogFile}>
-              {scenarioData.run_success ? 'OK' : 'LOG'}
-            </button>
-          )}
-        </td>
-
-        <td>
-          {resultsExist && (
-            <button onClick={openResultsFolder}>NÄYTÄ</button>
-          )}
-        </td>
-
-        <td>
-          {scenarioData.scenarioType !== SCENARIO_TYPES.GOODS_TRANSPORT && (
-            <button
-              onClick={() =>
-                handleClickCreateSubScenario(scenarioData.id)
-              }
-            >
-              Luo aliskenaario
-            </button>
-          )}
-        </td>
-
-        <td>
-          <button onClick={() => duplicateScenario(scenarioData.id)}>
-            KOPIOI
-          </button>
-        </td>
-
-        <td>
-          <button
-            disabled={!!runningScenarioID}
-            onClick={() =>
-              !runningScenarioID &&
-              setOpenScenarioID(scenarioData.id)
-            }
-          >
-            MUOKKAA
-          </button>
-        </td>
-
-        <td>
-          <button
-            disabled={!!runningScenarioID}
-            onClick={() =>
-              !runningScenarioID && deleteScenario(scenarioData)
-            }
-          >
-            POISTA
-          </button>
-        </td>
-
-        <Tooltip
-          anchorSelect={`#scenario-${scenarioData.id}`}
-          html={renderToStaticMarkup(tooltipContent(scenarioData))}
-        />
-      </tr>
-
-      {scenarioData.subScenarios &&
-        scenarioData.subScenarios.map(subScenario => (
-          <SubScenarioRow
-            key={subScenario.id}
-            scenarioData={scenarioData}
-            subScenario={subScenario}
-            runningScenarioID={runningScenarioID}
-            openScenarioID={openScenarioID}
-            scenarioIDsToRun={scenarioIDsToRun}
-            handleClickScenarioToActive={() => {}}
-            duplicateSubScenario={duplicateSubScenario}
-            modifySubScenario={modifySubScenario}
-            deleteSubScenario={deleteSubScenario}
-            tooltipContent={tooltipContent}
-            projectFolder={projectFolder}
-            parentScenarioIsRunOrSelectedForRunning={
-              scenarioIDsToRun.includes(scenarioData.id)
-            }
-            parentScenarioResultDataFolder={scenarioProjectFolder}
-          />
-        ))}
-    </>
+const tooltipContent = useMemo(() => {
+  return renderToStaticMarkup(
+    <ScenarioTooltip scenario={scenarioData} subScenario={undefined} />
   );
-};
+}, [scenarioData]);
+
+  return (
+    <Fragment>
+      <tr id={"row_" + scenarioData.id} className="Runtime__scenario">
+        <td>
+          <input
+            className={
+              "Runtime__scenario-activate-checkbox" +
+              (scenarioIDsToRun.includes(scenarioData.id)
+                ? " Runtime__scenario-activate-checkbox--active"
+                : "")
+            }
+            type="checkbox"
+            checked={scenarioIDsToRun.includes(scenarioData.id)}
+            disabled={runningScenarioID == scenarioData.id}
+            onChange={e => handleClickScenarioToActive(scenarioData.id)}
+          />
+        </td>
+        <td data-tooltip-id="scenario-tooltip"
+        data-tooltip-html={tooltipContent}
+        data-tooltip-delay-show={150}
+        data-tooltip-hidden={openScenarioID !== null}>
+          <div>
+            <span className="Runtime__scenario-name">
+              {scenarioData.name
+                ? scenarioData.name
+                : `Unnamed project (${scenarioData.id})`}
+            </span>
+          </div>
+        </td>
+        <td data-tooltip-id="scenario-tooltip"
+        data-tooltip-html={tooltipContent}
+        data-tooltip-delay-show={150}
+        data-tooltip-hidden={openScenarioID !== null}>
+          <div>
+            <span className="Runtime__scenario-type">
+              {(() => {
+                switch (scenarioData.scenarioType) {
+                  case SCENARIO_TYPES.GOODS_TRANSPORT:
+                    return "Tavaraliikenne";
+                  case SCENARIO_TYPES.PASSENGER_TRANSPORT:
+                    return "Henkilöliikenne";
+                  case SCENARIO_TYPES.LONG_DISTANCE:
+                    return "Pitkät matkat";
+                  default:
+                    return "Henkilöliikenne";
+                }
+              })()}
+            </span>
+          </div>
+        </td>
+        <td className="Table_space_after">{resultsExist && scenarioData.last_run && <span className="Runtime__scenario-name">
+          {scenarioData.last_run}
+        </span>} </td>
+        <td>{resultsExist && scenarioLogExists && <div onClick={e => openLogFile()}>{scenarioData.run_success ? <Check /> : <ErrorCircle />}</div>}</td>
+        <td className="Table_space_after">
+          {resultsExist && <div
+            className={"Runtime__scenario-open-folder"}
+            onClick={e => openResultsFolder()}
+          >
+            NÄYTÄ
+          </div>}
+        </td>
+
+        <td className="Table_space_after">
+          {scenarioData.scenarioType != SCENARIO_TYPES.GOODS_TRANSPORT &&
+            <div
+              className={"Runtime__scenario-sub_scenario"}
+              onClick={e => handleClickCreateSubScenario(scenarioData.id)}
+            >
+              <span><Plus />Luo aliskenaario</span>
+            </div>
+          }
+        </td>
+        <td>
+          <div
+            className={"Runtime__scenario-clone"}
+            onClick={e => duplicateScenario(scenarioData.id)}
+          >
+            <CopyIcon />
+          </div>
+          <div
+            className={
+              "Runtime__scenario-open-config" +
+              (openScenarioID === scenarioData.id
+                ? " Runtime__scenario-open-config-btn--active"
+                : "")
+            }
+            onClick={e =>
+              runningScenarioID ? undefined : setOpenScenarioID(scenarioData.id)
+            }
+          ></div>
+
+          <div
+            className={"Runtime__scenario-delete"}
+            onClick={e =>
+              runningScenarioID ? undefined : deleteScenario(scenarioData)
+            }
+          ></div>
+        </td>
+      </tr>
+      {
+        scenarioData.subScenarios &&
+        scenarioData.subScenarios.map((subScenario) => {
+          // Component for the tooltip showing scenario settings
+          const subTooltipContent = () => {
+            return (
+              <ScenarioTooltip scenario={scenarioData} subScenario={subScenario} />
+            );
+          };
+
+          return (
+            <SubScenarioRow
+              key={"SubRow_" + subScenario.id}
+              scenarioData={scenarioData}
+              subScenario={subScenario}
+              runningScenarioID={runningScenarioID}
+              openScenarioID={openScenarioID}
+              scenarioIDsToRun={scenarioIDsToRun}
+              handleClickScenarioToActive={handleClickScenarioToActive}
+              deleteSubScenario={deleteSubScenario}
+              tooltipContent={renderToStaticMarkup(subTooltipContent())}
+              projectFolder={projectFolder}
+              duplicateSubScenario={duplicateSubScenario}
+              modifySubScenario={modifySubScenario}
+              parentScenarioIsRunOrSelectedForRunning={
+                (resultsExist &&
+                  scenarioLogExists &&
+                  scenarioData.run_success == true &&
+                  scenarioData.last_run != "") ||
+                scenarioIDsToRun.includes(scenarioData.id)
+              }
+              parentScenarioResultDataFolder={scenarioProjectFolder}
+            />
+          );
+        })}
+    </Fragment>
+  );
+}
 
 export default ScenarioTableRow;
