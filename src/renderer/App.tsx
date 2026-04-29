@@ -321,7 +321,7 @@ function promptModelSystemDownload() {
     const settings = config?.settings;
     const selectedSettingsId = config?.selected_settings_id;
 
-    console.log("MAARUUU");
+    console.log("TESTING");
     console.log(settings);
     console.log()
 
