@@ -37,6 +37,10 @@ export interface ScenarioData {
   runStatus?: RunStatus | null;
 }
 
+export interface RunnableScenarioData extends ScenarioData, SubScenarioData {
+  runIndex: number;
+}
+
 export interface OverriddenProjectSettings {
   projectFolder: string | null;
   emmePythonPath: string | null;

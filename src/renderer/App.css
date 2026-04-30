@@ -152,9 +152,10 @@ ul li {
 .App__delete_setting {
     margin-left: 15px;
     display: inline-block;
+    vertical-align: middle;
     width: 16px;
     height: 19px;
-    background-image: url('trash.png');
+    background-image: url('./components/trash.png');
     background-repeat: no-repeat;
 }
 
@@ -165,7 +166,7 @@ ul li {
     margin-left: 20px;
     margin-top: 2px;
     background-color: var(--white-basic);
-    background-image: url('Edit.png');
+    background-image: url('./components/Edit.png');
     background-repeat: no-repeat;
 }
 

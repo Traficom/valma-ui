@@ -3,7 +3,6 @@ import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 import { Tooltip } from 'react-tooltip';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { exec } from 'child_process';
 
 import VlemProject from './components/Project/VlemProject';
 import Settings from './components/Settings/Settings';
@@ -12,13 +11,7 @@ import Loading from './components/Loading';
 import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
 import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
 import { ProjectSetting } from './components/Project/types/ProjectSetting';
-
 declare const vex: any;
-
-const homedir = (window as any).system.homedir();
-const path = (window as any).path;
-const fs = (window as any).fs;
-const pipInstall = (window as any).env.pipInstall;
 
 const emptySetting: ProjectSetting = {
   id: "",
@@ -46,8 +39,15 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   const [errorInfo, setErrorInfo] = useState('');
   const [isCreateEmmeBankModalOpen, setCreateEmmeBankModalOpen] = useState(false);
 
-  const globalSettingsStore = useRef<any>((window as any).store);
+
   const ipc = (window as any).ipc;
+
+  const homedir = (window as any).system.homedir();
+  const path = (window as any).path;
+  const fs = (window as any).fs;
+  const pipInstall = (window as any).env.pipInstall;
+  const store = (window as any).store;
+  const electron = (window as any).electron;
 
 
   function resolvePipFilePath(pythonDir: string): string {
@@ -58,6 +58,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     return candidates.find(fs.existsSync) ?? '';
   }
 
+  function selectBaseSettings(settingsId) {
+    const selectedBaseSetting = findSetting(projectSettings, settingsId);
+    setSettingInHandling({
+      ...settingInHandling,
+      project_folder: selectedBaseSetting.project_folder,
+      valma_scripts_path: selectedBaseSetting.valma_scripts_path,
+      emme_python_path: selectedBaseSetting.emme_python_path,
+      base_data_folder: selectedBaseSetting.base_data_folder,
+    });
+  }
 
 
   async function runPipInstall(
@@ -89,33 +99,6 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     }
   }
 
-
-  function constructAndSaveNewSettingsState(
-    setting: ProjectSetting,
-    prev: ProjectSetting[]
-  ): ProjectSetting[] {
-    const idx = prev.findIndex(s => s.id === setting.id);
-    const next = [...prev];
-    next[idx] = setting;
-
-    globalSettingsStore.current.set('settings', next);
-    globalSettingsStore.current.set('selected_settings_id', setting.id);
-
-    return next;
-  }
-
-
-  function saveAutomaticallyFixedSetting(
-    fixed: ProjectSetting,
-    all: ProjectSetting[]
-  ) {
-    const updated = constructAndSaveNewSettingsState(fixed, all);
-    setProjectSettings(updated);
-    setSettingInHandling(fixed);
-    setSelectedSettingsId(fixed.id);
-  }
-
-
   function setInstallingPipInProgress() {
     setLoading(true);
     setLoadingHeading('Tehdään PIP-asennusta');
@@ -128,7 +111,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setLoadingInfo('Projektin luominen käynnissä…');
   }
 
-  function findSetting(settings: any[], id: any) {
+  function findSetting(settings: ProjectSetting[], id: any) {
     if (settings && id) return settings.find(s => s.id === id);
     return { ...emptySetting };
   }
@@ -144,8 +127,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setSelectedSettingsId(newId);
     setProjectSettings(prev => {
       const next = [...prev, { ...newSetting, id: newId }];
-      globalSettingsStore.current.set('settings', next);
-      globalSettingsStore.current.set('selected_settings_id', newId);
+      saveSettingsToStore(next);
+      saveSelectedSettingsIdToStore(newId)
       return next;
     });
   }
@@ -155,8 +138,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
       const idx = prev.map(s => s.id).indexOf(setting.id);
       const next = [...prev];
       next[idx] = { ...setting };
-      globalSettingsStore.current.set('settings', next);
-      globalSettingsStore.current.set('selected_settings_id', setting.id);
+      saveSettingsToStore(next);
+      saveSelectedSettingsIdToStore(setting.id)
       return next;
     });
   }
@@ -175,8 +158,9 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setSettingsOpen(false);
   }
 
-  function cancel() {
-    const id = globalSettingsStore.current.get('selected_settings_id');
+  async function cancel() {
+    const config = await store.get("config");
+    const id = config?.selected_settings_id;
     setSelectedSettingsId(id);
     setSettingInHandling(findSetting(projectSettings, id));
     setSettingsOpen(false);
@@ -186,7 +170,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   function selectSetting(id: any) {
     setSelectedSettingsId(id);
     setSettingInHandling(findSetting(projectSettings, id));
-    globalSettingsStore.current.set('selected_settings_id', id);
+    saveSelectedSettingsIdToStore(id)
   }
 
   function addNewSetting() {
@@ -211,8 +195,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setProjectSettings(rest);
     setSelectedSettingsId(next.id);
     setSettingInHandling(next);
-    globalSettingsStore.current.set('settings', rest);
-    globalSettingsStore.current.set('selected_settings_id', next.id);
+    saveSettingsToStore(rest);
+    saveSelectedSettingsIdToStore(next.id)
     setSettingsOpen(false);
   }
 
@@ -232,6 +216,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setErrorInfo(msg);
     setErrorShown(true);
   };
+
+
+const saveSettingsToStore = async (settings: ProjectSetting[]) => {
+  await store.set("settings", settings);
+};
+
+
+const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
+  await store.set("selected_settings_id", selectedSettingsId);
+ };
 
   const closeError = () => {
     setErrorShown(false);
@@ -292,24 +286,26 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   };
 
   const settingsTooltipContent = (settingInHandling) => {
-    return settingInHandling ? ( <div key="settings_tooltip_body">
+    return settingInHandling ? (<div key="settings_tooltip_body">
       <h3>Projektin asetukset:</h3>
       {settingInHandling != undefined && settingInHandling.id != "" ? (
         <div>{
           Object.entries(settingInHandling).map(settingProperty => {
             return (
               <p key={"prop_" + settingProperty}>
-                { getPropertyForDisplayString(settingProperty) }
+                {getPropertyForDisplayString(settingProperty)}
               </p>);
           })}</div>
       ) : <p></p>}
-    </div>):(<p></p>);
+    </div>) : (<p></p>);
   };
 
- const closeCreateEmmeBank = () => {
+  const closeCreateEmmeBank = () => {
     setCreateEmmeBankModalOpen(false);
     closeError();
   };
+
+
 
   const createEmmeBank = (submodel, numberOfEmmeScenarios, separateEmmeScenarios) => {
     if (!fs.existsSync(settingInHandling.project_folder)) {
@@ -347,16 +343,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   };
 
   const onDownloadReady = (event, savePath) => {
-    const existingSettings = globalSettingsStore.current.get('settings');
-    const existingSelectedSettingId = globalSettingsStore.current.get('selected_settings_id');
+    const config = store.get("config");
+    const existingSettings = config?.settings;
+    const existingSelectedSettingId = config?.selected_settings_id;
     const settingsAreDefined = existingSettings && existingSettings.length > 0 && existingSelectedSettingId;
     const newPathFromDownload = cutUnvantedCharacters(savePath);
 
     if (settingsAreDefined) {
-      const settingsArray = existingSettings;
-      let settingInHandlingFromStore = findSetting(settingsArray, existingSelectedSettingId);
+      let settingInHandlingFromStore = findSetting(existingSettings, existingSelectedSettingId);
 
-      setProjectSettings(settingsArray);
+      setProjectSettings(existingSettings);
       setSelectedSettingsId(existingSelectedSettingId);
       setSettingInHandling(settingInHandlingFromStore);
       const pythonPath = settingInHandlingFromStore.emme_python_path;
@@ -389,15 +385,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
   useEffect(() => {
     const loadConfig = async () => {
-      const store = (window as any).store;
       const config = await store.get("config");
-      const settings = config?.settings;
-      const selectedSettingsId = config?.selected_settings_id;
-
-      if (selectedSettingsId && settings) {
-        setSettingInHandling(findSetting(projectSettings, selectedSettingsId));
-        setSelectedSettingsId(selectedSettingsId);
-        setProjectSettings(settings)
+      const settingsFromStore = config?.settings;
+      let selectedSettingsIdFromStore = config?.selected_settings_id;
+      if (settingsFromStore) {
+         if(!selectedSettingsIdFromStore){
+          selectedSettingsIdFromStore = settingsFromStore[0];
+         }
+        setSettingInHandling(findSetting(settingsFromStore, selectedSettingsIdFromStore));
+        setSelectedSettingsId(selectedSettingsIdFromStore);
+        setProjectSettings(settingsFromStore);
       }
     };
 
@@ -406,7 +403,17 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
 
   useEffect(() => {
-    const ipc = (window as any).ipc;
+    const settingsDefined = projectSettings && projectSettings.length > 0 && selectedSettingsId;
+
+    if (!settingsDefined) {
+      const [found, pythonPath] = searchEMMEPython();
+      if (found) {
+        vex.dialog.confirm({
+          message: `Python ${versions.emme_python} löytyi sijainnista:\n\n${pythonPath}\n\nHaluatko käyttää tätä sijaintia?`,
+          callback: (val: boolean) => val && setSettingInHandling((p: any) => ({ ...p, emme_python_path: pythonPath }))
+        });
+      }
+    }
 
     ipc.on('creating-emme-bank-completed', onCreatingEmmeBankReady);
     ipc.on('download-ready', onDownloadReady);
@@ -416,33 +423,6 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
       ipc.removeListener('download-ready', onDownloadReady);
     };
   }, []);
-
-  useEffect(() => {
-    const existingSettings = globalSettingsStore.current.get('settings');
-    const existingId = globalSettingsStore.current.get('selected_settings_id');
-    const defined = existingSettings && existingSettings.length > 0 && existingId;
-
-    (window as any).ipc.on('download-ready', (_: any, savePath: string) => {
-      setSettingInHandling((prev: any) => ({ ...prev, valma_scripts_path: savePath }));
-      setDownloadingValmaScripts(false);
-    });
-
-    if (!defined) {
-      const [found, pythonPath] = searchEMMEPython();
-      if (found) {
-        vex.dialog.confirm({
-          message: `Python ${versions.emme_python} löytyi sijainnista:\n\n${pythonPath}\n\nHaluatko käyttää tätä sijaintia?`,
-          callback: (val: boolean) => val && setSettingInHandling((p: any) => ({ ...p, emme_python_path: pythonPath }))
-        });
-      }
-    } else {
-      const arr = existingSettings;
-      setProjectSettings(arr);
-      setSelectedSettingsId(existingId);
-      setSettingInHandling(findSetting(arr, existingId));
-    }
-  }, []);
-
 
   // -------------------- render (unchanged structure) --------------------
 
@@ -463,7 +443,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
           setBaseDataFolder={(v: string) => setSettingInHandling({ ...settingInHandling, base_data_folder: v })}
           promptModelSystemDownload={promptModelSystemDownload}
           saveSetting={saveSetting}
-          selectBaseSettings={(id: any) => setSettingInHandling(findSetting(projectSettings, id))}
+          selectBaseSettings={(id: any) => selectBaseSettings(id)}
           setModeDestCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: v })}
           setMunicipalityCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, municipality_calibration_file: v })}
         />
@@ -495,7 +475,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
       <div className="App__header">
         <span className="App__header-title">VALMA</span>
         &nbsp;
-        <a onClick={() => (window as any).electron.openExternal("https://github.com/Traficom/valma-docs")} />
+        <a onClick={() => electron.openExternal("https://github.com/Traficom/valma-docs")} />
       </div>
       {/* VLEM Project -specific content, including runtime- & per-scenario-settings */}
       <div className="App__body">
@@ -528,17 +508,17 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
                 data-tooltip-delay-show={150}
                 style={{ display: isSettingsOpen || isProjectRunning ? "none" : "block" }}
                 onClick={(e) => handleEditSetting()}
-              > 
-              {settingInHandling && settingInHandling.id && (<Tooltip anchorSelect="#settings-tooltip-anchor" key={"tooltip_" + settingInHandling.id} place={"bottom"} id="settings-tooltip"
-                style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000" }} />)
-              }
+              >
+                {settingInHandling && settingInHandling.id && (<Tooltip anchorSelect="#settings-tooltip-anchor" key={"tooltip_" + settingInHandling.id} place={"bottom"} id="settings-tooltip"
+                  style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000" }} />)
+                }
               </div>
             </div>
           </li>
           <li>
             <div className="App__settings_modify">
               <div
-                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__delete_setting" : "App__delete_setting"}
+                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__delete_setting" : "App__delete_setting"}  
                 onClick={e =>
                   handleDeleteSetting()
                 }

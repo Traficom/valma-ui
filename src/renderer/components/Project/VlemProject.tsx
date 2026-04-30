@@ -4,7 +4,7 @@ import path from "path";
 import dayjs from 'dayjs';
 import Runtime from './Runtime/Runtime';
 import Scenario from './Scenario/Scenario';
-import { ScenarioData } from '../Project/types/ScenarioData'
+import { RunnableScenarioData, ScenarioData } from '../Project/types/ScenarioData'
 import { ProjectSetting } from '../Project/types/ProjectSetting'
 import CostBenefitAnalysis from '../CostBenefitAnalysis/CostBenefitAnalysis'
 import { CbaOptions } from '../Project/types/CbaOptions'
@@ -12,13 +12,12 @@ import SubScenario from './SubScenario/SubScenario';
 import RunLog from './RunLog/RunLog'
 import { SubScenarioData } from './types/SubScenarioData';
 import './VlemProject.css';
-
+import { STORED_SPEED_ASSIGNMENT_PREFIX } from '../../../constants';
+import { SCENARIO_TYPES } from '../../../enums';
+import { LoggableEvent } from './types/RunLog';
 
 // ---------------- globals ----------------
 declare const vex: any;
-declare const SCENARIO_TYPES: any;
-declare const STORED_SPEED_ASSIGNMENT_PREFIX: string;
-
 
 interface VlemProjectProps {
   signalProjectRunning: (running: boolean) => void;
@@ -36,7 +35,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   window.electron.setMaxListeners(20);
   const ipcRenderer = window.ipc;
   const fsHelpers = window.fsHelpers;
-  const store = window.store;
 
   // VLEM Project -specific settings
   const [scenarios, setScenarios] = useState<ScenarioData[]>([]); // Scenarios under currently selected Project
@@ -45,6 +43,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
   // Runtime controls & -logging
   const [scenarioIDsToRun, setScenarioIDsToRun] = useState([]); // selected active scenarios ready to run sequentially
+  const [scenariosToRun, setScenariosToRun] = useState<RunnableScenarioData[]>([]);
   const [runningScenarioID, setRunningScenarioID] = useState(null); // currently running Scenario, indicates if running
   const [runningScenarioIDsQueued, setRunningScenarioIDsQueued] = useState([]); // queued ("remaining") Scenarios
   const [logContents, setLogContents] = useState([]); // project runtime log-contents
@@ -54,27 +53,32 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   const [scenarioNames, setScenarioNames] = useState([]); // all scenario and subScenario names
 
   // Cost-Benefit Analysis (CBA) controls
-  var projectFolder = selectedSetting?.project_folder;
-  var projectName = selectedSetting?.project_name;
-  var emmePythonPath = selectedSetting?.emme_python_path;
-  var modeDestCalibrationFile = selectedSetting?.mode_dest_calibration_file;
-  var municipalityCalibrationFile = selectedSetting?.municipality_calibration_file;
-  var valmaScriptsPath = selectedSetting?.valma_scripts_path;
-  var baseDataFolder = selectedSetting?.base_data_folder;
 
-  const _handleClickScenarioToActive = (scenario) => {
-    if (scenarioIDsToRun.includes(scenario.id)) {
+  const [projectFolder, setProjectFolder] = useState(selectedSetting?.project_folder);
+  const [projectName, setProjectName] = useState(selectedSetting?.project_name);
+  const [emmePythonPath, setEmmePythonPath] = useState(selectedSetting?.emme_python_path);
+  const [modeDestCalibrationFile, setModeDestCalibrationFile] = useState(selectedSetting?.mode_dest_calibration_file);
+  const [municipalityCalibrationFile, setMunicipalityCalibrationFile] = useState(selectedSetting?.municipality_calibration_file);
+  const [valmaScriptsPath, setValmaScriptsPath] = useState(selectedSetting?.valma_scripts_path);
+  const [baseDataFolder, setBaseDataFolder] = useState(selectedSetting?.base_data_folder);
+  const ipcAttachedRef = useRef(false);
+
+
+  const _handleClickScenarioToActive = (scenarioId: string) => {
+    if (scenarioIDsToRun.includes(scenarioId)) {
       // If scenario exists in scenarios to run, remove it
-      let newScenarioIds = scenarioIDsToRun.filter((id) => id !== scenario.id);
-      if (scenario.subScenarios && (!scenario.run_success || scenario.run_success == false || scenario.last_run == "")) {
+      let newScenarioIds = scenarioIDsToRun.filter((id) => id != scenarioId);
+      let scenario = scenarios.find(s => s.id == scenarioId);
+      if (scenario && scenario.subScenarios && (!scenario.run_success || scenario.last_run == "")) {
         scenario.subScenarios.forEach(subScenario => newScenarioIds = newScenarioIds.filter((id) => id !== subScenario.id));
       }
       setScenarioIDsToRun(newScenarioIds);
     } else {
       // Else add it
-      setScenarioIDsToRun(scenarioIDsToRun.concat(scenario.id));
+      setScenarioIDsToRun(scenarioIDsToRun.concat(scenarioId));
     }
   }
+
 
   const _handleClickNewScenario = (scenarioType) => {
     const scenarioTypeText = scenarioType == SCENARIO_TYPES.PASSENGER_TRANSPORT ? "henkilöliikenteen" : "tavaraliikenteen";
@@ -121,8 +125,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     return defaultPath;
   }
 
-
-  const _loadProjectScenarios = (projectFilepath: string) => {
+  const loadProjectScenarios = (projectFilepath: string) => {
     const foundScenarios: ScenarioData[] = [];
     if (projectFilepath) {
       window.fsHelpers.readdirSync(projectFilepath).forEach((fileName) => {
@@ -226,11 +229,11 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     // If name changed, rename file
     if (beforeUpdate.name !== newValues.name) {
       fsHelpers.renameSync(
-        path.join(projectFolder, `${beforeUpdate.name}.json`),
-        path.join(projectFolder, `${newName}.json`)
+        fsHelpers.join(projectFolder, `${beforeUpdate.name}.json`),
+        fsHelpers.join(projectFolder, `${newName}.json`)
       );
     }
-    fsHelpers.writeFileSync(path.join(projectFolder, `${newName}.json`), newValues)
+    fsHelpers.writeFileSync(fsHelpers.join(projectFolder, `${newName}.json`), newValues)
     setScenarios(scenarios.map((s) => (s.id === newValues.id ? { ...s, ...newValues } : s)));
     // And persist all changes in file
     resolveScenarioNames(scenarios);
@@ -245,7 +248,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         if (value) {
           setOpenScenarioID(null);
           setScenarios(scenarios.filter((s) => s.id !== scenario.id));
-          fsHelpers.unlinkSync(path.join(projectFolder, `${scenario.name}.json`));
+          fsHelpers.unlinkSync(fsHelpers.join(projectFolder, `${scenario.name}.json`));
           window.location.reload();  // Vex-js dialog input gets stuck otherwise
           resolveScenarioNames(scenarios);
         }
@@ -262,7 +265,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     duplicatedScenario.subScenarios = [];
     const tempScenarios = scenarios.concat(duplicatedScenario);
     setScenarios(tempScenarios);
-    fsHelpers.writeFileSync(path.join(projectFolder, `${newName}.json`), duplicatedScenario)
+    fsHelpers.writeFileSync(fsHelpers.join(projectFolder, `${newName}.json`), duplicatedScenario)
     resolveScenarioNames(tempScenarios);
   }
 
@@ -321,7 +324,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     }
   };
 
-  const duplicateSubScenario = (subScenario) => {
+  const duplicateSubScenario = (subScenario: SubScenarioData) => {
     var parentScenario = scenarios.find((s) => s.id === subScenario.parentScenarioId);
     if (!parentScenario) {
       // Should not occur
@@ -332,10 +335,10 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     const newId = uuidv4();
     const newSubScenario: SubScenarioData = {
       id: newId,
-      parentScenarioId: `${subScenario.parentScenarioId}`,
-      name: `${subScenario.name + "_2"}`,
-      emmeScenarioNumber: `${subScenario.emmeScenarioNumber}`,
-      cost_data_file: `${subScenario.cost_data_file}`,
+      parentScenarioId: subScenario.parentScenarioId,
+      name: subScenario.name + "_2",
+      emmeScenarioNumber: subScenario.emmeScenarioNumber,
+      cost_data_file: subScenario.cost_data_file,
       last_run: "",
       runSuccess: false,
       runStatus: {
@@ -430,12 +433,12 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     _updateScenario(parentScenario);
   }
 
-  function resolveRunnableScenarios(scenarioIDsToRun, scenarios) {
+  function resolveRunnableScenarios(scenarioIDsToRun: String[], scenarios: ScenarioData[]) {
     if (!scenarioIDsToRun || scenarioIDsToRun.length == 0 || !scenarios || scenarios.length == 0) {
       return [];
     }
 
-    let runnableScenarios = [];
+    let runnableScenarios: RunnableScenarioData[] = [];
     scenarios.forEach(scenario => {
 
       if (scenarioIDsToRun.includes(scenario.id) && !runnableScenarios.find(s => s.id == scenario.id)) {
@@ -456,7 +459,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         scenario.subScenarios.forEach(subSenario => {
           if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
             const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
-            runnableScenarios.push({ ...subSenario, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
+            runnableScenarios.push({ ...scenario, ...subSenario, parentScenarioId: scenario.id, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
           }
         })
       }
@@ -477,8 +480,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     }
   }
 
-  const scenariosToRun = resolveRunnableScenarios(scenarioIDsToRun, scenarios);
-
   function resolveScenarioId(scenario) {
     if (scenario.parentScenarioId) {
       return scenario.parentScenarioId;
@@ -490,6 +491,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   }
 
   const _runAllActiveScenarios = (activeScenarioIDs) => {
+    const scenariosToRun = resolveRunnableScenarios(scenarioIDsToRun, scenarios);
     // Check required global parameters are set
     if (!projectName) {
       alert("Projektia ei ole valittu.");
@@ -514,9 +516,8 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
     // For each active scenario, check required scenario-specific parameters are set
     for (let scenario of scenariosToRun) {
-      const scenarioId = resolveScenarioId(scenario);
-      const iterations = scenario.get('iterations');
-      if (!scenario.get('zone_data_file')) {
+      const iterations = scenario.iterations;
+      if (!scenario.zone_data_file) {
         alert(`Syöttötietoja (zone_data_file) ei ole valittu skenaariossa "${scenario.name}"`);
         return;
       }
@@ -524,7 +525,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         alert(`Aseta iteraatiot väliltä 1 - 99 skenaariossa "${scenario.name}"`);
         return;
       }
-      if (!scenario.get('cost_data_file') && !scenario.cost_data_file) {
+      if (!scenario.cost_data_file) {
         alert(`Liikenteen hintadata-tiedostoa ei ole valittu skenaariossa "${scenario.name}"`);
         return;
       }
@@ -603,7 +604,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       alert("Python -sijaintia ei ole asetettu!");
       return;
     }
-    
+
     if (!valmaScriptsPath) {
       alert("VALMA Scripts -kansiota ei ole asetettu, tarkista Asetukset.");
       return;
@@ -641,10 +642,20 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   };
 
   // Electron IPC event listeners
-  const onLoggableEvent = (event, args) => {
-    setLogContents(previousLog => [...previousLog, args]);
-    setLogArgs(args);
+  const onLoggableEvent = (event: any) => {
+    var loggableEvent: LoggableEvent = event && event.level ? event : { level: 'ERROR', message: charsToText(event) + " " + event.time }
+    if (loggableEvent.message) {
+      setLogContents(previousLog => [...previousLog, loggableEvent]);
+    }
   };
+
+  function charsToText(data) {
+    return Object.keys(data)
+      .filter((k) => !isNaN(k))
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => data[k])
+      .join("").trim();
+  }
 
   const onScenarioComplete = (event, args) => {
     if (args.completed.id) {
@@ -664,20 +675,41 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     signalProjectRunning(false); // Let App-component know too
   };
 
+
   useEffect(() => {
+    if (!selectedSetting?.project_folder) return;
+    setProjectFolder(selectedSetting.project_folder);
+    setProjectName(selectedSetting.project_name);
+    setEmmePythonPath(selectedSetting.emme_python_path);
+    setModeDestCalibrationFile(selectedSetting.mode_dest_calibration_file);
+    setMunicipalityCalibrationFile(selectedSetting.municipality_calibration_file);
+    setValmaScriptsPath(selectedSetting.valma_scripts_path);
+    setBaseDataFolder(selectedSetting.base_data_folder);
+    loadProjectScenarios(selectedSetting.project_folder)
+  }, [selectedSetting?.project_folder]);
+
+  useEffect(() => {
+    setScenariosToRun(resolveRunnableScenarios(scenarioIDsToRun, scenarios));
+  }, [scenarioIDsToRun]);
+
+  useEffect(() => {
+    if (ipcAttachedRef.current) return;
+    ipcAttachedRef.current = true;
     // Attach Electron IPC event listeners (to worker => UI events)
     ipcRenderer.on('loggable-event', onLoggableEvent);
     ipcRenderer.on('scenario-complete', onScenarioComplete);
     ipcRenderer.on('all-scenarios-complete', onAllScenariosComplete);
-    _loadProjectScenarios(projectFolder);
 
     return () => {
       // Detach Electron IPC event listeners
       ipcRenderer.removeListener('loggable-event', onLoggableEvent);
       ipcRenderer.removeListener('scenario-complete', onScenarioComplete);
       ipcRenderer.removeListener('all-scenarios-complete', onAllScenariosComplete);
+      ipcAttachedRef.current = false;
     }
-  }, [selectedSetting]);
+  }, []);
+
+
 
   useEffect(() => {
     if (finishedScenarioInfo && finishedScenarioInfo.id.length > 0) {
@@ -729,9 +761,9 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         }
         <Runtime
           projectFolder={projectFolder}
-          reloadScenarios={() => _loadProjectScenarios(projectFolder)}
-          scenarios={[...scenarios]}
-          scenarioIDsToRun={[...scenarioIDsToRun]}
+          reloadScenarios={() => loadProjectScenarios(projectFolder)}
+          scenarios={scenarios}
+          scenarioIDsToRun={scenarioIDsToRun}
           runningScenarioID={runningScenarioID}
           openScenarioID={openScenarioID}
           setOpenScenarioID={setOpenScenarioID}

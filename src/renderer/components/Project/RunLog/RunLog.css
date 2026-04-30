@@ -47,7 +47,6 @@
     border-color: var(--turqoise-dark);
     margin-right: 10px;
     width: 100%;
-    font-family: open_sans_semi_bold;
 }
 .Log__header-control--on {
     background-color: var(--light-grey);

@@ -2,6 +2,7 @@ import React from 'react';
 import path from "path";
 import { CbaOptions } from '../Project/types/CbaOptions'
 import { openFileDialog, openFolderDialog } from '../Project/Dialog'
+import './CostBenefitAnalysis.css';
 
 interface CostBenefitAnalysisProps {
   projectFolder: string;
