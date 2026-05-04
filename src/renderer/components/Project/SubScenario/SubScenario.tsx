@@ -91,11 +91,12 @@ const SubScenario: React.FC<SubScenarioProps> = ({
         {/* Emme scenario number */}
         <label className="SubScenario_label"
           htmlFor="submodel">EMME-skenaarion numero</label>
-        <input id="project_name"
+        <input
           className="SubScenario_input"
           type="number"
-          min="1"
-          value={subScenarioEdit.emmeScenarioNumber || 1}
+          min={1}
+          max={999}
+          value={subScenarioEdit.emmeScenarioNumber || "1"}
           onChange={(e) => {
             handleChange({ ...subScenarioEdit, emmeScenarioNumber: e.target.value });
           }}
@@ -146,7 +147,6 @@ const SubScenario: React.FC<SubScenarioProps> = ({
           <button
             className="SubScenario_btn"
             disabled={nameIsInValid}
-            readOnly={nameIsInValid}
             onClick={(e) => { !nameIsInValid && handleSave() }}
           >
             <span>Tallenna</span>
