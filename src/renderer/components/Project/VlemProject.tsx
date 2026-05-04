@@ -640,12 +640,22 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   };
 
   // Electron IPC event listeners
-  const onLoggableEvent = (event: any) => {
-    var loggableEvent: LoggableEvent = event && event.level ? event : { level: 'ERROR', message: charsToText(event) + " " + event.time }
-    if (loggableEvent.message) {
-      setLogContents(previousLog => [...previousLog, loggableEvent]);
-    }
-  };
+const onLoggableEvent = (_event: any, payload: any) => {
+  if (!payload) return;
+
+  const loggableEvent: LoggableEvent =
+    payload.level
+      ? payload
+      : {
+          level: 'INFO',
+          message: charsToText(payload),
+          time: payload.time,
+        };
+
+  if (loggableEvent.message) {
+    setLogContents(prev => [...prev, loggableEvent]);
+  }
+};
 
   function charsToText(data) {
     return Object.keys(data)
@@ -655,23 +665,43 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       .join("").trim();
   }
 
-  const onScenarioComplete = (event, args) => {
-    if (args.completed.id) {
-      setFinishedScenarioInfo({ id: args.completed.id, error: false });
-    }
-    setRunningScenarioID(args.next.id);
-    setRunningScenarioIDsQueued(runningScenarioIDsQueued.filter((id) => id !== args.completed.id));
-    setLogContents(previousLog => [...previousLog, { level: 'NEWLINE', message: '' }]);
-  };
+const onScenarioComplete = (payload) => {
 
-  const onAllScenariosComplete = (event, args) => {
-    if (args && args.completedScenarioId) {
-      setFinishedScenarioInfo({ id: args.completedScenarioId, error: args.error == true });
-    }
-    setRunningScenarioID(null); // Re-enable controls
-    setRunningScenarioIDsQueued([]);
-    signalProjectRunning(false); // Let App-component know too
-  };
+  if (payload?.completed?.id) {
+    setFinishedScenarioInfo({ id: payload.completed.id, error: false });
+  }
+
+  if (payload?.next?.id) {
+    setRunningScenarioID(payload.next.id);
+  }
+
+  setRunningScenarioIDsQueued((prev) =>
+    prev.filter((id) => id !== payload.completed.id)
+  );
+};
+
+
+const onAllScenariosComplete = (payload) => {
+
+  if (payload?.completedScenarioId) {
+    setFinishedScenarioInfo({
+      id: payload.completedScenarioId,
+      error: payload.error === true
+    });
+  }
+     setLogContents((prev) => [
+    ...prev,
+      {
+          level: 'INFO',
+          message: "Completed running scenario's ",
+          time: new Date(),
+     }
+  ]);
+
+  setRunningScenarioID(null);
+  setRunningScenarioIDsQueued([]);
+  signalProjectRunning(false);
+};
 
 
   useEffect(() => {
@@ -690,22 +720,35 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     setScenariosToRun(resolveRunnableScenarios(scenarioIDsToRun, scenarios));
   }, [scenarioIDsToRun]);
 
-  useEffect(() => {
-    if (ipcAttachedRef.current) return;
-    ipcAttachedRef.current = true;
-    // Attach Electron IPC event listeners (to worker => UI events)
-    ipcRenderer.on('loggable-event', onLoggableEvent);
-    ipcRenderer.on('scenario-complete', onScenarioComplete);
-    ipcRenderer.on('all-scenarios-complete', onAllScenariosComplete);
+useEffect(() => {
+  if (ipcAttachedRef.current) return;
+  ipcAttachedRef.current = true;
 
-    return () => {
-      // Detach Electron IPC event listeners
-      ipcRenderer.removeListener('loggable-event', onLoggableEvent);
-      ipcRenderer.removeListener('scenario-complete', onScenarioComplete);
-      ipcRenderer.removeListener('all-scenarios-complete', onAllScenariosComplete);
-      ipcAttachedRef.current = false;
-    }
-  }, []);
+  ipcRenderer.on(
+    'scenario-complete',
+    onScenarioComplete
+  );
+
+  ipcRenderer.on(
+    'all-scenarios-complete',
+    onAllScenariosComplete
+  );
+
+  ipcRenderer.on('loggable-event', onLoggableEvent);
+
+  return () => {
+    ipcRenderer.removeListener(
+      'scenario-complete',
+      onScenarioComplete
+    );
+    ipcRenderer.removeListener(
+      'all-scenarios-complete',
+      onAllScenariosComplete
+    );
+    ipcRenderer.removeListener('loggable-event', onLoggableEvent);
+    ipcAttachedRef.current = false;
+  };
+}, []);
 
 
 

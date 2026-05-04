@@ -7,5 +7,6 @@ export interface RunLogEntry {
 
 export interface LoggableEvent {
     level: 'UI-event' | 'INFO' | 'WARN' | 'ERROR' | 'DEBUG' | string;
-    message: string
-  }
+    message: string;
+    time?: string;
+}
