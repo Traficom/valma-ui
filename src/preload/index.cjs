@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 
 const fsHelpers = require('../main/fsHelpers.cjs');
+const { brotliDecompress } = require('zlib');
 
 contextBridge.exposeInMainWorld('system', {
   homedir: () => os.homedir(),
@@ -50,7 +51,7 @@ contextBridge.exposeInMainWorld('fsHelpers', {
   readFileSync: (p) =>  fsHelpers.readFileSync(p),
   readdirSync: (p) =>  fsHelpers.readdirSync (p),
   unlinkSync: (p) =>  fsHelpers.unlinkSync(p),
-  renameSync: (p) =>  fsHelpers.renameSync(p),
+  renameSync: (a, b) =>  fsHelpers.renameSync(a, b),
   writeFileSync: (a, b) =>  fsHelpers.writeFileSync(a, b),
 });
 

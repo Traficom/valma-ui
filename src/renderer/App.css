@@ -93,7 +93,7 @@ hr {
 
 .App__settings {
     z-index: 900;
-    position: absolute;
+    position: fixed !important;
     width: 100%;
     height: 100%;
 }
@@ -109,13 +109,9 @@ ul li {
     vertical-align: top;
 }
 
-.App__settings-menu {
-    position: absolute;
-    top: 90px;
-    left: 240px;
-}
-.App__settings_modify{
-    margin-top: 3px;
+.App__settings_container{
+  display: flex;
+  margin-top: 10px;
 }
 
 .App__settings_select{
@@ -130,6 +126,16 @@ ul li {
     font-size: 14px;
     vertical-align: top;
     font-family: open_sans_medium, sans-serif;
+}
+
+.App__settings_heading {
+    font-style: normal;
+    font-weight: 350;
+    font-size: 24px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+    margin-top: 10px;
+    margin-left: 17px;
 }
 
 .App__header {
@@ -170,18 +176,11 @@ ul li {
     background-repeat: no-repeat;
 }
 
-.App__header-title {
-}
-
-
 .App__header-version {
     padding-left: 10px;
     color: var(--light-grey);
     font-size: 10px;
     line-height: 11px;
-}
-
-.App__body {
 }
 
 .header-documentation-link {

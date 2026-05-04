@@ -218,14 +218,14 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   };
 
 
-const saveSettingsToStore = async (settings: ProjectSetting[]) => {
-  await store.set("settings", settings);
-};
+  const saveSettingsToStore = async (settings: ProjectSetting[]) => {
+    await store.set("settings", settings);
+  };
 
 
-const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
-  await store.set("selected_settings_id", selectedSettingsId);
- };
+  const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
+    await store.set("selected_settings_id", selectedSettingsId);
+  };
 
   const closeError = () => {
     setErrorShown(false);
@@ -388,10 +388,11 @@ const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
       const config = await store.get("config");
       const settingsFromStore = config?.settings;
       let selectedSettingsIdFromStore = config?.selected_settings_id;
+
       if (settingsFromStore) {
-         if(!selectedSettingsIdFromStore){
+        if (!selectedSettingsIdFromStore) {
           selectedSettingsIdFromStore = settingsFromStore[0];
-         }
+        }
         setSettingInHandling(findSetting(settingsFromStore, selectedSettingsIdFromStore));
         setSelectedSettingsId(selectedSettingsIdFromStore);
         setProjectSettings(settingsFromStore);
@@ -477,6 +478,45 @@ const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
         &nbsp;
         <a onClick={() => electron.openExternal("https://github.com/Traficom/valma-docs")} />
       </div>
+      <div className="App__settings_container">
+        <Tooltip
+          id="settings-tooltip"
+          style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000", zIndex: 19999, fontSize: "11px", lineHeight: "80%" }}
+          place="bottom"
+        />
+        <div className="App__settings_heading">Projektin alustaminen</div>
+        <div className="App__settings_menu">
+          <ul>
+            <li>
+              <div className="App__settings_select" data-tooltip-id="settings-tooltip"
+                data-tooltip-html={renderToStaticMarkup(settingsTooltipContent(settingInHandling))}
+                data-tooltip-delay-show={150}
+                data-tooltip-hidden={isSettingsOpen}>
+                <select value={selectedSettingsId} disabled={isSettingsOpen || isProjectRunning} onChange={e => selectSetting(e.target.value)}>
+                  {projectSettings && projectSettings.map((setting) =>
+                    <option key={setting.id} value={setting.id}>{setting.project_name}</option>)
+                  }
+                </select>
+              </div>
+            </li>
+            <li>
+              <div className="App__settings_modify">
+                <div className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__open-settings" : "App__open-settings"} onClick={(e) => handleEditSetting()} />
+              </div>
+            </li>
+            <li>
+              <div className="App__settings_modify">
+                <div
+                  className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__delete_setting" : "App__delete_setting"}
+                  onClick={e =>
+                    handleDeleteSetting()
+                  }
+                ></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
       {/* VLEM Project -specific content, including runtime- & per-scenario-settings */}
       <div className="App__body">
         <VlemProject
@@ -487,49 +527,6 @@ const saveSelectedSettingsIdToStore = async (selectedSettingsId: String) => {
         />
       </div>
 
-      <div className="App__settings-menu">
-        <ul>
-          <li>
-            <div className="App__settings_select">
-              <select value={selectedSettingsId} disabled={isSettingsOpen || isProjectRunning} onChange={e => selectSetting(e.target.value)}>
-                {projectSettings && projectSettings.map((setting) =>
-                  <option key={setting.id} value={setting.id}>{setting.project_name}</option>)
-                }
-              </select>
-            </div>
-          </li>
-          <li>
-            <div className="App__settings_modify">
-              <div
-                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__open-settings" : "App__open-settings"}
-                id="settings-tooltip-anchor"
-                data-tooltip-id="settings-tooltip"
-                data-tooltip-html={renderToStaticMarkup(settingsTooltipContent(settingInHandling))}
-                data-tooltip-delay-show={150}
-                style={{ display: isSettingsOpen || isProjectRunning ? "none" : "block" }}
-                onClick={(e) => handleEditSetting()}
-              >
-                {settingInHandling && settingInHandling.id && (<Tooltip anchorSelect="#settings-tooltip-anchor" key={"tooltip_" + settingInHandling.id} place={"bottom"} id="settings-tooltip"
-                  style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000" }} />)
-                }
-              </div>
-            </div>
-          </li>
-          <li>
-            <div className="App__settings_modify">
-              <div
-                className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__delete_setting" : "App__delete_setting"}  
-                onClick={e =>
-                  handleDeleteSetting()
-                }
-              ></div>
-            </div>
-          </li>
-        </ul>
-
-
-
-      </div>
       <div className="footer"><span className="App__header-version">Versio {`${VLEMVersion}`}</span></div>
     </div>
   );

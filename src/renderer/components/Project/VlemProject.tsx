@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import path from "path";
 import dayjs from 'dayjs';
 import Runtime from './Runtime/Runtime';
 import Scenario from './Scenario/Scenario';
@@ -224,16 +223,15 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
     const beforeUpdate = scenarios.find(s => s.id === newValues.id);
     // If name was set empty - use ID instead
-    const newName = newValues.name ? newValues.name : newValues.id;
-
+    const newName = newValues.name? newValues.name : newValues.id;
     // If name changed, rename file
-    if (beforeUpdate.name !== newValues.name) {
+    if (beforeUpdate && beforeUpdate.name !== newName) {
       fsHelpers.renameSync(
         fsHelpers.join(projectFolder, `${beforeUpdate.name}.json`),
         fsHelpers.join(projectFolder, `${newName}.json`)
       );
     }
-    fsHelpers.writeFileSync(fsHelpers.join(projectFolder, `${newName}.json`), newValues)
+    fsHelpers.writeFileSync(fsHelpers.join(projectFolder, `${newName}.json`), JSON.stringify(newValues))
     setScenarios(scenarios.map((s) => (s.id === newValues.id ? { ...s, ...newValues } : s)));
     // And persist all changes in file
     resolveScenarioNames(scenarios);

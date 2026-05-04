@@ -69,7 +69,6 @@ const Runtime = ({
   return (
     <div className="Runtime">
       <div className="Runtime__valma-project-controls">
-        <div className="Runtime__heading">Projektin alustaminen</div>
         <p className="Runtime__project-path">
           Valma-skenaarioiden tallennuspolku: {projectFolder}
         </p>

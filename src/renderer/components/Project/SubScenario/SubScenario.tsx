@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import './SubScenario.css';
 
 import { openFileDialog } from '../Project/../Dialog'
+import { cutUnvantedCharacters } from '../../cutUnvantedCharacters';
+import ResetIcon from '../../../icons/ResetIcon';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -51,70 +53,76 @@ const SubScenario: React.FC<SubScenarioProps> = ({
   };
 
   const path = (window as any).path;
-  const [nameIsInvalid, setNameIsInvalid] = useState<boolean>(
-    checkName(subScenarioEdit.name)
-  );
+  const [nameIsInValid, setNameIsInValid] = useState(checkName(subScenarioEdit.name)); // all scenario and subScenario names 
 
-  const namePlaceholder = `${subScenarioEdit.parentScenarioName}_SUB`;
+  const namePlaceHolder = subScenarioEdit.parentScenarioName + "_SUB";
 
-  const handleNameChange = (val: string) => {
-    const newName = val;
-    setNameIsInvalid(checkName(newName));
+
+  function handleNameChange(val) {
+    const newName = cutUnvantedCharacters(val);
+    setNameIsInValid(checkName(newName));
     handleChange({ ...subScenarioEdit, name: newName });
-  };
+  }
 
   return (
     <div className="SubScenario">
-      {/* Overlay */}
-      <div className="SubScenario__overlay" onClick={handleCancel} />
 
-      <div className="SubScenario__content">
-        <h2>Aliskenaarion asetukset</h2>
+      <div className="SubScenario_overlay" onClick={(e) => handleCancel()}>{/* Dark background overlay */}</div>
 
-        {/* Subscenario name */}
-        <label>
-          Aliskenaarion nimi
-          <input
-            type="text"
-            placeholder={namePlaceholder}
-            value={subScenarioEdit.name}
-            onChange={e => handleNameChange(e.target.value)}
-          />
-        </label>
+      <div className="SubScenario_dialog">
 
-        {nameIsInvalid && (
-          <div className="SubScenario__error">
-            Tarkista aliskenaarion nimi. Nimi ei voi olla tyhjä
-            tai sama kuin jo olemassa oleva skenaarion nimi.
-          </div>
-        )}
+        <div className="SubScenario_dialog-controls" onClick={(e) => handleCancel()}></div>
 
+        <div className="SubScenario_dialog-heading">Aliskenaarion asetukset</div>
+
+        {/* Sub model name */}
+        <label className="SubScenario_label"
+          htmlFor="sub_cenario__name">Aliskenaarion nimi</label>
+        <input id="sub_scenario-name"
+          className="SubScenario_input"
+          type="text"
+          placeholder={namePlaceHolder}
+          value={subScenarioEdit.name}
+          onChange={(e) => {
+            handleNameChange(e.target.value);
+          }}
+        />
+        {nameIsInValid ? <span className="SubScenario_error">Tarkista aliskenaarion nimi. Nimi ei voi olla tyhjä tai sama kuin jo olemassa oleva skenaarionimi.</span> : ""}
         {/* Emme scenario number */}
-        <label>
-          EMME-skenaarion numero
-          <input
-            type="number"
-            min={1}
-            max={999}
-            value={subScenarioEdit.emmeScenarioNumber}
-            onChange={e =>
-              handleChange({
-                ...subScenarioEdit,
-                emmeScenarioNumber: Number(e.target.value),
-              })
-            }
-          />
-        </label>
+        <label className="SubScenario_label"
+          htmlFor="submodel">EMME-skenaarion numero</label>
+        <input id="project_name"
+          className="SubScenario_input"
+          type="number"
+          min="1"
+          value={subScenarioEdit.emmeScenarioNumber || 1}
+          onChange={(e) => {
+            handleChange({ ...subScenarioEdit, emmeScenarioNumber: e.target.value });
+          }}
+        />
 
-        {/* Cost data file */}
-        <label>
-          Liikenteen hintadata
-          <button
-            onClick={async () => {
+        {/* File path to cost data */}
+        <div>
+          <span className="SubScenario_label">Liikenteen hintadata</span>
+          <div className="SubScenario_input_with_reset">
+            <label className="SubScenario_input" htmlFor="sub-cost-data-file-select" title={subScenarioEdit.cost_data_file ? subScenarioEdit.cost_data_file : "Cost data file"}>
+              {subScenarioEdit.cost_data_file ? path.basename(subScenarioEdit.cost_data_file) : "Valitse.."}
+            </label>
+            {subScenarioEdit.cost_data_file &&
+              <span onClick={(event) => {
+                event.preventDefault();
+                handleChange({ ...subScenarioEdit, cost_data_file: "" });
+              }}>
+                <ResetIcon />
+              </span>
+            }
+          </div>
+          <input className="SubScenario__hidden-input"
+            id="sub-cost-data-file-select"
+            type="text"
+             onClick={async () => {
               const file = await openFileDialog(
-                subScenarioEdit.cost_data_file
-                  ? subScenarioEdit.cost_data_file
-                  : subScenarioEdit.parentCostDataFile,
+              subScenarioEdit.cost_data_file ? subScenarioEdit.cost_data_file : subScenarioEdit.parentCostDataFile,
                 [
                   { name: 'Json', extensions: ['json'] },
                   { name: 'All Files', extensions: ['*'] },
@@ -126,42 +134,31 @@ const SubScenario: React.FC<SubScenarioProps> = ({
                   cost_data_file: file
                 });
               }
-            }}>
-            {subScenarioEdit.cost_data_file
-              ? path.basename(subScenarioEdit.cost_data_file)
-              : 'Valitse..'}
-          </button>
-
-          {subScenarioEdit.cost_data_file && (
-            <button
-              onClick={e => {
-                e.preventDefault();
-                handleChange({
-                  ...subScenarioEdit,
-                  cost_data_file: '',
-                });
-              }}
-            >
-              ✕
-            </button>
-          )}
-        </label>
-
-        <p>
-          Aliskenaarion kysyntämatriisit otetaan skenaariosta{' '}
-          <strong>{subScenarioEdit.parentScenarioName}</strong>
-        </p>
-
-        {/* Actions */}
-        <div className="SubScenario__actions">
-          <button
-            disabled={nameIsInvalid}
-            onClick={handleSave}
-          >
-            Tallenna
-          </button>
-          <button onClick={handleCancel}>Peruuta</button>
+            }}
+          />
         </div>
+
+        <label className="SubScenario_label"
+          htmlFor="submodel">Aliskenaarion kysyntämatriisit otetaan skenaariosta <b>{subScenarioEdit.parentScenarioName}</b></label>
+
+
+        <div className="SubScenario_buttons">
+          <button
+            className="SubScenario_btn"
+            disabled={nameIsInValid}
+            readOnly={nameIsInValid}
+            onClick={(e) => { !nameIsInValid && handleSave() }}
+          >
+            <span>Tallenna</span>
+          </button>
+          <button
+            className="SubScenario_btn"
+            onClick={(e) => handleCancel()}
+          >
+            <span>Peruuta</span>
+          </button>
+        </div>
+
       </div>
     </div>
   );

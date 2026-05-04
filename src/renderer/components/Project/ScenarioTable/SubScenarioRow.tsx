@@ -1,5 +1,4 @@
 import React from 'react';
-import { renderToStaticMarkup } from 'react-dom/server';
 import CopyIcon from '../../../icons/CopyIcon';
 import Check from '../../../icons/Check';
 import ErrorCircle from '../../../icons/ErrorCircle';
