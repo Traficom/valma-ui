@@ -41,6 +41,7 @@ function createUI() {
       preload: fsHelpers.join(__dirname, '../preload/index.cjs'),
       contextIsolation: true,
       sandbox: false,
+      devTools: true
     },
   });
 
@@ -48,8 +49,8 @@ function createUI() {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools({ mode: 'right' });
   } else {
-    mainWindow.loadFile(
-      fsHelpers.join(__dirname, '../../dist/renderer/index.html')
+    mainWindow.loadFile( 
+      fsHelpers.join(__dirname, "../../dist/index.html")
     );
   }
 

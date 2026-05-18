@@ -3,21 +3,19 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 
 export default defineConfig({
+  base: "./",
   root: path.resolve(__dirname, 'src/renderer'),
   plugins: [react()],
   build: {
-    outDir: path.resolve(__dirname, '../../dist/renderer'),
+    outDir: '../../dist',
     emptyOutDir: true,
-    rollupOptions: {
-      external: [
-        'electron',
-        'electron-store',
-        'fs',
-        'path'
-      ]
-    }
   },
   server: {
     open: false,
+  },
+  css: {
+    lightningcss: {
+      errorRecovery: true
+    }
   }
 });
