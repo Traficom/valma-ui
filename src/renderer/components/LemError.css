@@ -63,10 +63,10 @@
     background-color: var(--pale-yellow);
     color: var(--color-brand-base);
     float: right;
-    border-color: var(--turqoise-medium);
+    border-color: var(--color-brand-base);
 }
 
 .LemError_ok_btn:hover{
     background-color: white;
-    color: var(--turqoise-medium);
+    color: var(--color-brand-light3) !important;
 }

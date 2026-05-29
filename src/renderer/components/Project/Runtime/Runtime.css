@@ -17,6 +17,11 @@
     margin-right: 10px;
 }
 
+.Runtime__button :hover {
+  color: var(--color-brand-light3) !important;
+}
+
+
 /* Scenarios */
 
 .Runtime__scenarios-controls {
@@ -102,7 +107,7 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 }
 
 .Runtime__scenario-sub_scenario:hover {
-    color: #000000;
+    color: var(--color-brand-light3) !important;
 }
 
 .Runtime__scenario-sub_scenario svg {
@@ -110,7 +115,6 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     padding-top: 5px;
     vertical-align: bottom;
 }
-
 
 .Runtime__scenario-open-config {
     display: inline-block;
@@ -122,6 +126,10 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     background-repeat: no-repeat;
 }
 
+.Runtime__scenario-open-config:hover {
+    filter: brightness(1.6) contrast(0.5);
+}
+
 .Runtime__scenario-delete {
     display: inline-block;
     vertical-align: top;
@@ -131,18 +139,15 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     background-repeat: no-repeat;
 }
 
+.Runtime__scenario-delete:hover {
+    filter: brightness(1.6) contrast(0.5);
+}
+
 .Runtime__scenarios-footer {
     display: flex;
     padding-top: 22px;
 }
 
-.Runtime_btn {
-    margin-right: 10px;
-    color: #ffffff;
-}
-.Runtime_btn:hover {
-    color: #ffffff;
-}
 
 .Runtime__add-icon {
     display: inline-flex;
@@ -154,8 +159,6 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     background-image: url('../../../icons/plus.svg');
     background-repeat: no-repeat;
 }
-
-/* Start-stop */
 
 .Runtime__start-stop-controls {
     padding: 20px;
@@ -174,7 +177,10 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
   vertical-align: top;
   width: 24px;
   height: 24px;
-  color: #026273;
+}
+
+.Runtime__scenario-clone:hover {
+    filter: brightness(1.6) contrast(0.5);
 }
 
 .Runtime__scenario-open-folder {
@@ -183,8 +189,8 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 }
 
 .Runtime__scenario-open-folder:hover {
-    color: #000000;
     font-weight: bold;
+    color: var(--color-brand-light3) !important;
 }
 
 
@@ -199,4 +205,22 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 
 .Runtime__buttons {
     display: inline;
+}
+
+.Runtime__project-path {
+    font-family: montserrat, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.Runtime_link {
+    font-family: open-sans, sans-serif;
+    color: var(--color-brand-base);
+    text-decoration: underline;
+}
+
+.Runtime_link:hover {
+     color: var(--color-brand-light3) !important;
 }

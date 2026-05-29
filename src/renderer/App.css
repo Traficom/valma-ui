@@ -4,6 +4,16 @@
 }
 
 @font-face {
+    font-family: open-sans-italic;
+    src: url('./fonts/OpenSans-Italic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: open-sans;
+    src: url('./fonts/OpenSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
     font-family: open-sans-semi-bold;
     src: url('./fonts/OpenSans-SemiBold.ttf') format('truetype');
 }
@@ -22,7 +32,6 @@
     --color-blue-light1:#0065cc;
     --color-blue-light2:#ccdeef;
     --color-blue-light3:#f0f7ff;
-    --turqoise-medium:#018285;
     --pale-grey: #eaeaea;
     --light-grey: #ccc;
     --medium-grey: #8c8c8c;
@@ -32,7 +41,7 @@
     --pale-yellow: #fcfaf2;
     --color-brand-base: #002c74;
     --color-blue-base: #0058b1;
-    --color-brand-light3: #6f86af:
+    --color-brand-light3: #6f86af;
     min-width: 900px;
 }
 
@@ -70,7 +79,7 @@ title {
 }
 
 button:hover {
-    color: #000000;
+     color: var(--color-brand-light3);
 }
 
 input {
@@ -140,7 +149,7 @@ ul li {
 
 .App__settings_select select{
     color: var(--color-brand-base);
-    border-color: var(--turqoise-medium);
+    border-color: var(--color-brand-base);
     border-radius: 2px;
     font-size: 14px;
     vertical-align: top;
@@ -149,8 +158,7 @@ ul li {
 
 .App__settings_heading {
     font-style: normal;
-    font-weight: 350;
-    font-size: 20px;
+    font-size: 22px;
     line-height: 28px;
     letter-spacing: -0.02em;
     margin-top: 10px;
@@ -160,8 +168,6 @@ ul li {
 
 .App__header {
     display: flex;
-    align-items: center;
-    justify-content: flex-start;
     background-color: var(--white-basic);
     background-position: right;
     background-repeat: no-repeat, no-repeat;
@@ -180,6 +186,12 @@ ul li {
     height: 22px;
     background-image: url('./icons/trash_icon.svg');
     background-repeat: no-repeat;
+    transition: filter 0.3s ease;
+}
+
+
+.App__delete_setting:hover {
+   filter: brightness(1.6) contrast(0.5);
 }
 
 .App__open-settings {
@@ -188,9 +200,21 @@ ul li {
     height: 19px;
     margin-left: 20px;
     margin-top: 2px;
-    background-color: var(--white-basic);
     background-image: url('./icons/edit_icon.svg');
     background-repeat: no-repeat;
+}
+
+.App__open-settings:hover {
+   filter: brightness(1.6) contrast(0.5);
+}
+
+.App__add_setting {
+    padding-left: 10px;
+    color: var(--color-brand-base);
+}
+
+.App__add_setting:hover{
+   filter: brightness(1.6) contrast(0.5);
 }
 
 .App__header-version {

@@ -12,6 +12,7 @@ import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
 import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
 import { ProjectSetting } from './components/Project/types/ProjectSetting';
 import vex from './main'
+import Plus from './icons/Plus';
 
 const emptySetting: ProjectSetting = {
   id: "",
@@ -431,7 +432,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   return (
     <div className={"App" + (isProjectRunning ? " App--busy" : "")}>
       {/* Pop-up global settings dialog with overlay behind it */}
-      {isSettingsOpen && <div className="App__settings">
+      {isSettingsOpen &&
         <Settings
           settings={settingInHandling}
           settingsList={projectSettings}
@@ -448,8 +449,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
           selectBaseSettings={(id: any) => selectBaseSettings(id)}
           setModeDestCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: v })}
           setMunicipalityCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, municipality_calibration_file: v })}
-        />
-      </div>}
+        />}
       {/* Pop-up used instead of Alert, which messes with window focus and block */}
       {errorShown && <LemError
         info={errorInfo}
@@ -515,6 +515,16 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
                 ></div>
               </div>
             </li>
+             <li>
+              <div className="App__settings_modify">
+                <div
+                  className={!selectedSettingsId || selectedSettingsId == '' ? "settings_disabled App__add_setting" : "App__add_setting"}
+                  onClick={e =>
+                    addNewSetting()
+                  }
+                ><span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Plus />Luo uusi VALMA-projekti</span></div>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -524,7 +534,6 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
           selectedSetting={settingInHandling}
           openCreateEmmeBank={() => setCreateEmmeBankModalOpen(true)}
           signalProjectRunning={setProjectRunning}
-          addNewSetting={addNewSetting}
         />
       </div>
 

@@ -24,7 +24,6 @@ const Runtime = ({
   duplicateScenario,
   handleClickCreateSubScenario,
   openCreateEmmeBank,
-  addNewSetting,
   duplicateSubScenario,
   modifySubScenario,
   deleteSubScenario,
@@ -38,6 +37,10 @@ const Runtime = ({
     }
     return activeScenario;
   })
+
+  const openProjecFolder = () => {
+    window.electron.openPath(projectFolder);
+  };
 
   const RunStatusList = () => {
     if (renderableScenarios.length > 0) {
@@ -69,29 +72,30 @@ const Runtime = ({
   return (
     <div className="Runtime">
       <div className="Runtime__valma-project-controls">
-        <p className="Runtime__project-path">
-          Valma-skenaarioiden tallennuspolku: {projectFolder}
-        </p>
-        <button
-          className="Runtime__button Table_space_after"
-          onClick={() => addNewSetting()}
-        >
-          <span>Luo uusi VALMA-projekti</span>
-        </button>
+        <div className="Runtime__project-path">
+          <span>
+            Valma-skenaarioiden tallennuspolku:
+          </span>
+          <div className="Runtime_link"
+            onClick={e => openProjecFolder()}
+          >
+            {projectFolder}
+          </div>
+        </div>
 
         <div className="Runtime__buttons">
+           <button
+            className="Runtime__button"
+            onClick={e => openCreateEmmeBank()}
+            disabled={runningScenarioID}
+          >Luo Emmepankki
+          </button>
           <button
             className="Runtime__button Table_space_after"
             onClick={e => reloadScenarios()}
             disabled={runningScenarioID}
           >
             Lataa uudelleen projektin skenaariot
-          </button>
-          <button
-            className="Runtime__button"
-            onClick={e => openCreateEmmeBank()}
-            disabled={runningScenarioID}
-          >Luo Emmepankki
           </button>
         </div>
       </div>
@@ -100,7 +104,7 @@ const Runtime = ({
         <div className="Runtime__scenarios">
           <Tooltip
             id="scenario-tooltip"
-            style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000", zIndex: 9999, fontSize: "11px", lineHeight: "80%"}} 
+            style={{ borderRadius: "1rem", maxWidth: "40rem", backgroundColor: "#e3e3e3", color: "#000000", zIndex: 9999, fontSize: "11px", lineHeight: "80%" }}
             place="bottom"
           />
           {/* Create table of all scenarios "<Button-To-Add-As-Runnable> <Button-To-Open-Configuration>" */}
@@ -144,21 +148,21 @@ const Runtime = ({
         </div>
         <div className="Runtime__scenarios-footer">
           <button
-            className="Runtime_btn"
+            className="Runtime__button"
             disabled={runningScenarioID}
             onClick={e => handleClickNewScenario(SCENARIO_TYPES.PASSENGER_TRANSPORT)}
           >
             <span className="Runtime__add-icon">Uusi lyhyiden matkojen skenaario</span>
           </button>
           <button
-            className="Runtime_btn"
+            className="Runtime__button"
             disabled={runningScenarioID}
             onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}
           >
             <span className="Runtime__add-icon">Uusi pitkien matkojen skenaario</span>
           </button>
           <button
-            className="Runtime_btn"
+            className="Runtime__button"
             disabled={runningScenarioID}
             onClick={e => handleClickNewScenario(SCENARIO_TYPES.GOODS_TRANSPORT)}
           >

@@ -30,74 +30,69 @@ const CreateEmmeBank: React.FC<CreateEmmeBankProps> = ({
 
   return (
     <div className="CreateEmmeBank">
-      {/* Overlay */}
-      <div
-        className="CreateEmmeBank__overlay"
-        onClick={handleCancel}
-      />
 
-      <div className="CreateEmmeBank__content">
-        <h2>Luo Emme-pankki</h2>
+      <div className="CreateEmmeBank_overlay" onClick={(e) => handleCancel()}>{/* Dark background overlay */}</div>
 
-        {/* Submodel */}
-        <label>
-          Osamalli
-          <select
-            value={submodel}
-            onChange={e => setSubmodel(e.target.value)}
-          >
-            <option value="">--- valitse ---</option>
-            {projectSubmodels &&
-              projectSubmodels.map((sm: Submodel) => (
-                <option key={sm.name} value={sm.name}>
-                  {sm.name}
-                </option>
-              ))}
+      <div className="CreateEmmeBank_dialog">
+
+        <div className="CreateEmmeBank_dialog-controls" onClick={(e) => handleCancel()}></div>
+
+        <div className="CreateEmmeBank_dialog-heading">Luo Emme-pankki</div>
+
+        {/* Sub model selection */}
+        <label className="CreateEmmeBank_label"
+          htmlFor="submodel">Osamalli</label>
+        <div className="Submodel_select">
+          <select id="submodel" value={submodel} onChange={e => setSubmodel(e.target.value)}>
+            <option key={"submodel_select"} value={""}>--- valitse ---</option>
+            {projectSubmodels && projectSubmodels.map((submodel) =>
+              <option key={submodel.id} value={submodel.id}>{submodel.name}</option>)
+            }
           </select>
-        </label>
+        </div>
+        {/* Amount of scenerios */}
+        <label className="CreateEmmeBank_label"
+          htmlFor="submodel">Skenaarioiden lukumäärä</label>
+        <input className='CreateEmmeBank_input'
+          type="number"
+          min="1"
+          max="999"
+          step="1"
+          value={numberOfEmmeScenarios}
+          onChange={e => setNumberOfEmmeScenarios(Number(e.target.value))}
+        />
 
-        {/* Scenario count */}
-        <label>
-          Skenaarioiden lukumäärä
-          <input
-            type="number"
-            min={1}
-            value={numberOfEmmeScenarios}
-            onChange={e => setNumberOfEmmeScenarios(Number(e.target.value))}
-          />
-        </label>
-
-        {/* Separate scenarios */}
-        <label>
-          <input
+        {/* Save to separate emme scenarios */}
+        <div className='CreateEmmeBank_checkbox_container'>
+          <input id="separate-emme-scenarios"
+            className='CreateEmmeBank_checkbox'
             type="checkbox"
             checked={separateEmmeScenarios}
-            onChange={() =>
-              setSeparateEmmeScenarios(!separateEmmeScenarios)
-            }
+            onChange={(e) => {
+              setSeparateEmmeScenarios(!separateEmmeScenarios);
+            }}
           />
-          Tallenna ajanjaksot erillisiin Emme-skenaarioihin
-        </label>
-
-        {/* Actions */}
-        <div className="CreateEmmeBank__actions">
-          <button
-            onClick={() =>
-              createProject(
-                submodel,
-                numberOfEmmeScenarios,
-                separateEmmeScenarios
-              )
-            }
-            disabled={!submodel}
-          >
-            Luo pankki
-          </button>
-          <button onClick={handleCancel}>Peruuta</button>
+          <label className="CreateEmmeBank_checkbox_label"
+            htmlFor="separate-emme-scenarios">Tallenna ajanjaksot erillisiin Emme-skenaarioihin</label>
         </div>
+
+        <div className="CreateEmmeBank_buttons">
+          <button
+            className="CreateEmmeBank_btn"
+            onClick={e => createProject(submodel, numberOfEmmeScenarios, separateEmmeScenarios)}
+          >
+            <span>Luo pankki</span>
+          </button>
+          <button
+            className="CreateEmmeBank_btn"
+            onClick={(e) => handleCancel()}
+          >
+            <span>Peruuta</span>
+          </button>
+        </div>
+
       </div>
-    </div>
-  );
+    </div>)
 };
 
 export default CreateEmmeBank;

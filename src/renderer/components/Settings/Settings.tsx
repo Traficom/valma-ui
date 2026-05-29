@@ -3,7 +3,7 @@ import { openFileDialog, openFolderDialog } from '../Project/Dialog'
 import './Settings.css';
 import { searchEMMEPython } from './../../search_emme_pythonpath';
 import versions from '../../../versions';
-import {ProjectSetting} from '../Project/types/ProjectSetting';
+import { ProjectSetting } from '../Project/types/ProjectSetting';
 
 /* ----------------------------- Types ----------------------------- */
 
@@ -72,7 +72,7 @@ const Settings: React.FC<SettingsProps> = ({
 
 
   return (
-  <div className="Settings">
+    <div className="Settings">
 
       <div className="Settings__overlay" onClick={(e) => handleCancel()}>{/* Dark background overlay */}</div>
 
@@ -116,13 +116,13 @@ const Settings: React.FC<SettingsProps> = ({
             id="hidden-input-project-folder"
             type="text"
             onClick={async () => {
-                const folder = await openFolderDialog(
-                  settings.project_folder || ''
-                );
-                if (folder) {
-                  setProjectFolder(folder);
-                }
-              }}
+              const folder = await openFolderDialog(
+                settings.project_folder || ''
+              );
+              if (folder) {
+                setProjectFolder(folder);
+              }
+            }}
           />
         </div>
         <div className="Settings__dialog-input-group">
@@ -136,10 +136,10 @@ const Settings: React.FC<SettingsProps> = ({
             onClick={async () => {
               const file = await openFileDialog(
                 settings.emme_python_path || path.resolve('/'),
-                 [
+                [
                   { name: 'Executable', extensions: ['exe'] },
                   { name: 'All Files', extensions: ['*'] },
-                 ],
+                ],
               );
               if (file) {
                 setEMMEPythonPath(file);
@@ -209,27 +209,27 @@ const Settings: React.FC<SettingsProps> = ({
             }}
           />
         </div>
-          <div className="Settings__dialog-input-group">
+        <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">Kulkutapa- ja matkakohdevalinnan kalibrointitiedosto (.json)</span>
           <span>
-          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.mode_dest_calibration_file ? " shorter" : "")} htmlFor="hidden-input-mode-dest-calibration-path" title={settings.mode_dest_calibration_file}>
-            {settings.mode_dest_calibration_file ? path.basename(settings.mode_dest_calibration_file) : "Valitse.."}
-          </label>
-           {settings.mode_dest_calibration_file &&
-            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-mode-dest-calibration-path" onClick={(e) => {
-                     setModeDestCalibrationFile("");
-              }}>
+            <label className={"Settings__pseudo-file-select bg_plus" + (settings.mode_dest_calibration_file ? " shorter" : "")} htmlFor="hidden-input-mode-dest-calibration-path" title={settings.mode_dest_calibration_file}>
+              {settings.mode_dest_calibration_file ? path.basename(settings.mode_dest_calibration_file) : "Valitse.."}
             </label>
-           }
-           </span>
+            {settings.mode_dest_calibration_file &&
+              <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-mode-dest-calibration-path" onClick={(e) => {
+                setModeDestCalibrationFile("");
+              }}>
+              </label>
+            }
+          </span>
           <input className="Settings__hidden-input"
             id="hidden-input-mode-dest-calibration-path"
-            type="text"       
+            type="text"
             onClick={async () => {
               const file = await openFileDialog(
-                  settings.mode_dest_calibration_file ||
-                  settings.base_data_folder ||
-                  settings.project_folder,
+                settings.mode_dest_calibration_file ||
+                settings.base_data_folder ||
+                settings.project_folder,
                 [
                   { name: 'Executable', extensions: ['json'] },
                   { name: 'All Files', extensions: ['*'] },
@@ -244,17 +244,17 @@ const Settings: React.FC<SettingsProps> = ({
         </div>
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">Kunta-kunta-kalibroinnin tiedosto (.txt)</span>
-            <span>
-          <label className= {"Settings__pseudo-file-select bg_plus" + (settings.municipality_calibration_file ? " shorter" : "")} htmlFor="hidden-input-municipality-calibration-file" title={settings.municipality_calibration_file}>
-            {settings.municipality_calibration_file ? path.basename(settings.municipality_calibration_file) : "Valitse.."}
-          </label>
-           {settings.municipality_calibration_file &&
-            <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-municipality-calibration-file" onClick={(e) => {
-                     setMunicipalityCalibrationFile("");
-              }}>
+          <span>
+            <label className={"Settings__pseudo-file-select bg_plus" + (settings.municipality_calibration_file ? " shorter" : "")} htmlFor="hidden-input-municipality-calibration-file" title={settings.municipality_calibration_file}>
+              {settings.municipality_calibration_file ? path.basename(settings.municipality_calibration_file) : "Valitse.."}
             </label>
-           }
-           </span>
+            {settings.municipality_calibration_file &&
+              <label className="bg_minus Settings__pseudo-file-select_minus" htmlFor="hidden-input-municipality-calibration-file" onClick={(e) => {
+                setMunicipalityCalibrationFile("");
+              }}>
+              </label>
+            }
+          </span>
           <input className="Settings__hidden-input"
             id="hidden-input-municipality-calibration-file"
             type="text"

@@ -21,14 +21,12 @@ interface VlemProjectProps {
   signalProjectRunning: (running: boolean) => void;
   selectedSetting?: ProjectSetting;
   openCreateEmmeBank: () => void;
-  addNewSetting: () => void;
 }
 
 const VlemProject: React.FC<VlemProjectProps> = ({
   signalProjectRunning,
   selectedSetting,
   openCreateEmmeBank,
-  addNewSetting
 }) => {
   window.electron.setMaxListeners(20);
   const ipcRenderer = window.ipc;
@@ -815,7 +813,6 @@ useEffect(() => {
           duplicateScenario={duplicateScenario}
           handleClickCreateSubScenario={handleClickCreateSubScenario}
           openCreateEmmeBank={openCreateEmmeBank}
-          addNewSetting={addNewSetting}
           duplicateSubScenario={duplicateSubScenario}
           deleteSubScenario={deleteSubScenario}
           modifySubScenario={handleClickModifySubScenario}
