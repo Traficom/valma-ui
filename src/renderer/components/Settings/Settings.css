@@ -169,7 +169,7 @@
     border: 1px solid var(--turqoise-medium);
     font-size: 16px;
     font-family: open_sans_medium, sans-serif;
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     border-radius: 2px;
     padding-left: 4px;
 }

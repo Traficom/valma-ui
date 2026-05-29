@@ -37,7 +37,7 @@
     font-size: 15px;
     line-height: 18px;
     letter-spacing: -0.6px;
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     order: 0;
     margin-bottom: 10px;
 }
@@ -61,7 +61,7 @@
     max-width: 40px;
     max-height: 35px;
     background-color: var(--pale-yellow);
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     float: right;
     border-color: var(--turqoise-medium);
 }

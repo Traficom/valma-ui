@@ -5,7 +5,6 @@ import Runtime from './Runtime/Runtime';
 import Scenario from './Scenario/Scenario';
 import { RunnableScenarioData, ScenarioData } from '../Project/types/ScenarioData'
 import { ProjectSetting } from '../Project/types/ProjectSetting'
-import CostBenefitAnalysis from '../CostBenefitAnalysis/CostBenefitAnalysis'
 import { CbaOptions } from '../Project/types/CbaOptions'
 import SubScenario from './SubScenario/SubScenario';
 import RunLog from './RunLog/RunLog'
@@ -821,10 +820,6 @@ useEffect(() => {
           deleteSubScenario={deleteSubScenario}
           modifySubScenario={handleClickModifySubScenario}
           activeScenarios={scenariosToRun}
-        />
-        <CostBenefitAnalysis
-          projectFolder={projectFolder}
-          runCbaScript={_runCbaScript}
         />
       </div>
 

@@ -37,7 +37,7 @@
     font-size: 15px;
     line-height: 18px;
     letter-spacing: -0.6px;
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     order: 0;
     margin-bottom: 10px;
 }

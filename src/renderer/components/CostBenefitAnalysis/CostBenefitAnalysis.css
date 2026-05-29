@@ -1,7 +1,7 @@
 .CBA {
     background: var(--white-basic);
-    border-top: 1px solid var(--turqoise-dark);
-    border-bottom: 1px solid var(--turqoise-dark);
+    border-top: 1px solid var(--color-brand-base);
+    border-bottom: 1px solid var(--color-brand-base);
     box-sizing: border-box;
     padding: 20px;
     margin-bottom: 20px;

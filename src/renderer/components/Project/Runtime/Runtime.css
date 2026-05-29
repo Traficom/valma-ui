@@ -9,6 +9,7 @@
     font-size: 24px;
     line-height: 28px;
     letter-spacing: -0.02em;
+    font-family: montserrat, sans-serif;
 }
 
 .Runtime__button {
@@ -20,8 +21,8 @@
 
 .Runtime__scenarios-controls {
     background: var(--white-basic);
-    border-top: 1px solid var(--turqoise-dark);
-    border-bottom: 1px solid var(--turqoise-dark);
+    border-top: 1px solid var(--color-brand-base);
+    border-bottom: 1px solid var(--color-brand-base);
     box-sizing: border-box;
     padding: 20px;
 }
@@ -33,6 +34,7 @@
     line-height: 28px;
     letter-spacing: -0.02em;
     margin-bottom: 10px;
+    font-family: montserrat, sans-serif;
 }
 
 .Runtime__scenarios {
@@ -95,7 +97,7 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 }
 .Runtime__scenario-sub_scenario {
     padding-left: 100px;
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     vertical-align: center;
 }
 
@@ -116,16 +118,16 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     vertical-align: top;
     width: 20px;
     height: 19px;
-    background-image: url('../../Edit.png');
+    background-image: url('../../../icons/edit_icon.svg');
     background-repeat: no-repeat;
 }
 
 .Runtime__scenario-delete {
     display: inline-block;
     vertical-align: top;
-    width: 16px;
-    height: 19px;
-    background-image: url('../../trash.png');
+    width: 22px;
+    height: 22px;
+    background-image: url('../../../icons/trash_icon.svg');
     background-repeat: no-repeat;
 }
 
@@ -134,13 +136,11 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     padding-top: 22px;
 }
 
-.Runtime__add-new-scenario-btn {
+.Runtime_btn {
     margin-right: 10px;
-    background: var(--turqoise-dark);
-    border-color: var(--turqoise-dark);
     color: #ffffff;
 }
-.Runtime__add-new-scenario-btn:hover {
+.Runtime_btn:hover {
     color: #ffffff;
 }
 
@@ -149,8 +149,9 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     align-items: center;
     height: 35px;
     padding-left: 45px;
-    background-color: var(--turqoise-dark);
-    background-image: url(../../add.png);
+    color: var(--color-brand-base);
+    background-color: var(--white-basic);
+    background-image: url('../../../icons/plus.svg');
     background-repeat: no-repeat;
 }
 
@@ -177,7 +178,7 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 }
 
 .Runtime__scenario-open-folder {
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     font-weight: bold;
 }
 
@@ -189,6 +190,7 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 
 .Runtime__scenario_table th {
     text-align: left;
+    font-family: montserrat, sans-serif;
 }
 
 .Table_space_after {

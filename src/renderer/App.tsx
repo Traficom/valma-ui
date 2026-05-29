@@ -11,7 +11,7 @@ import Loading from './components/Loading';
 import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
 import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
 import { ProjectSetting } from './components/Project/types/ProjectSetting';
-declare const vex: any;
+import vex from './main'
 
 const emptySetting: ProjectSetting = {
   id: "",
@@ -201,6 +201,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   }
 
   const handleDeleteSetting = () => {
+
     if (!selectedSettingsId) return;
     if (projectSettings.length === 1) {
       showError("Viimeistä määriteltyä asetusta ei voi poistaa.");

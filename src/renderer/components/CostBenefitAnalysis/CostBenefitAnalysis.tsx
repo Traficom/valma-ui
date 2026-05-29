@@ -1,8 +1,8 @@
-import React from 'react';
-import path from "path";
+import React, { useState } from 'react';
 import { CbaOptions } from '../Project/types/CbaOptions'
-import { openFileDialog, openFolderDialog } from '../Project/Dialog'
+import { openFolderDialog } from '../Project/Dialog'
 import './CostBenefitAnalysis.css';
+const path = (window as any).path;
 
 interface CostBenefitAnalysisProps {
   projectFolder: string;
@@ -14,12 +14,13 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
   runCbaScript
 }) => {
 
-  let cbaOptions: CbaOptions = {
+
+  const [cbaOptions, setCbaOptions] = useState<CbaOptions>({
     baseline_scenario_path: "",
     projected_scenario_path: "",
     baseline_scenario_2_path: "",
     projected_scenario_2_path: ""
-  };
+  });
 
   return (
     <div className="CBA">
@@ -31,7 +32,7 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
             <td>
               <span className="CBA__pseudo-label">Vertailuvaihtoehto</span>
               <label className="CBA__pseudo-file-select" htmlFor="baseline-scenario-results-folder-select" title={cbaOptions.baseline_scenario_path}>
-                {cbaOptions.baseline_scenario_path ? path.basename(cbaOptions.baseline_scenario_path) : "Valitse.."}
+                {cbaOptions.baseline_scenario_path.length > 0 ? path.basename(cbaOptions.baseline_scenario_path) : "Valitse.."}
               </label>
               <input className="CBA__hidden-input"
                 id="baseline-scenario-results-folder-select"
@@ -41,7 +42,10 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
                     projectFolder
                   );
                   if (folder) {
-                    cbaOptions.baseline_scenario_path = folder;
+                    setCbaOptions(prev => ({
+                      ...prev,
+                      baseline_scenario_path: folder
+                    }));
                   }
                 }}
               />
@@ -55,12 +59,15 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
               <input className="CBA__hidden-input"
                 id="projected-scenario-results-folder-select"
                 type="text"
-                 onClick={async () => {
+                onClick={async () => {
                   const folder = await openFolderDialog(
                     projectFolder
                   );
                   if (folder) {
-                    cbaOptions.projected_scenario_path = folder;
+                    setCbaOptions(prev => ({
+                      ...prev,
+                      projected_scenario_path: folder
+                    }));
                   }
                 }}
               />
@@ -81,7 +88,10 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
                     projectFolder
                   );
                   if (folder) {
-                    cbaOptions.baseline_scenario_2_path = folder;
+                    setCbaOptions(prev => ({
+                      ...prev,
+                      baseline_scenario_2_path: folder
+                    }));
                   }
                 }}
               />
@@ -100,7 +110,10 @@ const CostBenefitAnalysis: React.FC<CostBenefitAnalysisProps> = ({
                     projectFolder
                   );
                   if (folder) {
-                    cbaOptions.projected_scenario_2_path = folder;
+                    setCbaOptions(prev => ({
+                      ...prev,
+                      projected_scenario_2_path: folder
+                    }));
                   }
                 }}
               />
