@@ -637,10 +637,10 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   };
 
   // Electron IPC event listeners
-const onLoggableEvent = (_event: any, payload: any) => {
+const onLoggableEvent = (payload: any) => {
   if (!payload) return;
 
-  const loggableEvent: LoggableEvent =
+  const loggEvent: LoggableEvent =
     payload.level
       ? payload
       : {
@@ -649,8 +649,8 @@ const onLoggableEvent = (_event: any, payload: any) => {
           time: payload.time,
         };
 
-  if (loggableEvent.message) {
-    setLogContents(prev => [...prev, loggableEvent]);
+  if (loggEvent.message) {
+    setLogContents(prev => [...prev, loggEvent]);
   }
 };
 

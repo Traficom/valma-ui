@@ -13,6 +13,7 @@ import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
 import { ProjectSetting } from './components/Project/types/ProjectSetting';
 import vex from './main'
 import Plus from './icons/Plus';
+import logo_traficom from './icons/logo_traficom.svg';
 
 const emptySetting: ProjectSetting = {
   id: "",
@@ -475,7 +476,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
       {/* UI title bar, app-version, etc. */}
       <div className="App__header">
-        <span className="App__header-title">VALMA</span>
+       <img src={logo_traficom} alt="logo" width="250" height="70"/>
+       <span className="App__header-title">VALMA</span>
         &nbsp;
         <a onClick={() => electron.openExternal("https://github.com/Traficom/valma-docs")} />
       </div>

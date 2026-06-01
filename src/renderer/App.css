@@ -166,15 +166,18 @@ ul li {
     font-family: montserrat, sans-serif;
 }
 
-.App__header {
+.App__header { 
     display: flex;
+    flex-direction: column;
     background-color: var(--white-basic);
     background-position: right;
     background-repeat: no-repeat, no-repeat;
     font-size: 20px;
-    padding: 0 0 20px 25px;
+    padding: 0 0 0 15px;
+    margin: 0;
     font-weight: normal;
     border-bottom: 1px solid var(--light-grey);
+    color: var(--color-brand-base);
     font-family: montserrat-medium, sans-serif;
 }
 
@@ -236,6 +239,11 @@ ul li {
 .settings_disabled {
     filter: grayscale(70%);
     opacity: 0.5;
+}
+
+.App__header-title{
+    margin: 0 0 0 18px;
+    padding: 0;
 }
 
 .logo {
