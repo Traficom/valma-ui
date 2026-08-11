@@ -663,7 +663,6 @@ const onLoggableEvent = (payload: any) => {
   }
 
 const onScenarioComplete = (payload) => {
-
   if (payload?.completed?.id) {
     setFinishedScenarioInfo({ id: payload.completed.id, error: false });
   }

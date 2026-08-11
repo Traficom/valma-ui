@@ -4,6 +4,9 @@ import ScenariosToRun from './ScenariosToRun';
 import RunStatus from './RunStatus/RunStatus';
 import ScenarioTableRow from '../ScenarioTable/ScenarioTableRow';
 import { Tooltip } from 'react-tooltip';
+import Plus from '../../../icons/Plus';
+import PlusLabel from '../../PageElements/PlusLabel';
+import OuterLink from '../../../icons/OuterLink';
 
 declare const SCENARIO_TYPES: any;
 declare const SCENARIO_STATUS_STATE: any;
@@ -81,6 +84,10 @@ const Runtime = ({
           >
             {projectFolder}
           </div>
+          <button className="Emme_project_button"
+            onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: "4px"}}>Emmeprojekti <OuterLink /></span>
+          </button>
         </div>
 
         <div className="Runtime__buttons">
@@ -101,6 +108,26 @@ const Runtime = ({
       </div>
       <div className="Runtime__scenarios-controls">
         <div className="Runtime__scenarios-heading">Ladatut skenaariot</div>
+        <div className="Runtime__scenario-buttons">
+          <button
+            className="Runtime__button"
+            disabled={runningScenarioID}
+            onClick={e => handleClickNewScenario(SCENARIO_TYPES.PASSENGER_TRANSPORT)}>
+              <PlusLabel label='Uusi lyhyiden matkojen skenaario'/>
+          </button>
+          <button
+            className="Runtime__button"
+            disabled={runningScenarioID}
+            onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}>
+              <PlusLabel label='Uusi pitkien matkojen skenaario'/>
+          </button>
+          <button
+            className="Runtime__button"
+            disabled={runningScenarioID}
+            onClick={e => handleClickNewScenario(SCENARIO_TYPES.GOODS_TRANSPORT)}>
+              <PlusLabel label='Uusi tavaraliikenteen skenaario'/>
+          </button>
+        </div>
         <div className="Runtime__scenarios">
           <Tooltip
             id="scenario-tooltip"
@@ -146,29 +173,7 @@ const Runtime = ({
             </tbody>
           </table>
         </div>
-        <div className="Runtime__scenarios-footer">
-          <button
-            className="Runtime__button"
-            disabled={runningScenarioID}
-            onClick={e => handleClickNewScenario(SCENARIO_TYPES.PASSENGER_TRANSPORT)}
-          >
-            <span className="Runtime__add-icon">Uusi lyhyiden matkojen skenaario</span>
-          </button>
-          <button
-            className="Runtime__button"
-            disabled={runningScenarioID}
-            onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}
-          >
-            <span className="Runtime__add-icon">Uusi pitkien matkojen skenaario</span>
-          </button>
-          <button
-            className="Runtime__button"
-            disabled={runningScenarioID}
-            onClick={e => handleClickNewScenario(SCENARIO_TYPES.GOODS_TRANSPORT)}
-          >
-            <span className="Runtime__add-icon">Uusi tavaraliikenteen skenaario</span>
-          </button>
-        </div>
+        
       </div>
 
       <div className="Runtime__start-stop-controls">

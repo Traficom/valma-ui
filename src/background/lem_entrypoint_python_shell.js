@@ -157,7 +157,7 @@ module.exports = {
     worker = new ps.PythonShell(
       `${runParameters.valma_scripts_path}/valma_freight.py`,
       {
-        mode: 'json',
+        mode: 'text',
         pythonPath: runParameters.emme_python_path,
         pythonOptions: ['-u'], // unbuffered
         args: [

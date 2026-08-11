@@ -12,8 +12,8 @@ import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
 import { cutUnvantedCharacters } from './components/cutUnvantedCharacters';
 import { ProjectSetting } from './components/Project/types/ProjectSetting';
 import vex from './main'
-import Plus from './icons/Plus';
 import logo_traficom from './icons/logo_traficom.svg';
+import PlusLabel from './components/PageElements/PlusLabel';
 
 const emptySetting: ProjectSetting = {
   id: "",
@@ -32,6 +32,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   const [isDownloadingValmaScripts, setDownloadingValmaScripts] = useState(false);
   const [dlValmaScriptsVersion, setDlValmaScriptsVersion] = useState<any>(undefined);
   const [settingInHandling, setSettingInHandling] = useState<typeof emptySetting>(emptySetting);
+  const settingRef = useRef(settingInHandling);
   const [projectSettings, setProjectSettings] = useState<any[]>([]);
   const [selectedSettingsId, setSelectedSettingsId] = useState<any>(undefined);
   const [isLoading, setLoading] = useState(false);
@@ -40,7 +41,6 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   const [errorShown, setErrorShown] = useState(false);
   const [errorInfo, setErrorInfo] = useState('');
   const [isCreateEmmeBankModalOpen, setCreateEmmeBankModalOpen] = useState(false);
-
 
   const ipc = (window as any).ipc;
 
@@ -60,6 +60,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     return candidates.find(fs.existsSync) ?? '';
   }
 
+
   function selectBaseSettings(settingsId) {
     const selectedBaseSetting = findSetting(projectSettings, settingsId);
     setSettingInHandling({
@@ -77,9 +78,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     pipRequirementsPath: string
   ) {
     try {
-      setLoading(true);
-      setLoadingHeading('Tehdään PIP-asennusta');
-      setLoadingInfo('Asennus käynnissä…');
+      setInstallingPipInProgress();
 
       const { stdout, stderr } = await pipInstall(
         pipFilePath,
@@ -102,6 +101,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   }
 
   function setInstallingPipInProgress() {
+    console.log("TESTING !!!!!!!!!!!!!!!!!!!!!!! setInstallingPipInProgress");
     setLoading(true);
     setLoadingHeading('Tehdään PIP-asennusta');
     setLoadingInfo('Asennus käynnissä…');
@@ -345,53 +345,33 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     setCreateEmmeBankModalOpen(false);
   };
 
-  const onDownloadReady = (event, savePath) => {
-    const config = store.get("config");
-    const existingSettings = config?.settings;
-    const existingSelectedSettingId = config?.selected_settings_id;
-    const settingsAreDefined = existingSettings && existingSettings.length > 0 && existingSelectedSettingId;
+
+useEffect(() => {
+  settingRef.current = settingInHandling;
+}, [settingInHandling]);
+
+  const onDownloadReady = (savePath: string) => {
+    
+    setDownloadingValmaScripts(false);
     const newPathFromDownload = cutUnvantedCharacters(savePath);
-
-    if (settingsAreDefined) {
-      let settingInHandlingFromStore = findSetting(existingSettings, existingSelectedSettingId);
-
-      setProjectSettings(existingSettings);
-      setSelectedSettingsId(existingSelectedSettingId);
-      setSettingInHandling(settingInHandlingFromStore);
-      const pythonPath = settingInHandlingFromStore.emme_python_path;
-
-      setSettingInHandling({ ...settingInHandlingFromStore, valma_scripts_path: newPathFromDownload });
-
-      const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
-      if (pipFilePath == '') {
-        const errorMessage = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
-        showError(errorMessage + '. Tarkista Emme Python - asetus.');
-        setDownloadingValmaScripts(false);
-        return;
-      }
-
-      const pipRequirementsPath = path.join(newPathFromDownload, "requirements.txt");
-      if (!fs.existsSync(pipRequirementsPath)) {
-        showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista: ' + pipRequirementsPath);
-        setDownloadingValmaScripts(false);
-        return;
-      }
-
-      setInstallingPipInProgress();
-      runPipInstall(pipFilePath, pipRequirementsPath);
+    if (settingRef.current && settingRef.current.id.length > 0) {
+      setSettingInHandling({ ...settingRef.current, valma_scripts_path: newPathFromDownload });
+      resolveAndRunPipInstall(newPathFromDownload);
     } else {
       setSettingInHandling({ ...emptySetting, valma_scripts_path: newPathFromDownload });
+      resolveAndRunPipInstall(newPathFromDownload);
       openSettings();
     };
-    setDownloadingValmaScripts(false);
+
   };
 
   useEffect(() => {
+    console.log("USE EFFECT!!!!")
     const loadConfig = async () => {
       const config = await store.get("config");
       const settingsFromStore = config?.settings;
       let selectedSettingsIdFromStore = config?.selected_settings_id;
-
+    
       if (settingsFromStore) {
         if (!selectedSettingsIdFromStore) {
           selectedSettingsIdFromStore = settingsFromStore[0];
@@ -428,7 +408,32 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     };
   }, []);
 
-  // -------------------- render (unchanged structure) --------------------
+const resolveAndRunPipInstall = (newPath:string) => {
+    const pythonPath = settingInHandling.emme_python_path;
+     const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
+      if (pipFilePath == '') {
+        const errorMessage = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
+        showError(errorMessage + '. Tarkista Emme Python - asetus.');
+        setDownloadingValmaScripts(false);
+        return;
+      }
+
+      const pipRequirementsPath = path.join(cutUnvantedCharacters(newPath), "requirements.txt");
+      if (!fs.existsSync(pipRequirementsPath)) {
+        showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista: ' + pipRequirementsPath);
+        setDownloadingValmaScripts(false);
+        return;
+      }
+      runPipInstall(pipFilePath, pipRequirementsPath);
+
+}
+
+
+
+  async function plaa() {
+    console.log("dishffffffffffffffffffffffffffffffffffffffffff")
+  }
+
 
   return (
     <div className={"App" + (isProjectRunning ? " App--busy" : "")}>
@@ -524,8 +529,13 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
                   onClick={e =>
                     addNewSetting()
                   }
-                ><span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}><Plus />Luo uusi VALMA-projekti</span></div>
+                ></div>
               </div>
+              <button
+                  className="Runtime__button"
+                  onClick={e =>
+                    addNewSetting()
+                  }><PlusLabel label={'Luo uusi VALMA-projekti'} /></button>
             </li>
           </ul>
         </div>

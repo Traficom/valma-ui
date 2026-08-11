@@ -163,7 +163,7 @@ const Settings: React.FC<SettingsProps> = ({
         </div>
         <div className="Settings__dialog-input-group">
           <span className="Settings__pseudo-label semi_bold">valma model system</span>
-          {isDownloadingValmaScripts ?
+          {isDownloadingValmaScripts == true ?
             <span className="Settings__pseudo-file-select bg_plus">
               Downloading model-system {dlValmaScriptsVersion === 'main' ? 'latest' : dlValmaScriptsVersion}. . .
             </span>
