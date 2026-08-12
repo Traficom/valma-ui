@@ -208,11 +208,6 @@ ipcMain.on('process-error-from-worker', (event, args) => {
   mainWindow.webContents.send('process-error-from-worker', {...args, error: true});
 });
 
-
-ipcMain.on('message-from-ui-to-create-project', (_e, args) =>
-  createProjectWorkerWindow.webContents.send('create-project', args)
-);
-
 ipcMain.on('message-from-worker-all-scenarios-complete', (event, ...args) => {
   const payload = args[0];
   mainWindow.webContents.send('all-scenarios-complete', payload)
@@ -233,7 +228,7 @@ ipcMain.on('message-from-worker-creating-emme-bank-completed', (event, args) => 
   mainWindow.webContents.send('creating-emme-bank-completed', args.error);
 });
 
-// Relay message to run create emme project
+// Relay message to run create VLEM project
 ipcMain.on('message-from-ui-to-create-project', (event, args) => {
   createProjectWorkerWindow.webContents.send('create-project', args);
 });

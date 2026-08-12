@@ -159,6 +159,11 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     if (settingInHandling.id === "") saveNewSetting({ ...settingInHandling });
     else saveSettingChanges({ ...settingInHandling });
 
+    if(settingInHandling.project_folder == ""){
+      showError("Projektikansiota ei ole asetettu. Tarkasta asetukset");
+      return;
+    }
+
     ipc.send('message-from-ui-to-create-project', {
       project_folder: settingInHandling.project_folder,
       emme_python_path: settingInHandling.emme_python_path,
@@ -358,20 +363,12 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 useEffect(() => {
   settingRef.current = settingInHandling;
 }, [settingInHandling]);
-
-  const onDownloadReady = (savePath: string) => {
+    const onDownloadReady = (savePath: string) => {
     setDownloadingValmaScripts(false);
     const newPathFromDownload = cutUnvantedCharacters(savePath);
     console.log('New path from download: ' + newPathFromDownload);
-    if (settingRef.current && settingRef.current.id.length > 0) {
-      setSettingInHandling({ ...settingRef.current, valma_scripts_path: newPathFromDownload });
-      resolveAndRunPipInstall(newPathFromDownload);
-    } else {
-      setSettingInHandling({ ...emptySetting, valma_scripts_path: newPathFromDownload });
-      resolveAndRunPipInstall(newPathFromDownload);
-      openSettings();
-    };
-
+    setSettingInHandling({ ...settingRef.current, valma_scripts_path: newPathFromDownload });
+    resolveAndRunPipInstall(newPathFromDownload);
   };
 
   useEffect(() => {
@@ -417,10 +414,10 @@ useEffect(() => {
   }, []);
 
 const resolveAndRunPipInstall = (newPath:string) => {
-    const pythonPath = settingInHandling.emme_python_path;
+     const pythonPath = settingRef.current.emme_python_path;
      const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
       if (!fsHelpers.existsSync(pipFilePath)) {
-        console.log('Error: no pip.exe found');
+        console.log('Error: no pip.exe found from path: ' + pipFilePath);
         const errorMessage = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
         showError(errorMessage + '. Tarkista Emme Python - asetus.');
         setDownloadingValmaScripts(false);
@@ -455,16 +452,16 @@ function setValmaScriptsPath(path: string){
           dlValmaScriptsVersion={dlValmaScriptsVersion}
           isDownloadingValmaScripts={isDownloadingValmaScripts}
           cancel={cancel}
-          setProjectName={(v: string) =>  updateSetting('project_name')}
-          setProjectFolder={(v: string) => updateSetting('project_folder')}
-          setEMMEPythonPath={(v: string) => updateSetting('emme_python_path')}
+          setProjectName={(v: string) =>  updateSetting('project_name')(v)}
+          setProjectFolder={(v: string) => updateSetting('project_folder')(v)}
+          setEMMEPythonPath={(v: string) => updateSetting('emme_python_path')(v)}
           setValmaScriptsPath={(v: string) => setValmaScriptsPath(cutUnvantedCharacters(v))}
-          setBaseDataFolder={(v: string) => updateSetting('base_data_folder')}
+          setBaseDataFolder={(v: string) => updateSetting('base_data_folder')(v)}
           promptModelSystemDownload={promptModelSystemDownload}
           saveSetting={saveSetting}
           selectBaseSettings={(id: any) => selectBaseSettings(id)}
-          setModeDestCalibrationFile={(v: string) => updateSetting('mode_dest_calibration_file')}
-          setMunicipalityCalibrationFile={(v: string) => updateSetting('municipality_calibration_file')}
+          setModeDestCalibrationFile={(v: string) => updateSetting('mode_dest_calibration_file')(v)}
+          setMunicipalityCalibrationFile={(v: string) => updateSetting('municipality_calibration_file')(v)}
         />}
       {/* Pop-up used instead of Alert, which messes with window focus and block */}
       {errorShown && <LemError

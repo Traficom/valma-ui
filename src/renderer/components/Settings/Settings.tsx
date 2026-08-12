@@ -49,7 +49,6 @@ const Settings: React.FC<SettingsProps> = ({
   isDownloadingValmaScripts,
 }) => {
   const [selectedBaseSettings, setSelectedBaseSettings] = useState<string>('');
-  const fsHelpers = window.fsHelpers;
   const path = (window as any).path;
 
   const handleSelectBaseSettings = (settingsId: string) => {
