@@ -53,6 +53,7 @@ contextBridge.exposeInMainWorld('fsHelpers', {
   unlinkSync: (p) =>  fsHelpers.unlinkSync(p),
   renameSync: (a, b) =>  fsHelpers.renameSync(a, b),
   writeFileSync: (a, b) =>  fsHelpers.writeFileSync(a, b),
+  existsSync: (p) => fsHelpers.existsSync(p),
 });
 
 contextBridge.exposeInMainWorld('dialog', {

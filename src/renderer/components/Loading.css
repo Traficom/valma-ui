@@ -68,3 +68,7 @@
     border: 0;
     background: rgba(0, 0, 0, 0.4);
 }
+
+.Loading__content {
+    z-index: 3010;
+}

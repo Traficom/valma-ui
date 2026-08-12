@@ -9,6 +9,7 @@ declare global {
       readdirSync(path: string): string[];
       unlinkSync(path: string): void;
       renameSync(from: string, to: string): void;
+      existsSync(from: string): boolean;
     };
 
     system: {

@@ -46,10 +46,19 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
   const homedir = (window as any).system.homedir();
   const path = (window as any).path;
-  const fs = (window as any).fs;
   const pipInstall = (window as any).env.pipInstall;
   const store = (window as any).store;
   const electron = (window as any).electron;
+  const fsHelpers = window.fsHelpers;
+
+  const updateSetting =
+    (key: keyof typeof emptySetting) =>
+      (value: string) => {
+        setSettingInHandling(prev => ({
+          ...prev,
+          [key]: cutUnvantedCharacters(value),
+        }));
+      };
 
 
   function resolvePipFilePath(pythonDir: string): string {
@@ -57,7 +66,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
       path.join(pythonDir, 'Scripts', 'pip.exe'),
       path.join(pythonDir, 'pip.exe'),
     ];
-    return candidates.find(fs.existsSync) ?? '';
+    let match = candidates.find(fsHelpers.existsSync) ?? '';
+    return match;
   }
 
 
@@ -310,18 +320,18 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
 
   const createEmmeBank = (submodel, numberOfEmmeScenarios, separateEmmeScenarios) => {
-    if (!fs.existsSync(settingInHandling.project_folder)) {
+    if (!fsHelpers.existsSync(settingInHandling.project_folder)) {
       showError('Tarkista projektikansio ' + settingInHandling.project_folder);
       return;
     }
     // If create_emme_project.py doesn't exist, alert.
     const createEmmeScript = settingInHandling.valma_scripts_path + "\\create_emme_project.py"
-    if (!fs.existsSync(createEmmeScript)) {
+    if (!fsHelpers.existsSync(createEmmeScript)) {
       showError('create_emme_project.py -scriptiä ei löydy polusta ' + createEmmeScript);
       return;
     }
 
-    if (!fs.existsSync(settingInHandling.emme_python_path)) {
+    if (!fsHelpers.existsSync(settingInHandling.emme_python_path)) {
       showError('Pythonia ei löydy polusta ' + settingInHandling.emme_python_path);
       return;
     }
@@ -350,9 +360,9 @@ useEffect(() => {
 }, [settingInHandling]);
 
   const onDownloadReady = (savePath: string) => {
-    
     setDownloadingValmaScripts(false);
     const newPathFromDownload = cutUnvantedCharacters(savePath);
+    console.log('New path from download: ' + newPathFromDownload);
     if (settingRef.current && settingRef.current.id.length > 0) {
       setSettingInHandling({ ...settingRef.current, valma_scripts_path: newPathFromDownload });
       resolveAndRunPipInstall(newPathFromDownload);
@@ -409,7 +419,8 @@ useEffect(() => {
 const resolveAndRunPipInstall = (newPath:string) => {
     const pythonPath = settingInHandling.emme_python_path;
      const pipFilePath = resolvePipFilePath(path.dirname(pythonPath));
-      if (pipFilePath == '') {
+      if (!fsHelpers.existsSync(pipFilePath)) {
+        console.log('Error: no pip.exe found');
         const errorMessage = pythonPath ? 'pip.exe-sovellusta ei löydy sijainnista: ' + pythonPath : 'Pythonin sijaintia ei ole annettu'
         showError(errorMessage + '. Tarkista Emme Python - asetus.');
         setDownloadingValmaScripts(false);
@@ -417,13 +428,21 @@ const resolveAndRunPipInstall = (newPath:string) => {
       }
 
       const pipRequirementsPath = path.join(cutUnvantedCharacters(newPath), "requirements.txt");
-      if (!fs.existsSync(pipRequirementsPath)) {
+      if (!fsHelpers.existsSync(pipRequirementsPath)) {
+        console.log('Error: no requirements.txt file found from path: ' + pipRequirementsPath);
         showError('Tarvittavaa requirements.txt-tiedostoa ei löydy sijainnista: ' + pipRequirementsPath);
         setDownloadingValmaScripts(false);
         return;
       }
       runPipInstall(pipFilePath, pipRequirementsPath);
 
+}
+
+function setValmaScriptsPath(path: string){
+  if(path.length > 0 && path != settingInHandling.valma_scripts_path){
+    resolveAndRunPipInstall(path);
+  }
+  setSettingInHandling({ ...settingInHandling, valma_scripts_path: path });
 }
 
   return (
@@ -436,16 +455,16 @@ const resolveAndRunPipInstall = (newPath:string) => {
           dlValmaScriptsVersion={dlValmaScriptsVersion}
           isDownloadingValmaScripts={isDownloadingValmaScripts}
           cancel={cancel}
-          setProjectName={(v: string) => setSettingInHandling({ ...settingInHandling, project_name: v })}
-          setProjectFolder={(v: string) => setSettingInHandling({ ...settingInHandling, project_folder: v })}
-          setEMMEPythonPath={(v: string) => setSettingInHandling({ ...settingInHandling, emme_python_path: v })}
-          setValmaScriptsPath={(v: string) => setSettingInHandling({ ...settingInHandling, valma_scripts_path: v })}
-          setBaseDataFolder={(v: string) => setSettingInHandling({ ...settingInHandling, base_data_folder: v })}
+          setProjectName={(v: string) =>  updateSetting('project_name')}
+          setProjectFolder={(v: string) => updateSetting('project_folder')}
+          setEMMEPythonPath={(v: string) => updateSetting('emme_python_path')}
+          setValmaScriptsPath={(v: string) => setValmaScriptsPath(cutUnvantedCharacters(v))}
+          setBaseDataFolder={(v: string) => updateSetting('base_data_folder')}
           promptModelSystemDownload={promptModelSystemDownload}
           saveSetting={saveSetting}
           selectBaseSettings={(id: any) => selectBaseSettings(id)}
-          setModeDestCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, mode_dest_calibration_file: v })}
-          setMunicipalityCalibrationFile={(v: string) => setSettingInHandling({ ...settingInHandling, municipality_calibration_file: v })}
+          setModeDestCalibrationFile={(v: string) => updateSetting('mode_dest_calibration_file')}
+          setMunicipalityCalibrationFile={(v: string) => updateSetting('municipality_calibration_file')}
         />}
       {/* Pop-up used instead of Alert, which messes with window focus and block */}
       {errorShown && <LemError

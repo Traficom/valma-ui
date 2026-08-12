@@ -9,6 +9,7 @@ const readdirSync = (dirPath) => fs.readdirSync(dirPath);
 const unlinkSync = (filePath) => fs.unlinkSync(filePath);
 const renameSync = (oldPath, newPath) => fs.renameSync(oldPath, newPath);
 const writeFileSync = (file, data) => fs.writeFileSync(file, data,  "utf8");
+const existsSync = (path) => fs.existsSync(path);
 
 module.exports = {
   exists,
@@ -17,5 +18,6 @@ module.exports = {
   readdirSync,
   unlinkSync,
   renameSync,
-  writeFileSync
+  writeFileSync,
+  existsSync
 };

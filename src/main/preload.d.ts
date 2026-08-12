@@ -33,6 +33,7 @@ declare global {
       unlinkSync(path: string): void;
       renameSync(oldPath: string, newPath: string): void;
       writeFileSync(file, data): void;
+      existsSync(path: string) : boolean;
     };
 
     /** OS path helpers */

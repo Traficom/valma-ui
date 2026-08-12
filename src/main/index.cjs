@@ -129,7 +129,7 @@ ipcMain.handle('open-file-dialog', async (_event, options) => {
 ipcMain.handle(
   'pip-install',
   async (_event, pipPath, requirementsPath) => {
-    return new Promise<{ stdout, stderr }>((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       exec(
         `"${pipPath}" install --user -r "${requirementsPath}"`,
         (error, stdout, stderr) => {
