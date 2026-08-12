@@ -101,7 +101,6 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   }
 
   function setInstallingPipInProgress() {
-    console.log("TESTING !!!!!!!!!!!!!!!!!!!!!!! setInstallingPipInProgress");
     setLoading(true);
     setLoadingHeading('Tehdään PIP-asennusta');
     setLoadingInfo('Asennus käynnissä…');
@@ -366,7 +365,6 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    console.log("USE EFFECT!!!!")
     const loadConfig = async () => {
       const config = await store.get("config");
       const settingsFromStore = config?.settings;
@@ -427,13 +425,6 @@ const resolveAndRunPipInstall = (newPath:string) => {
       runPipInstall(pipFilePath, pipRequirementsPath);
 
 }
-
-
-
-  async function plaa() {
-    console.log("dishffffffffffffffffffffffffffffffffffffffffff")
-  }
-
 
   return (
     <div className={"App" + (isProjectRunning ? " App--busy" : "")}>
