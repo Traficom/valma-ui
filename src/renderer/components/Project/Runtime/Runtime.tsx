@@ -1,12 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './Runtime.css'
 import ScenariosToRun from './ScenariosToRun';
 import RunStatus from './RunStatus/RunStatus';
 import ScenarioTableRow from '../ScenarioTable/ScenarioTableRow';
 import { Tooltip } from 'react-tooltip';
-import Plus from '../../../icons/Plus';
 import PlusLabel from '../../PageElements/PlusLabel';
 import OuterLink from '../../../icons/OuterLink';
+import { Pagination } from '../../Pagination/Pagination';
 
 declare const SCENARIO_TYPES: any;
 declare const SCENARIO_STATUS_STATE: any;
@@ -34,6 +34,8 @@ const Runtime = ({
 }: any) => {
 
   const runningScenario = activeScenarios.filter((s: any) => s.id === runningScenarioID);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pages, setPages] = useState(2);
   const renderableScenarios = activeScenarios.map(activeScenario => {
     if (activeScenario.id === runningScenario.id) {
       return runningScenario;
@@ -44,6 +46,11 @@ const Runtime = ({
   const openProjecFolder = () => {
     window.electron.openPath(projectFolder);
   };
+
+  function onClick(page: number)  {
+    setCurrentPage(page);
+  };
+
 
   const RunStatusList = () => {
     if (renderableScenarios.length > 0) {
@@ -172,6 +179,7 @@ const Runtime = ({
               })}
             </tbody>
           </table>
+          <Pagination ariaLabel='Skenaariot' currentPage={currentPage} onClick={onClick} pages={pages} paginationId='213123132'/>
         </div>
         
       </div>

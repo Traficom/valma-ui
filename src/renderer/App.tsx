@@ -156,13 +156,13 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   }
 
   function saveSetting() {
-    if (settingInHandling.id === "") saveNewSetting({ ...settingInHandling });
-    else saveSettingChanges({ ...settingInHandling });
-
     if(settingInHandling.project_folder == ""){
       showError("Projektikansiota ei ole asetettu. Tarkasta asetukset");
       return;
     }
+    
+    if (settingInHandling.id === "") saveNewSetting({ ...settingInHandling });
+    else saveSettingChanges({ ...settingInHandling });
 
     ipc.send('message-from-ui-to-create-project', {
       project_folder: settingInHandling.project_folder,
@@ -175,6 +175,9 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   }
 
   async function cancel() {
+    if(settingInHandling.id == ""){
+      setSettingInHandling(emptySetting);
+    }
     const config = await store.get("config");
     const id = config?.selected_settings_id;
     setSelectedSettingsId(id);
@@ -376,7 +379,7 @@ useEffect(() => {
       const config = await store.get("config");
       const settingsFromStore = config?.settings;
       let selectedSettingsIdFromStore = config?.selected_settings_id;
-    
+
       if (settingsFromStore) {
         if (!selectedSettingsIdFromStore) {
           selectedSettingsIdFromStore = settingsFromStore[0];
@@ -384,26 +387,21 @@ useEffect(() => {
         setSettingInHandling(findSetting(settingsFromStore, selectedSettingsIdFromStore));
         setSelectedSettingsId(selectedSettingsIdFromStore);
         setProjectSettings(settingsFromStore);
+      } else {
+        const [found, pythonPath] = searchEMMEPython();
+        if (found) {
+          vex.dialog.confirm({
+            message: `Python ${versions.emme_python} löytyi sijainnista:\n\n${pythonPath}\n\nHaluatko käyttää tätä sijaintia?`,
+            callback: (val: boolean) => val && setSettingInHandling((p: any) => ({ ...p, emme_python_path: pythonPath }))
+          });
+        }
       }
     };
 
     loadConfig();
   }, []);
 
-
   useEffect(() => {
-    const settingsDefined = projectSettings && projectSettings.length > 0 && selectedSettingsId;
-
-    if (!settingsDefined) {
-      const [found, pythonPath] = searchEMMEPython();
-      if (found) {
-        vex.dialog.confirm({
-          message: `Python ${versions.emme_python} löytyi sijainnista:\n\n${pythonPath}\n\nHaluatko käyttää tätä sijaintia?`,
-          callback: (val: boolean) => val && setSettingInHandling((p: any) => ({ ...p, emme_python_path: pythonPath }))
-        });
-      }
-    }
-
     ipc.on('creating-emme-bank-completed', onCreatingEmmeBankReady);
     ipc.on('download-ready', onDownloadReady);
 

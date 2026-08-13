@@ -24,7 +24,7 @@ declare global {
     /** Filesystem helpers exposed from fsHelpers.cjs */
     fsHelpers: {
       exists(path: string): boolean;
-      join(path: string): string;
+      join(path: string, path2: string): string;
       readFileSync(
         path: string,
         options?: { encoding?: string | null; flag?: string }

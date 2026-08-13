@@ -4,17 +4,12 @@ import versions from '../versions';
 /**
  * Check and try to set EMME's Python location on Windows,
  * searching from common known paths.
- *
- * IMPORTANT:
- * - Logic intentionally unchanged
- * - Order of checks preserved
  */
 export const searchEMMEPython = (): [boolean, string | null] => {
   // Set Windows python exe path postfix (e.g. Python311\python.exe)
-  const p = getVersion(versions.emme_python);
-  const pythonPathPostfix = `Python${p.major}${p.minor}\\python.exe`;
+  const pyhthonVersion = getVersion(versions.emme_python);
+  const pythonPathPostfix = `Python${pyhthonVersion.major}${pyhthonVersion.minor}\\python.exe`;
   const fsHelpers = window.fsHelpers;
-  const path = (window as any).path
 
   // Search from environment variable "EMMEPATH"
   const envEmmePath = (window as any).env.get('EMMEPATH') ?? '';
@@ -25,11 +20,16 @@ export const searchEMMEPython = (): [boolean, string | null] => {
   }
 
   // Not found based on EMMEPATH, try guessing common locations
-  const e = getVersion(versions.emme_system);
+  const emmeSystemVersion = getVersion(versions.emme_system);
 
+  const emmeSemver = `\\Emme ${emmeSystemVersion.semver}`;
   const commonEmmePath = `Bentley\\OpenPaths`;
-  const emmeMajor = `\\EMME ${e.major}`;
-  const emmeSemver = `\\Emme ${e.semver}`;
+  const emmeMajor = `\\EMME ${emmeSystemVersion.major}`;
+  const windowsCProgramsPythonPath86 = `C:\\Program Files (x86)\\${pythonPathPostfix}`;
+  const windowsCProgramsPythonPath = `C:\\Program Files\\${pythonPathPostfix}`;
+  const windowsCPythonPath = `C:\\${pythonPathPostfix}`;
+
+  const windowsPaths = [windowsCProgramsPythonPath86, windowsCProgramsPythonPath, windowsCPythonPath]
 
   const drives = ['C:', 'D:', 'E:', 'F:', 'G:', 'H:', 'I:', 'J:', '/'];
 
@@ -43,7 +43,7 @@ export const searchEMMEPython = (): [boolean, string | null] => {
 
   const allPathCombinations = drives.reduce<string[]>((acc, d) => {
     return acc.concat(paths.map(p => `${d}${p}`));
-  }, []);
+  }, []).concat(windowsPaths);
 
   const firstExisting = allPathCombinations.find(p => fsHelpers.exists(p));
 

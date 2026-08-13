@@ -68,8 +68,6 @@ const Settings: React.FC<SettingsProps> = ({
     saveSetting();
   };
 
-
-
   return (
     <div className="Settings">
 
