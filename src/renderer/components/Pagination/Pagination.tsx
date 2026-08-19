@@ -5,7 +5,7 @@ import './Pagination.css'
 export interface PaginationProps {
   ariaLabel?: string;
   currentPage?: number;
-  onClick?: (page: number) => void;
+  setPage?: (page: number) => void;
   pages?: number;
   paginationId?: string;
 }
@@ -19,37 +19,36 @@ export const combineClasses = (classes: string[]): string => {
  */
 export const Pagination = ({
   ariaLabel,
-  currentPage = 1,
-  onClick,
-  pages = 1,
+  currentPage,
+  setPage,
+  pages,
   paginationId,
 }: PaginationProps) => {
-  const [current, setCurrent] = useState(currentPage);
   const [pageList, setPageList] = useState<(string | number)[]>([]);
 
   useEffect(() => {
-    const newPageList = createPaginationPages(pages, current);
+    const newPageList = createPaginationPages(pages, currentPage);
     setPageList(newPageList);
-  }, [pages, current]);
+  }, [pages, currentPage]);
 
   const handleClick = (event: MouseEvent, page: number) => {
     event.preventDefault();
-    setCurrent(page);
-    if (onClick) {
-      onClick(page);
+    if (page) {
+      setPage(page);
     }
   };
 
   return (
     <nav
       id="pagination_component"
-      className="tds-pagination"
+      className="pagination-nav"
       aria-label={ariaLabel}
     >
       <div className="prev-button">
            <div className="next-button">
               <button
-                   onClick={(event: MouseEvent) => handleClick(event, current - 1)}>
+                   disabled={currentPage === pageList[0]}
+                   onClick={(event: MouseEvent) => handleClick(event, currentPage - 1)}>
                   <span>Edellinen</span>
               </button>
           </div>
@@ -65,15 +64,14 @@ export const Pagination = ({
                 >
                   {page}
                 </span>
-                <span className="sr-only">.</span>
               </li>
             );
-          const classes = combineClasses(["page-number semi_bold", page === current ? "current-page" : ""]);
+          const classes = combineClasses(["page-number semi_bold", page === currentPage ? "current-page" : ""]);
           return (
             <li key={"page-" + index}>
               <a
                 id={paginationId ? `${paginationId}-page-${page}` : undefined}
-                aria-current={page === current ? "page" : "false"}
+                aria-current={page === currentPage ? "page" : "false"}
                 aria-label={`Sivu ${page}`}
                 className={classes}
                 href="/#"
@@ -87,7 +85,8 @@ export const Pagination = ({
       </ul>
           <div className="next-button">
               <button
-                  onClick={(event: MouseEvent) => handleClick(event, current + 1)}>
+                  disabled={currentPage === pageList.length}
+                  onClick={(event: MouseEvent) => handleClick(event, currentPage + 1)}>
                   <span>Seuraava</span>
               </button>
           </div>

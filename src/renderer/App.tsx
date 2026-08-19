@@ -363,10 +363,11 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
   };
 
 
-useEffect(() => {
-  settingRef.current = settingInHandling;
-}, [settingInHandling]);
-    const onDownloadReady = (savePath: string) => {
+  useEffect(() => {
+    settingRef.current = settingInHandling;
+  }, [settingInHandling]);
+
+  const onDownloadReady = (savePath: string) => {
     setDownloadingValmaScripts(false);
     const newPathFromDownload = cutUnvantedCharacters(savePath);
     console.log('New path from download: ' + newPathFromDownload);

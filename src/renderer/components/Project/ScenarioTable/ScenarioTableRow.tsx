@@ -1,4 +1,4 @@
-import React, { Fragment, JSX, useMemo } from 'react';
+import React, { Fragment, useMemo } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
 import { SCENARIO_TYPES } from '../../../../enums';
@@ -35,7 +35,7 @@ interface ScenarioTableRowProps {
   duplicateScenario: (id: string) => void;
   handleClickCreateSubScenario: (id: string) => void;
   setOpenScenarioID: (id: string) => void;
-  deleteScenario: (scenario: ScenarioData) => void;
+  deleteScenario: (id: string) => void;
 
   projectFolder: string;
 
@@ -89,20 +89,6 @@ const ScenarioTableRow: React.FC<ScenarioTableRowProps> = ({
       window.electron.openPath(scenarioLogFilePath);
     }
   };
-
-  const scenarioTypeLabel = (() => {
-    switch (scenarioData.scenarioType) {
-      case SCENARIO_TYPES.GOODS_TRANSPORT:
-        return 'Tavaraliikenne';
-      case SCENARIO_TYPES.PASSENGER_TRANSPORT:
-        return 'Henkilöliikenne';
-      case SCENARIO_TYPES.LONG_DISTANCE:
-        return 'Pitkät matkat';
-      default:
-        return 'Henkilöliikenne';
-    }
-  })();
-
 
 const tooltipContent = useMemo(() => {
   return renderToStaticMarkup(
@@ -205,7 +191,7 @@ const tooltipContent = useMemo(() => {
           <div
             className={"Runtime__scenario-delete"}
             onClick={e =>
-              runningScenarioID ? undefined : deleteScenario(scenarioData)
+              runningScenarioID ? undefined : deleteScenario(scenarioData.id)
             }
           ></div>
         </td>

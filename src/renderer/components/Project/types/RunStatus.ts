@@ -4,8 +4,15 @@ export interface RunStatus{
     statusIterationsCompleted?: number | null;
     statusIterationsFailed?: number | null;
     statusLogfilePath?: string | null;
-    statusReadyScenariosLogfiles?: string | null;
+    statusReadyScenariosLogfile?: ScenarioLogfile | null;
     statusRunStartTime?: string | null;
     statusRunFinishTime?: string | null;
     demandConvergenceArray?:  [] | null;
+    statusState?: string | null;
+}
+
+export interface ScenarioLogfile {
+  name?: string;
+  logfile?: string;
+  resultDataFolder?: string;
 }

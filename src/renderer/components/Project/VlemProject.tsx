@@ -11,11 +11,9 @@ import RunLog from './RunLog/RunLog'
 import { SubScenarioData } from './types/SubScenarioData';
 import './VlemProject.css';
 import { STORED_SPEED_ASSIGNMENT_PREFIX } from '../../../constants';
-import { SCENARIO_TYPES } from '../../../enums';
+import { SCENARIO_TYPES, SORT_TYPES, SortType } from '../../../enums';
 import { LoggableEvent } from './types/RunLog';
-
-// ---------------- globals ----------------
-declare const vex: any;
+import vex from '../../main'
 
 interface VlemProjectProps {
   signalProjectRunning: (running: boolean) => void;
@@ -58,6 +56,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   const [valmaScriptsPath, setValmaScriptsPath] = useState(selectedSetting?.valma_scripts_path);
   const [baseDataFolder, setBaseDataFolder] = useState(selectedSetting?.base_data_folder);
   const ipcAttachedRef = useRef(false);
+  const [sort, setSort] = useState<SortType>(SORT_TYPES.NAME_ASC);
 
 
   const _handleClickScenarioToActive = (scenarioId: string) => {
@@ -76,7 +75,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   }
 
 
-  const _handleClickNewScenario = (scenarioType) => {
+  const _handleClickNewScenario = (scenarioType: string) => {
     const scenarioTypeText = scenarioType == SCENARIO_TYPES.PASSENGER_TRANSPORT ? "henkilöliikenteen" : "tavaraliikenteen";
     const promptCreation = (previousError) => {
       vex.dialog.prompt({
@@ -128,7 +127,9 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         if (!fileName.endsWith(".json")) return;
 
         const raw = window.fsHelpers.readFileSync(fsHelpers.join(projectFilepath, fileName));
-        const obj = JSON.parse(raw);
+        const obj = JSON.parse(
+          typeof raw === "string" ? raw : raw.toString("utf8")
+        );
 
         if ("id" in obj && "name" in obj && "iterations" in obj) {
           foundScenarios.push(
@@ -136,7 +137,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
           );
         }
       });
-      setScenarios(foundScenarios);
+      setScenarios(sortScenarios(sort, foundScenarios));
       setOpenScenarioID(null);
       setSubScenarioEdit(null);
       setScenarioIDsToRun([]);
@@ -200,7 +201,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         statusIterationsCompleted: 0,
         statusIterationsFailed: 0,
         statusLogfilePath: null,
-        statusReadyScenariosLogfiles: null,
+        statusReadyScenariosLogfile: null,
         statusRunStartTime: null,
         statusRunFinishTime: null,
         demandConvergenceArray: []
@@ -217,7 +218,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
   const _updateScenario = (newValues: ScenarioData) => {
     // Update newValues to matching .id in this.state.scenarios
-
     const beforeUpdate = scenarios.find(s => s.id === newValues.id);
     // If name was set empty - use ID instead
     const newName = newValues.name? newValues.name : newValues.id;
@@ -234,7 +234,8 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     resolveScenarioNames(scenarios);
   };
 
-  const _deleteScenario = (scenario) => {
+  const _deleteScenario = (scenarioId: string) => {
+    var scenario = scenarios.find((s) => s.id === scenarioId);
     const subScenarioMessage = scenario.subScenarios && scenario.subScenarios.length > 0 ? ` HUOM! Skenaarion poisto poistaa myös ${scenario.subScenarios.length} kpl. aliskenaarioita.` : "";
 
     vex.dialog.confirm({
@@ -244,23 +245,45 @@ const VlemProject: React.FC<VlemProjectProps> = ({
           setOpenScenarioID(null);
           setScenarios(scenarios.filter((s) => s.id !== scenario.id));
           fsHelpers.unlinkSync(fsHelpers.join(projectFolder, `${scenario.name}.json`));
-          window.location.reload();  // Vex-js dialog input gets stuck otherwise
           resolveScenarioNames(scenarios);
         }
       }
     })
   };
 
-  const duplicateScenario = (scenario) => {
+  function sortScenarios(newSort: SortType, scenariosToSort: ScenarioData[]) : ScenarioData[] {
+    setSort(newSort);
+    switch (newSort) {
+      case SORT_TYPES.NAME_ASC:
+        return [...scenariosToSort].sort((a, b) => a.name.localeCompare(b.name));
+      case SORT_TYPES.NAME_DESC:
+        return [...scenariosToSort].sort((a, b) => b.name.localeCompare(a.name));
+      case SORT_TYPES.TYPE_ASC:
+         return [...scenariosToSort].sort((a, b) => a.scenarioType.localeCompare(b.scenarioType) || a.name.localeCompare(b.name));
+      case SORT_TYPES.TYPE_DESC:
+        return [...scenariosToSort].sort((a, b) => b.scenarioType.localeCompare(a.scenarioType) || a.name.localeCompare(b.name));
+    }
+  }
+
+  function sortAndSetScenarios(sort: SortType) {
+        var sortedScenarios = sortScenarios(sort, scenarios)
+        setScenarios(sortedScenarios);
+  } 
+
+  const duplicateScenario = (scenarioId: string) => {
+    var scenario = scenarios.find((s) => s.id === scenarioId);
     var duplicatedScenario = structuredClone(scenario);
     var newName = duplicatedScenario.name + `(${duplicatedScenario.id.split('-')[0]})`;
     //Change ID and rename the scenario to avoid conflicts.
     duplicatedScenario.id = uuidv4();
     duplicatedScenario.name = newName;
     duplicatedScenario.subScenarios = [];
-    const tempScenarios = scenarios.concat(duplicatedScenario);
+    const tempScenarios = sortScenarios(sort, scenarios.concat(duplicatedScenario));
     setScenarios(tempScenarios);
-    fsHelpers.writeFileSync(fsHelpers.join(projectFolder, `${newName}.json`), duplicatedScenario)
+    fsHelpers.writeFileSync(
+      fsHelpers.join(projectFolder, `${newName}.json`),
+          JSON.stringify(duplicatedScenario),
+      );
     resolveScenarioNames(tempScenarios);
   }
 
@@ -290,7 +313,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     setSubScenarioEdit(newSubScenarioEdit);
   }
 
-  const handleClickModifySubScenario = (subScenario) => {
+  const handleClickModifySubScenario = (subScenario: SubScenarioData) => {
     var parentScenario = scenarios.find((s) => s.id === subScenario.parentScenarioId);
     if (!parentScenario) {
       // Should not occur
@@ -305,7 +328,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     setSubScenarioEdit(newSubScenarioEdit);
   }
 
-  const deleteSubScenario = (subScenario) => {
+  const deleteSubScenario = (subScenario: SubScenarioData) => {
     if (confirm(`Oletko varma aliskenaarion ${subScenario.name} poistosta?`)) {
       var parentScenario = scenarios.find((s) => s.id === subScenario.parentScenarioId);
       if (!parentScenario || !parentScenario.subScenarios) {
@@ -342,7 +365,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         statusIterationsCompleted: 0,
         statusIterationsFailed: 0,
         statusLogfilePath: null,
-        statusReadyScenariosLogfiles: null,
+        statusReadyScenariosLogfile: null,
         statusRunStartTime: null,
         statusRunFinishTime: null,
         demandConvergenceArray: []
@@ -710,7 +733,7 @@ const onAllScenariosComplete = (payload) => {
     setValmaScriptsPath(selectedSetting.valma_scripts_path);
     setBaseDataFolder(selectedSetting.base_data_folder);
     loadProjectScenarios(selectedSetting.project_folder)
-  }, [selectedSetting?.project_folder]);
+  }, [selectedSetting]);
 
   useEffect(() => {
     setScenariosToRun(resolveRunnableScenarios(scenarioIDsToRun, scenarios));
@@ -745,8 +768,6 @@ useEffect(() => {
     ipcAttachedRef.current = false;
   };
 }, []);
-
-
 
   useEffect(() => {
     if (finishedScenarioInfo && finishedScenarioInfo.id.length > 0) {
@@ -816,6 +837,8 @@ useEffect(() => {
           deleteSubScenario={deleteSubScenario}
           modifySubScenario={handleClickModifySubScenario}
           activeScenarios={scenariosToRun}
+          sortScenarios={sortAndSetScenarios}
+          sort={sort}
         />
       </div>
 

@@ -18,6 +18,7 @@ import { SCENARIO_STATUS_STATE } from '../../../../../enums';
 import duration from 'dayjs/plugin/duration';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { DemandConvergenceEntry } from '../../types/DemandConvergenceEntry';
+import { ScenarioLogfile } from '../../types/RunStatus';
 
 dayjs.extend(duration);
 dayjs.extend(relativeTime);
@@ -36,12 +37,6 @@ ChartJS.register(
 /* Types                                                              */
 /* ------------------------------------------------------------------ */
 
-interface ReadyScenarioLogfiles {
-  name?: string;
-  logfile?: string;
-  resultDataFolder?: string;
-}
-
 interface RunStatusProps {
   id: string;
   isScenarioRunning: boolean;
@@ -49,10 +44,10 @@ interface RunStatusProps {
   statusIterationsTotal: number;
   statusIterationsCompleted: number;
 
-  statusReadyScenariosLogfiles?: ReadyScenarioLogfiles;
+  statusReadyScenariosLogfile?: ScenarioLogfile;
 
-  statusRunStartTime?: number;
-  statusRunFinishTime?: number;
+  statusRunStartTime?: string;
+  statusRunFinishTime?: string;
 
   statusState?: string;
 
@@ -65,7 +60,7 @@ const RunStatus: React.FC<RunStatusProps> = ({
   isScenarioRunning,
   statusIterationsTotal,
   statusIterationsCompleted,
-  statusReadyScenariosLogfiles,
+  statusReadyScenariosLogfile,
   statusRunStartTime,
   statusRunFinishTime,
   statusState,
@@ -122,8 +117,8 @@ const RunStatus: React.FC<RunStatusProps> = ({
   /* ---------------------------- Helpers --------------------------- */
 
   const formatRunStatusTime = (
-    runFinishTime?: number,
-    runStartTime?: number
+    runFinishTime?: string,
+    runStartTime?: string
   ): string => {
     if (!runFinishTime || !runStartTime) return '-';
 
@@ -148,19 +143,19 @@ const RunStatus: React.FC<RunStatusProps> = ({
         <div>Starting python shell...</div>
       )}
 
-      {statusReadyScenariosLogfiles &&
+      {statusReadyScenariosLogfile &&
         !isScenarioRunning &&
-        statusReadyScenariosLogfiles.name && (
+        statusReadyScenariosLogfile.name && (
           <div className="RunStatus__results">
             <span>
-              {statusReadyScenariosLogfiles.name} valmis
+              {statusReadyScenariosLogfile.name} valmis
             </span>
 
-            {statusReadyScenariosLogfiles.logfile && (
+            {statusReadyScenariosLogfile.logfile && (
               <button
                 onClick={() =>
                   window.electron.openPath(
-                    statusReadyScenariosLogfiles.logfile!
+                    statusReadyScenariosLogfile.logfile!
                   )
                 }
               >
@@ -168,11 +163,11 @@ const RunStatus: React.FC<RunStatusProps> = ({
               </button>
             )}
 
-            {statusReadyScenariosLogfiles.resultDataFolder && (
+            {statusReadyScenariosLogfile.resultDataFolder && (
               <button
                 onClick={() =>
                   window.electron.openPath(
-                    statusReadyScenariosLogfiles.resultDataFolder!
+                    statusReadyScenariosLogfile.resultDataFolder!
                   )
                 }
               >

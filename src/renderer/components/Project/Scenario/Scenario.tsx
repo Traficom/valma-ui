@@ -56,6 +56,7 @@ const Scenario: React.FC<ScenarioProps> = ({
   const [nameError, setNameError] = useState('');
   const [errorShown, setErrorShown] = useState(false);
   const [errorInfo, setErrorInfo] = useState('');
+  const [editableScenarioName, setEditableScenarioName] = useState(scenario.name);
 
   const isPassengerTransportScenario =
     !scenario.scenarioType ||
@@ -77,6 +78,19 @@ const Scenario: React.FC<ScenarioProps> = ({
 
   function setStoredSpeedAssignment(value: boolean) {
     updateScenario({ ...scenario, stored_speed_assignment: value, storedSpeedAssignmentInputs: [] })
+  }
+
+  function updateScenarioName(updatedName: string){
+      setEditableScenarioName(updatedName);
+
+       if(updatedName.length < 3){
+              setNameError(`Name must be atleast 3 charactest long.`);
+        }else if (!existingOtherNames.includes(updatedName)) {
+              updateScenario({ ...scenario, name: updatedName });
+              setNameError("");
+       } else {
+              setNameError(`Invalid name. Scenario "${updatedName}" already exists.`);
+      }
   }
   /* ------------------------------------------------------------------ */
   /* Effects                                                             */
@@ -183,15 +197,10 @@ const Scenario: React.FC<ScenarioProps> = ({
           className="Scenario__name"
           type="text"
           placeholder="esim. 2030_v1"
-          value={scenario.name}
+          value={editableScenarioName}
           onChange={(e) => {
             const newName = cutUnvantedCharacters(e.target.value);
-            if (!existingOtherNames.includes(newName)) {
-              updateScenario({ ...scenario, name: newName });
-              setNameError("");
-            } else {
-              setNameError(`Invalid name. Scenario "${newName}" already exists.`);
-            }
+            updateScenarioName(newName);
           }}
         />
         {nameError ? <span className="Scenario-error">{nameError}</span> : ""}

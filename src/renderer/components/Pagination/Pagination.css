@@ -1,4 +1,4 @@
-nav.tds-pagination {
+nav.pagination-nav {
     display: flex;
     flex-direction: row;
     gap: 4px;
@@ -47,13 +47,19 @@ nav.tds-pagination {
     order: 1;
 }
 
+.pagination-nav button:disabled{
+    color: var(--light-grey) !important;
+    background-color: var(--pale-grey) !important;;
+}
+
 .next-button {
     display: inline-flex;
     order: 3;
     padding: 3px;
 }
 
-button {
+.pagination-nav button {
+    color: var(--color-brand-base);
     border-color: var(--white-basic) !important;
 }
 

@@ -16,3 +16,14 @@ export const SCENARIO_TYPES = {
 
 export type ScenarioType =
   typeof SCENARIO_TYPES[keyof typeof SCENARIO_TYPES];
+
+ 
+export const SORT_TYPES = {
+  NAME_ASC: 'name_asc',
+  NAME_DESC: 'name_desc',
+  TYPE_ASC: 'type_asc',
+  TYPE_DESC: 'type_desc',
+} as const;
+
+export type SortType =
+  typeof SORT_TYPES[keyof typeof SORT_TYPES];
