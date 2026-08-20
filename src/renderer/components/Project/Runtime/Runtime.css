@@ -1,6 +1,6 @@
 
 .Runtime__valma-project-controls {
-    padding: 20px;
+    padding: 0 20px 20px;
 }
 
 .Runtime__heading {
@@ -9,19 +9,32 @@
     font-size: 24px;
     line-height: 28px;
     letter-spacing: -0.02em;
+    font-family: montserrat, sans-serif;
 }
 
 .Runtime__button {
-    display: inline;
     margin-right: 10px;
+}
+
+.Runtime__button :hover {
+  color: var(--color-brand-light3) !important;
+}
+
+.Emme_project_button {
+      color: var(--color-brand-base) !important;
+      font-family: open-sans-medium, sans-serif;
+}
+
+.Emme_project_button :hover {
+      color: var(--color-brand-light3) !important;
 }
 
 /* Scenarios */
 
 .Runtime__scenarios-controls {
     background: var(--white-basic);
-    border-top: 1px solid var(--turqoise-dark);
-    border-bottom: 1px solid var(--turqoise-dark);
+    border-top: 1px solid var(--color-brand-base);
+    border-bottom: 1px solid var(--color-brand-base);
     box-sizing: border-box;
     padding: 20px;
 }
@@ -33,11 +46,7 @@
     line-height: 28px;
     letter-spacing: -0.02em;
     margin-bottom: 10px;
-}
-
-.Runtime__scenarios {
-    max-height: 210px;
-    overflow-y: auto;
+    font-family: montserrat, sans-serif;
 }
 
 tr.Runtime__scenario td {
@@ -95,12 +104,12 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 }
 .Runtime__scenario-sub_scenario {
     padding-left: 100px;
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     vertical-align: center;
 }
 
 .Runtime__scenario-sub_scenario:hover {
-    color: #000000;
+    color: var(--color-brand-light3) !important;
 }
 
 .Runtime__scenario-sub_scenario svg {
@@ -109,52 +118,38 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
     vertical-align: bottom;
 }
 
-
 .Runtime__scenario-open-config {
     display: inline-block;
     margin-right: 20px;
     vertical-align: top;
     width: 20px;
     height: 19px;
-    background-image: url('../../Edit.png');
+    background-image: url('../../../icons/edit_icon.svg');
     background-repeat: no-repeat;
+}
+
+.Runtime__scenario-open-config:hover {
+    filter: brightness(1.6) contrast(0.5);
 }
 
 .Runtime__scenario-delete {
     display: inline-block;
     vertical-align: top;
-    width: 16px;
-    height: 19px;
-    background-image: url('../../trash.png');
+    width: 22px;
+    height: 22px;
+    background-image: url('../../../icons/trash_icon.svg');
     background-repeat: no-repeat;
 }
 
-.Runtime__scenarios-footer {
+.Runtime__scenario-delete:hover {
+    filter: brightness(1.6) contrast(0.5);
+}
+
+.Runtime__scenario-buttons {
     display: flex;
-    padding-top: 22px;
+    padding-top: 5px;
+    padding-bottom: 25px;
 }
-
-.Runtime__add-new-scenario-btn {
-    margin-right: 10px;
-    background: var(--turqoise-dark);
-    border-color: var(--turqoise-dark);
-    color: #ffffff;
-}
-.Runtime__add-new-scenario-btn:hover {
-    color: #ffffff;
-}
-
-.Runtime__add-icon {
-    display: inline-flex;
-    align-items: center;
-    height: 35px;
-    padding-left: 45px;
-    background-color: var(--turqoise-dark);
-    background-image: url(../../add.png);
-    background-repeat: no-repeat;
-}
-
-/* Start-stop */
 
 .Runtime__start-stop-controls {
     padding: 20px;
@@ -173,22 +168,40 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
   vertical-align: top;
   width: 24px;
   height: 24px;
-  color: #026273;
+}
+
+.Runtime__scenario-clone:hover {
+    filter: brightness(1.6) contrast(0.5);
 }
 
 .Runtime__scenario-open-folder {
-    color: var(--turqoise-dark);
+    color: var(--color-brand-base);
     font-weight: bold;
 }
 
 .Runtime__scenario-open-folder:hover {
-    color: #000000;
     font-weight: bold;
+    color: var(--color-brand-light3) !important;
 }
-
+.Runtime__scenario_table {
+    border-collapse: separate;
+}
 
 .Runtime__scenario_table th {
     text-align: left;
+    color: var(--white-basic) !important;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    background-color: var(--color-brand-base);
+    font-family: montserrat, sans-serif;;
+    text-shadow: none;
+    font-size: 10pt;
+    border-left: 1px solid;
+    border-color: var(--white-basic);
+}
+.Runtime__scenario_table th span{
+    vertical-align: middle;
 }
 
 .Table_space_after {
@@ -197,4 +210,27 @@ tr.Runtime__scenario:nth-child(1n):not(:first-of-type) td:nth-child(1n):not(:fir
 
 .Runtime__buttons {
     display: inline;
+}
+
+.SortedByColumn{
+    background-color: var(--color-blue-base) !important;
+}
+
+.Runtime__project-path {
+    font-family: montserrat, sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.Runtime_link {
+    font-family: open-sans, sans-serif;
+    color: var(--color-brand-base);
+    text-decoration: underline;
+    margin-right: 15px;
+}
+
+.Runtime_link:hover {
+     color: var(--color-brand-light3) !important;
 }

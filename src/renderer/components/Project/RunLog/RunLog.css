@@ -43,16 +43,15 @@
 }
 
 .Log__header-control {
-    background-color: var(--turqoise-dark);
-    border-color: var(--turqoise-dark);
+    background-color: var(--color-brand-base);
+    border-color: var(--color-brand-base);
     margin-right: 10px;
     width: 100%;
-    font-family: open_sans_semi_bold;
 }
 .Log__header-control--on {
     background-color: var(--light-grey);
-    color: var(--turqoise-dark) ;
-    border-color: var(--turqoise-dark);
+    color: var(--color-brand-base) ;
+    border-color: var(--color-brand-base);
 }
 
 .Log__overflow {

@@ -19,7 +19,7 @@ module.exports = {
     worker = new ps.PythonShell(
       createProjectScript,
       {
-        mode: 'json',
+        mode: 'text',
         pythonPath: runParameters.emme_python_path,
         pythonOptions: ['-u'], // unbuffered
         args: [
@@ -39,7 +39,6 @@ module.exports = {
       }
       onEndCallback(err? err.message : '');
     });
-
     // Return worker, because the original reference isn't in use when assigning local worker var to new PythonShell().
     return worker;
   }

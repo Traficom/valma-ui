@@ -28,7 +28,7 @@
 
       ipcRenderer.on('create-project', (event, args) => {
         sendLoggableEvent(
-          `Creating Emme-project`
+          `Creating VLEM-project`
         );
         worker = createProjectPythonShell(worker, args, (error) => onComplete(error));
       });
