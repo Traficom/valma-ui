@@ -1,0 +1,73 @@
+.CBA {
+    background: var(--white-basic);
+    border-top: 1px solid var(--color-brand-base);
+    border-bottom: 1px solid var(--color-brand-base);
+    box-sizing: border-box;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.CBA__heading {
+    font-style: normal;
+    font-weight: 350;
+    font-size: 24px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+}
+
+.CBA__choices {
+    border-spacing: 0;
+}
+
+.CBA__choices tr td {
+    vertical-align: bottom;
+}
+
+.CBA__pseudo-label {
+    display: block;
+    font-style: normal;
+    font-weight: 350;
+    font-size: 15px;
+    line-height: 24px;
+    letter-spacing: -0.3px;
+    color: #333333;
+    margin-top: 10px;
+}
+
+.CBA__pseudo-file-select {
+    display: block;
+    width: 280px;
+    padding: 10px 12px;
+    font-style: normal;
+    font-weight: 325;
+    font-size: 15px;
+    letter-spacing: -0.3px;
+    color: #333333;
+    background-color: #ffffff;
+    border: 1px solid #888888;
+    box-sizing: border-box;
+    border-radius: 5px;
+    margin-top: 4px;
+    margin-right: 10px;
+    /* Overflowing file/dir names show as "First part..." */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.CBA__hidden-input {
+    display: none;
+}
+
+.CBA__radio-label {
+    margin: 0;
+    padding: 0;
+}
+
+.CBA__run {
+}
+
+.CBA__run button {
+    margin-top: 20px;
+}

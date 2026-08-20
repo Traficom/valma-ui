@@ -1,0 +1,261 @@
+@font-face {
+    font-family: open-sans-medium;
+    src: url('./fonts/OpenSans-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: open-sans-italic;
+    src: url('./fonts/OpenSans-Italic.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: open-sans;
+    src: url('./fonts/OpenSans-Regular.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: open-sans-semi-bold;
+    src: url('./fonts/OpenSans-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: montserrat-medium;
+    src: url('./fonts/Montserrat-Medium.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: montserrat;
+    src: url('./fonts/Montserrat-Regular.ttf') format('truetype');
+}
+
+:root {
+    --color-blue-light1:#0065cc;
+    --color-blue-light2:#ccdeef;
+    --color-blue-light3:#f0f7ff;
+    --pale-grey: #eaeaea;
+    --light-grey: #ccc;
+    --medium-grey: #8c8c8c;
+    --dark-grey: #6d6d6d;
+    --white-basic: #ffffff;
+    --light-yellow: #FFFBE5;
+    --pale-yellow: #fcfaf2;
+    --color-brand-base: #002c74;
+    --color-blue-base: #0058b1;
+    --color-brand-light3: #6f86af;
+    min-width: 900px;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    position: relative;
+    background: var(--white-basic);
+    font-size: 11pt;
+    font-family: open-sans-medium, sans-serif;
+}
+
+.semi_bold{
+    font-family: open-sans-semi-bold;
+}
+
+button {
+    display: inline-flex;
+    gap: 4px;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--white-basic);
+    color: var(--color-brand-base);
+    border: 1px solid var(--color-brand-base);
+    height: 30px;
+    padding: 0 15px;
+    border-radius: 2px;
+    font-family: inherit;
+    font-size: 10pt;
+    letter-spacing: -0.5px;
+    font-weight: 350;
+}
+
+button-span {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px; 
+}
+
+title {
+    font-family: montserrat-medium, sans-serif;
+}
+
+button:hover {
+     color: var(--color-brand-light3);
+     background-color: var(--white-basic) !important;
+}
+
+input {
+    font-family: inherit;
+    font-size: inherit;
+    background-color: #ffffff;
+    border: 1px solid #c0c0c0;
+    border-radius: 2px;
+    padding: 0 0.25em;
+}
+
+input[type="checkbox"] {
+    background: #FFFFFF;
+    border: 1px solid #888888;
+    box-sizing: border-box;
+    border-radius: 2px;
+    width: 30px;
+    height: 30px;
+    margin: 0;
+}
+
+hr {
+    border-top: 1px solid black;
+    border-bottom: none;
+}
+
+.App {
+    overflow-y: scroll;
+    width: 100%;
+    height: 100vh;
+}
+
+.App--busy {
+    cursor: progress;
+}
+.App--busy button {
+    cursor: progress;
+}
+
+.App__settings {
+    z-index: 900;
+    position: fixed !important;
+    width: 100%;
+    height: 100%;
+}
+
+.App__loading {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+ul li {
+    display:inline-block;
+    vertical-align: top;
+}
+
+.App__settings_container{
+  display: flex;
+  margin-top: 10px;
+}
+
+.App__settings_select{
+    margin-top: 0px;
+    padding-top: 0px;
+}
+
+.App__settings_select select{
+    color: var(--color-brand-base);
+    border-color: var(--color-brand-base);
+    border-radius: 2px;
+    font-size: 14px;
+    vertical-align: top;
+    font-family: open-sans-medium, sans-serif;
+}
+
+.App__settings_heading {
+    font-style: normal;
+    font-size: 22px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+    margin-top: 10px;
+    margin-left: 17px;
+    font-family: montserrat, sans-serif;
+}
+
+.App__header { 
+    display: flex;
+    flex-direction: column;
+    background-color: var(--white-basic);
+    background-position: right;
+    background-repeat: no-repeat, no-repeat;
+    font-size: 20px;
+    padding: 0 0 0 15px;
+    margin: 0;
+    font-weight: normal;
+    border-bottom: 1px solid var(--light-grey);
+    color: var(--color-brand-base);
+    font-family: montserrat-medium, sans-serif;
+}
+
+.App__delete_setting {
+    margin-left: 15px;
+    display: inline-block;
+    margin-right: 25px;
+    vertical-align: middle;
+    width: 22px;
+    height: 22px;
+    background-image: url('./icons/trash_icon.svg');
+    background-repeat: no-repeat;
+    transition: filter 0.3s ease;
+}
+
+
+.App__delete_setting:hover {
+   filter: brightness(1.6) contrast(0.5);
+}
+
+.App__open-settings {
+    display: inline-block;
+    width: 20px;
+    height: 19px;
+    margin-left: 20px;
+    margin-top: 2px;
+    background-image: url('./icons/edit_icon.svg');
+    background-repeat: no-repeat;
+}
+
+.App__open-settings:hover {
+   filter: brightness(1.6) contrast(0.5);
+}
+
+.App__add_setting {
+    padding-left: 10px;
+    color: var(--color-brand-base);
+}
+
+.App__add_setting:hover{
+   filter: brightness(1.6) contrast(0.5);
+}
+
+.App__header-version {
+    padding-left: 10px;
+    color: var(--light-grey);
+    font-size: 10px;
+    line-height: 11px;
+}
+
+.header-documentation-link {
+    margin-top: .4rem;
+    margin-left: 2rem;
+}
+
+.header-documentation-link:hover {
+    cursor: pointer;
+}
+
+.settings_disabled {
+    filter: grayscale(70%);
+    opacity: 0.5;
+}
+
+.App__header-title{
+    margin: 0 0 0 18px;
+    padding: 0;
+}
+
+.logo {
+    margin: 0;
+    padding: 0;
+}

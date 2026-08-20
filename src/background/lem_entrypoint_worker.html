@@ -32,14 +32,13 @@
 
         // Send to log "a scenario finished"
         sendLoggableEvent(`Scenario "${completedRunParams.name}" finished`);
-
         if (queuedRunParams.length) {
           const nextRunParams = queuedRunParams[0];
           // Notify UI of current scenario
           ipcRenderer.send('message-from-worker-scenario-complete', {completed: completedRunParams, next: nextRunParams});
           // Run next scenario in queue
           queuedRunParams = queuedRunParams.slice(1);
-          sendLoggableEvent(`Running scenario "${nextRunParams.name}. Scenario type: "${nextRunParams.scenarioType}"`);
+          sendLoggableEvent(`Running next scenario "${nextRunParams.name}. Scenario type: "${nextRunParams.scenarioType}"`);
           worker = nextRunParams.scenarioType && nextRunParams.scenarioType == 'goods_transport' ?
           runModelSystemFreightEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams)) :
               runModelSystemEntrypointPythonShell(worker, nextRunParams, () => onScenarioComplete(nextRunParams));
