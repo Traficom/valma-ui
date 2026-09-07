@@ -3,7 +3,7 @@ import React from 'react';
 const ErrorCircle: React.FC = () => {
   return (
     <svg
-      fill="#026273"
+      fill="#002c74"
       xmlns="http://www.w3.org/2000/svg"
       height="18px"
       width="18px"

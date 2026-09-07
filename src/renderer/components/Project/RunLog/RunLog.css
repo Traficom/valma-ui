@@ -42,16 +42,21 @@
     justify-content: space-between;
 }
 
-.Log__header-control {
-    background-color: var(--color-brand-base);
-    border-color: var(--color-brand-base);
+.Log__button {
     margin-right: 10px;
     width: 100%;
 }
-.Log__header-control--on {
-    background-color: var(--light-grey);
-    color: var(--color-brand-base) ;
-    border-color: var(--color-brand-base);
+
+.Log__header-controls button {
+    background-color: var(--color-brand-base) !important;
+    color: var(--white-basic) !important;
+    border-color: var(--color-brand-base) !important;
+}
+
+.Log__header-controls button.Log__header-control--on {
+    background-color: var(--light-grey) !important;
+    color: var(--color-brand-base) !important;
+    border-color: var(--color-brand-base) !important;
 }
 
 .Log__overflow {

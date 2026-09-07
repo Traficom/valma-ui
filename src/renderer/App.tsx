@@ -65,6 +65,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     const candidates = [
       path.join(pythonDir, 'Scripts', 'pip.exe'),
       path.join(pythonDir, 'pip.exe'),
+      path.join(pythonDir, 'Scripts', 'pip3.exe'),
+      path.join(pythonDir, 'Scripts', 'pip3.11.exe'),
     ];
     let match = candidates.find(fsHelpers.existsSync) ?? '';
     return match;
