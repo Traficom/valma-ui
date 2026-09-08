@@ -35,22 +35,22 @@ const RunLog: React.FC<RunLogProps> = ({
       <div className="Log__header">
 
         <div className="Log__header-controls">
-          <button className={"Log__header-control" + (showINFO ? " Log__header-control--on" : "")}
+          <button className={"Log__button " + (showINFO ? "Log__header-control--on" : "Log__header-control")}
                   onClick={(e) => setShowINFO(prevState => !prevState)}
           >
             INFO
           </button>
-          <button className={"Log__header-control" + (showERROR ? " Log__header-control--on" : "")}
+          <button className={"Log__button " + (showERROR ? "Log__header-control--on" : "Log__header-control")}
                   onClick={(e) => setShowERROR(prevState => !prevState)}
           >
             ERROR
           </button>
-          <button className={"Log__header-control" + (showWARN ? " Log__header-control--on" : "")}
+          <button className={"Log__button " +  (showWARN ? "Log__header-control--on" : "Log__header-control")}
                   onClick={(e) => setShowWARN(prevState => !prevState)}
           >
             WARNING
           </button>
-          <button className={"Log__header-control" + (showDEBUG ? " Log__header-control--on" : "")}
+          <button className={"Log__button " + (showDEBUG ? "Log__header-control--on" : "Log__header-control")}
                   onClick={(e) => setShowDEBUG(prevState => !prevState)}
           >
             DEBUG

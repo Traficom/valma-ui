@@ -1,6 +1,7 @@
 const ps = require('python-shell');
 const {ipcRenderer} = require('electron');
 const { getLongDistDemandForecast } = require('./getLongDistDemandForecast.js');
+const { parseLogEvent } = require('./parseLogEvent.js');
 
 module.exports = {
 
@@ -39,21 +40,12 @@ module.exports = {
 
     // Attach runtime handlers (stdout/stderr, process errors)
     worker.on('message', (event) =>
-      ipcRenderer.send('loggable-event-from-worker', {
-        source: 'stdout',
-        level: 'INFO',
-        message: event,
-        time: new Date()
-      })
+      ipcRenderer.send('loggable-event-from-worker', parseLogEvent(event, 'INFO'))  
     );
 
-    worker.on('stderr', (event) =>
-      ipcRenderer.send('loggable-event-from-worker', {
-        source: 'stderr',
-        level: 'ERROR',
-        message: event,
-        time: new Date()
-      })
+    worker.on('stderr', (event) => {
+      ipcRenderer.send('loggable-event-from-worker', parseLogEvent(event, 'ERROR'))
+      }
     );
     worker.on('error', (error) => ipcRenderer.send('process-error-from-worker', error));
 
@@ -113,21 +105,11 @@ module.exports = {
 
     // Attach runtime handlers (stdout/stderr, process errors)
     worker.on('message', (event) =>
-      ipcRenderer.send('loggable-event-from-worker', {
-        source: 'stdout',
-        level: 'INFO',
-        message: event,
-        time: new Date()
-      })
+      ipcRenderer.send('loggable-event-from-worker', parseLogEvent(event, 'INFO'))
     );
         
     worker.on('stderr', (event) =>
-      ipcRenderer.send('loggable-event-from-worker', {
-        source: 'stderr',
-        level: 'ERROR',
-        message: event,
-        time: new Date()
-      })
+      ipcRenderer.send('loggable-event-from-worker', parseLogEvent(event, 'ERROR'))
     );
 
     worker.on('error', (error) => ipcRenderer.send('process-error-from-worker', error));

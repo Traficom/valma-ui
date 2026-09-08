@@ -19,12 +19,14 @@ interface VlemProjectProps {
   signalProjectRunning: (running: boolean) => void;
   selectedSetting?: ProjectSetting;
   openCreateEmmeBank: () => void;
+  openProject:() => void;
 }
 
 const VlemProject: React.FC<VlemProjectProps> = ({
   signalProjectRunning,
   selectedSetting,
   openCreateEmmeBank,
+  openProject
 }) => {
   window.electron.setMaxListeners(20);
   const ipcRenderer = window.ipc;
@@ -73,6 +75,11 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       setScenarioIDsToRun(scenarioIDsToRun.concat(scenarioId));
     }
   }
+
+
+  const handleClickOpenProject = () => {
+      openProject();
+  };
 
 
   const _handleClickNewScenario = (scenarioType: string) => {
@@ -839,6 +846,7 @@ useEffect(() => {
           activeScenarios={scenariosToRun}
           sortScenarios={sortAndSetScenarios}
           sort={sort}
+          handleClickOpenProject={handleClickOpenProject}
         />
       </div>
 
