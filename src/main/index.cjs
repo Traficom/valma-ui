@@ -12,6 +12,7 @@ const fsHelpers = require('./fsHelpers.cjs');
 const squirrelStartup = require('electron-squirrel-startup');
 const path = require('path');
 const { error } = require('console');
+const { scales } = require('chart.js');
 
 // Handle squirrel startup
 if (squirrelStartup) {
@@ -24,6 +25,7 @@ let entrypointWorkerWindow;
 let cbaWorkerWindow;
 let createEmmeBankWorkerWindow;
 let createProjectWorkerWindow;
+let openProjectWorkerWindow;
 
 const isDev = !app.isPackaged;
 
@@ -90,6 +92,9 @@ app.whenReady().then(async () => {
   );
   createProjectWorkerWindow = await createWorker(
     'src/background/create_project_worker.html'
+  );
+  openProjectWorkerWindow = await createWorker(
+    'src/background/open_project_worker.html'
   );
 });
 
@@ -236,6 +241,16 @@ ipcMain.on('message-from-ui-to-create-project', (event, args) => {
 // Relay message emme project created
 ipcMain.on('message-from-worker-creating-project-completed', (event, args) => {
   mainWindow.webContents.send('creating-project-completed', args.error);
+});
+
+// Relay message to run open project
+ipcMain.on('message-from-ui-to-open-project', (event, args) => {
+  openProjectWorkerWindow.webContents.send('open-project', args);
+});
+
+// Relay message emme project opened
+ipcMain.on('message-from-worker-open-project-completed', (event, args) => {
+  mainWindow.webContents.send('opening-project-completed', args.error);
 });
 
 // Relay a loggable event in worker; worker => main => UI

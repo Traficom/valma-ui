@@ -262,6 +262,20 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     );
   }
 
+  function  openProject() {
+    if(settingInHandling.project_folder == ""){
+      showError("Projektikansiota ei ole asetettu. Tarkasta asetukset");
+      return;
+    }
+
+    ipc.send('message-from-ui-to-open-project', {
+      project_folder: settingInHandling.project_folder,
+      emme_python_path: settingInHandling.emme_python_path,
+      valma_scripts_path: settingInHandling.valma_scripts_path,
+      project_name: settingInHandling.project_name,
+    });
+  }
+
 
   function promptModelSystemDownload() {
     fetch('https://api.github.com/repos/Traficom/lem-model-system/tags')
@@ -554,6 +568,7 @@ function setValmaScriptsPath(path: string){
           selectedSetting={settingInHandling}
           openCreateEmmeBank={() => setCreateEmmeBankModalOpen(true)}
           signalProjectRunning={setProjectRunning}
+          openProject={openProject}
         />
       </div>
 
