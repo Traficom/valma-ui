@@ -10,6 +10,7 @@ declare global {
       unlinkSync(path: string): void;
       renameSync(from: string, to: string): void;
       existsSync(from: string): boolean;
+      writeFileSync(path: string, content: string)
     };
 
     system: {

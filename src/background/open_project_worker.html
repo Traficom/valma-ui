@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <title>Hidden process-running window</title>
+    <script type="text/javascript">
+      const {ipcRenderer} = require('electron');
+      const {openProjectPythonShell} = require('./open_project_python_shell');
+
+      const sendLoggableEvent = (message) => {
+        ipcRenderer.send('loggable-ui-event-from-worker', {
+          level: "UI-event",
+          message: message
+        });
+      };
+
+      let worker = null;
+
+      const onComplete = (error) => {
+        worker = null; // Reset worker reference for new/next runs
+        // Send to log "finished"
+        sendLoggableEvent(`Finished opening Emme-project`);
+        // Notify UI that all processing complete for now
+        ipcRenderer.send('message-from-worker-open-project-completed', {
+          error: error
+        });
+      };
+
+      ipcRenderer.on('open-project', (event, args) => {
+        sendLoggableEvent(
+          `Opening VLEM-project`
+        );
+        worker = openProjectPythonShell(worker, args, (error) => onComplete(error));
+      });
+    </script>
+</head>
+<body>
+</body>
+</html>
+

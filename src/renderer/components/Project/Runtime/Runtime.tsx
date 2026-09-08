@@ -35,6 +35,7 @@ interface RuntimeProps {
   activeScenarios: RunnableScenarioData[];
   sortScenarios: (sort: SortType) => void;
   sort: SortType;
+  handleClickOpenProject: () => void;
 }
 
 const Runtime: React.FC<RuntimeProps> = ({
@@ -58,7 +59,8 @@ const Runtime: React.FC<RuntimeProps> = ({
   deleteSubScenario,
   activeScenarios,
   sortScenarios,
-  sort
+  sort,
+  handleClickOpenProject
 }) => {
   const scenariosPerPage = 4;
   const runningScenario = activeScenarios.filter((s: any) => s.id === runningScenarioID)[0];
@@ -203,7 +205,7 @@ const Runtime: React.FC<RuntimeProps> = ({
             {projectFolder}
           </div>
           <button className="Emme_project_button"
-            onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}>
+            onClick={e => handleClickOpenProject()}>
             <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>Emmeprojekti <OuterLink /></span>
           </button>
         </div>

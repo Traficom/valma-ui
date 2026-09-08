@@ -65,6 +65,8 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     const candidates = [
       path.join(pythonDir, 'Scripts', 'pip.exe'),
       path.join(pythonDir, 'pip.exe'),
+      path.join(pythonDir, 'Scripts', 'pip3.exe'),
+      path.join(pythonDir, 'Scripts', 'pip3.11.exe'),
     ];
     let match = candidates.find(fsHelpers.existsSync) ?? '';
     return match;
@@ -258,6 +260,20 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
         ? `VIRHE:\n${error}`
         : 'Emme-projekti luotu onnistuneesti'
     );
+  }
+
+  function  openProject() {
+    if(settingInHandling.project_folder == ""){
+      showError("Projektikansiota ei ole asetettu. Tarkasta asetukset");
+      return;
+    }
+
+    ipc.send('message-from-ui-to-open-project', {
+      project_folder: settingInHandling.project_folder,
+      emme_python_path: settingInHandling.emme_python_path,
+      valma_scripts_path: settingInHandling.valma_scripts_path,
+      project_name: settingInHandling.project_name,
+    });
   }
 
 
@@ -552,6 +568,7 @@ function setValmaScriptsPath(path: string){
           selectedSetting={settingInHandling}
           openCreateEmmeBank={() => setCreateEmmeBankModalOpen(true)}
           signalProjectRunning={setProjectRunning}
+          openProject={openProject}
         />
       </div>
 
