@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import dayjs from 'dayjs';
 import Runtime from './Runtime/Runtime';
 import Scenario from './Scenario/Scenario';
-import { RunnableScenarioData, ScenarioData } from '../Project/types/ScenarioData'
+import { RunnableScenarioData, ScenarioData, SubmodelData } from '../Project/types/ScenarioData'
 import { ProjectSetting } from '../Project/types/ProjectSetting'
 import { CbaOptions } from '../Project/types/CbaOptions'
 import SubScenario from './SubScenario/SubScenario';
@@ -14,6 +14,9 @@ import { STORED_SPEED_ASSIGNMENT_PREFIX } from '../../../constants';
 import { SCENARIO_TYPES, SORT_TYPES, SortType } from '../../../enums';
 import { LoggableEvent } from './types/RunLog';
 import vex from '../../main'
+import submodels, { SUBMODELS } from './Scenario/Submodels';
+import { isSet } from '../Common/functions';
+import { _splitKey } from 'chart.js/helpers';
 
 interface VlemProjectProps {
   signalProjectRunning: (running: boolean) => void;
@@ -139,6 +142,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         );
 
         if ("id" in obj && "name" in obj && "iterations" in obj) {
+          addSubmodels(obj);
           foundScenarios.push(
             obj.runStatus ? obj : addRunStatusProperties(obj)
           );
@@ -159,6 +163,35 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
 
   const addRunStatusProperties = (scenario) => {
+    return {
+      ...scenario,
+      runStatus: {
+        statusIterationsTotal: null,
+        statusIterationsCurrent: 0,
+        statusIterationsCompleted: 0,
+        statusIterationsFailed: 0,
+        statusState: null,
+        statusLogfilePath: null,
+        statusReadyScenariosLogfiles: [],
+        statusRunStartTime: null,
+        statusRunFinishTime: null,
+        demandConvergenceArray: []
+      }
+    }
+  }
+
+  const addSubmodels = (scenario: ScenarioData) => {
+    if (SCENARIO_TYPES.PASSENGER_TRANSPORT == scenario.scenarioType && !isSet(scenario.submodels)) {
+      const scenarioSubmodels: Record<string, SubmodelData> = {};
+      
+      Object.values(submodels).forEach(model => {
+        const submodelIsSelected = (isSet(scenario.submodel) && model.id == scenario.submodel) 
+                                    || SUBMODELS.KOKO_SUOMI == model.id; // selects koko_suomi by default to new scenario
+        scenarioSubmodels[model.id] = { selected: submodelIsSelected, firstScenarioId: submodelIsSelected ? scenario.first_scenario_id : 0, runIndex: model.index};
+      });
+      scenario.submodels = scenarioSubmodels;
+    }
+
     return {
       ...scenario,
       runStatus: {
@@ -215,6 +248,8 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       },
       submodel: ''
     };
+    addSubmodels(newScenario);
+
     // Create the new scenario in "scenarios" array first
     const tempScenarios = scenarios.concat(newScenario);
     setScenarios(tempScenarios);
@@ -468,13 +503,16 @@ const VlemProject: React.FC<VlemProjectProps> = ({
 
       if (scenarioIDsToRun.includes(scenario.id) && !runnableScenarios.find(s => s.id == scenario.id)) {
         const scenarioRunIndex = scenarioIDsToRun.indexOf(scenario.id) + 1;
-        runnableScenarios.push({ ...scenario, runIndex: scenarioRunIndex + 0.001 });
 
-        if (scenario.storedSpeedAssignmentInputs && scenario.storedSpeedAssignmentInputs.length > 0) {
-          const validStoredSpeedAssignmentInputs = scenario.storedSpeedAssignmentInputs.filter(Boolean);
-          if (validStoredSpeedAssignmentInputs.length > 0) {
-            validStoredSpeedAssignmentInputs.map((storedSpeedAssignment, index) => {
-              runnableScenarios.push(createRunnableStoredSpeedAssignment(scenario, storedSpeedAssignment, scenarioRunIndex, index));
+        if(SCENARIO_TYPES.PASSENGER_TRANSPORT != scenario.scenarioType){
+          runnableScenarios.push({ ...scenario, runIndex: scenarioRunIndex + 0.001 });
+        }
+
+        if (isSet(scenario.submodels)) {
+          const selectedSubModels = Object.entries(scenario.submodels).filter(([_key, submodel]) => submodel.selected);
+          if (selectedSubModels.length > 0) {
+            selectedSubModels.map(([key, submodel]) => {
+              runnableScenarios.push(createRunnableSubmodelScenario(scenario, [key, submodel], scenarioRunIndex, submodels.find(model => model.id == key).index));
             });
           }
         }
@@ -494,14 +532,14 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     return sortedRunnableScenarios;
   }
 
-  function createRunnableStoredSpeedAssignment(scenario, storedSpeedAssignmentInput, scenarioIndex, ssaIndex) {
+  function createRunnableSubmodelScenario(scenario: ScenarioData, [key, submodel]: [string, SubmodelData], scenarioIndex: number, subModelIndex: number,) {
     return {
       ...scenario,
-      id: STORED_SPEED_ASSIGNMENT_PREFIX + ssaIndex + "_" + scenario.id,
-      runIndex: scenarioIndex + ((1 + ssaIndex) / 10000),
-      first_scenario_id: storedSpeedAssignmentInput.firstScenarioId,
-      submodel: storedSpeedAssignmentInput.submodel,
-      stored_speed_assignment: false
+      id: STORED_SPEED_ASSIGNMENT_PREFIX + subModelIndex + "_" + scenario.id,
+      runIndex: scenarioIndex + ((1 + subModelIndex) / 10000),
+      first_scenario_id: submodel.firstScenarioId,
+      submodel: key,
+      stored_speed_assignment: scenario.stored_speed_assignment && isSet(submodel.firstScenarioId)
     }
   }
 
@@ -538,7 +576,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       alert("L\u00E4ht\u00F6datan kansiota ei ole asetettu, tarkista Asetukset.");
       return;
     }
-
     // For each active scenario, check required scenario-specific parameters are set
     for (let scenario of scenariosToRun) {
       const iterations = scenario.iterations;
@@ -553,6 +590,9 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       if (!scenario.cost_data_file) {
         alert(`Liikenteen hintadata-tiedostoa ei ole valittu skenaariossa "${scenario.name}"`);
         return;
+      }
+      if (!isSet(scenario.first_scenario_id)) {
+        alert("Skenaarion " + scenario.name + ' ei ole asetettu skenaarion id:tä');
       }
     }
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 import './Scenario.css';
 import _ from 'lodash';
 import classNames from 'classnames';
@@ -9,11 +9,12 @@ import ArrowDown from '../../../icons/ArrowDown';
 import ResetIcon from '../../../icons/ResetIcon';
 
 import submodels from './Submodels';
+import { SUBMODELS } from './Submodels';
 import { SCENARIO_TYPES } from '../../../../enums';
-import { ScenarioData } from '../types/ScenarioData'
-import { StoredSpeedAssignmentInput } from '../types/ScenarioData'
+import { ScenarioData, SubmodelData } from '../types/ScenarioData'
 import { cutUnvantedCharacters } from '../../cutUnvantedCharacters';
 import { openFileDialog, openFolderDialog } from '../../Project/Dialog'
+import { isSet } from '../../Common/functions';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -54,6 +55,7 @@ const Scenario: React.FC<ScenarioProps> = ({
     useState<'base' | 'path'>('base');
 
   const [nameError, setNameError] = useState('');
+  const [showFirstScenarioIdError, setShowFirstScenarioIdError] = useState(false);
   const [errorShown, setErrorShown] = useState(false);
   const [errorInfo, setErrorInfo] = useState('');
   const [editableScenarioName, setEditableScenarioName] = useState(scenario.name);
@@ -68,16 +70,21 @@ const Scenario: React.FC<ScenarioProps> = ({
   const hasOverriddenSettings = (sc: ScenarioData): boolean =>
     !!_.find(sc.overriddenProjectSettings, v => v);
 
-  function isSet(value: unknown): boolean {
-    return value !== undefined && value !== null && value !== '';
-  }
 
   function longDistDemandForecastIsCalc(): boolean {
     return scenario.long_dist_demand_forecast === longDistDemandForecastCalc;
   }
 
   function setStoredSpeedAssignment(value: boolean) {
-    updateScenario({ ...scenario, stored_speed_assignment: value, storedSpeedAssignmentInputs: [] })
+    updateScenario({ ...scenario, stored_speed_assignment: value })
+  }
+
+  function updateSubmodel( [key, submodel]: [string, SubmodelData] ) {
+    setShowFirstScenarioIdError(!!submodel.selected && !isSet(submodel.firstScenarioId));
+    
+    const changedSubmodels = scenario.submodels;
+    changedSubmodels[key] = submodel;
+    updateScenario({ ...scenario, submodels: changedSubmodels })
   }
 
   function updateScenarioName(updatedName: string){
@@ -109,15 +116,6 @@ const Scenario: React.FC<ScenarioProps> = ({
     }
   }, [scenario.freight_matrix_path]);
 
-  useEffect(() => {
-    if (
-      isSet(scenario.stored_speed_assignment) &&
-      !isSet(scenario.storedSpeedAssignmentInputs)
-    ) {
-      updateScenario({ ...scenario, storedSpeedAssignmentInputs: [] });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [scenario.stored_speed_assignment]);
 
   /* ------------------------------------------------------------------ */
   /* Helpers                                                             */
@@ -133,14 +131,6 @@ const Scenario: React.FC<ScenarioProps> = ({
     setErrorInfo('');
   };
 
-  function setStoredSpeedAssignmentInput(index, input) {
-    const firstScenarioIdIsSet = isSet(input) && isSet(input.firstScenarioId) && input.firstScenarioId != 0;
-    const newInput = firstScenarioIdIsSet ? input : null;
-    let inputs = [...scenario.storedSpeedAssignmentInputs];
-    inputs[index] = newInput;
-    updateScenario({ ...scenario, storedSpeedAssignmentInputs: inputs })
-  }
-
   const baseDataFolder =
     scenario.overriddenProjectSettings.baseDataFolder ??
     inheritedGlobalProjectSettings.baseDataFolder;
@@ -152,26 +142,37 @@ const Scenario: React.FC<ScenarioProps> = ({
   /* ------------------------------------------------------------------ */
   /* Stored speed assignment input renderer                               */
   /* ------------------------------------------------------------------ */
-  function storedSpeedAssignmentInput(index, submodel, input) {
-    const firstScenarioIdIsSet = input && input.firstScenarioId && input.firstScenarioId != 0;
+  function submodelAndStoredSpeedAssignmentInput(index: number, submodelName: string) {
+    let submodel: SubmodelData = scenario.submodels[submodelName];
     return (
-      <span className="stored_speed_assignment_fields">
-        <label className='stored_speed_assignment_labels'>
-          {submodels.filter(model => model.id == submodel)[0].name}, Emme skenaario
+      <span className='stored_speed_assignment_fields'>
+        <span className='submodel_input'>
+        <input id={"submodel_input_" + index}
+          className="Scenario__inline"
+          type="checkbox"
+          disabled={isPassengerTransportScenario == false || longDistDemandForecastIsCalc()}
+          checked={submodel.selected}
+          onChange={() => {
+            updateSubmodel([submodelName, {...submodel, selected: !!submodel.selected ? false : true}])
+          }}
+        /></span>
+        <label className='stored_speed_assignment_labels' style={{ whiteSpace: 'pre-line' }}>
+          {submodels.filter(model => model.id == submodelName)[0].name}{SUBMODELS.KOKO_SUOMI == submodelName ? '\n Tallennetun nopeuden sijoittelu' : ' Emme skenaario'}
         </label>
-
         <input id={"stored_speed_assignment_input_" + index}
-          className="stored_speed_assignment_id_input Scenario__inline"
+          className={(!!submodel.selected && !isSet(submodel.firstScenarioId)) ? 
+              'stored_speed_assignment_id_input Scenario__inline validation_failure' :
+              'stored_speed_assignment_id_input Scenario__inline'}
           type="number"
           min="0"
           max="999"
           step="1"
-          disabled={!scenario.stored_speed_assignment}
-          value={firstScenarioIdIsSet ? input.firstScenarioId : ''}
+          disabled={!submodel.selected}
+          value={submodel.firstScenarioId? submodel.firstScenarioId : ''}
           placeholder={""}
           onChange={(e) => {
-            const newValue = e.target.value;
-            setStoredSpeedAssignmentInput(index, { submodel, 'firstScenarioId': newValue });
+            const newValue = Number(e.target.value);
+            updateSubmodel([submodelName, {...submodel, firstScenarioId: newValue}])
           }}
         /></span>);
   }
@@ -207,6 +208,7 @@ const Scenario: React.FC<ScenarioProps> = ({
       </div>
 
       {/* Number of first EMME-scenario ID (of 4) - NOTE: EMME-scenario is different from VALMA-scenario (ie. this config) */}
+      { !isPassengerTransportScenario && 
       <div className="Scenario__section">
         <label className="Scenario__pseudo-label"
           htmlFor="first-scenario-id">Liikenneverkon sisältävä Emme-skenaario</label>
@@ -221,7 +223,7 @@ const Scenario: React.FC<ScenarioProps> = ({
             updateScenario({ ...scenario, first_scenario_id: parseInt(e.target.value) });
           }}
         />
-      </div>
+      </div>}
 
       {/* Folder path to variable input data (input data with variables sent to EMME) */}
       <div className="Scenario__section">
@@ -363,19 +365,6 @@ const Scenario: React.FC<ScenarioProps> = ({
         </label>
       </div>}
 
-      {/* Sub model selection */}
-      <label className="Scenario__pseudo-label"
-        htmlFor="submodel">Osamalli</label>
-      <div className="Submodel_select">
-        <select id="submodel" disabled={isPassengerTransportScenario == false || longDistDemandForecastIsCalc()}
-          value={scenario.submodel} onChange={e => updateScenario({ ...scenario, submodel: e.target.value })}>
-          <option key={"submodel_select"} value={""}>--- valitse ---</option>
-          {submodels && submodels.map((submodel) =>
-            <option key={submodel.id} value={submodel.id}>{submodel.name}</option>)
-          }
-        </select>
-      </div>
-
       {/* Choice for goods transport freight matrix path */}
       {isPassengerTransportScenario && <div className="Scenario__section Scenario_radio_select_section">
         <h4 className="Scenario_radio_label">Tavaraliikenteen kysyntäennuste</h4>
@@ -423,13 +412,42 @@ const Scenario: React.FC<ScenarioProps> = ({
         close={closeError}
       />}
 
+      {/* Sub model selection for other than passenger transport*/}
+      {!isPassengerTransportScenario && (<div className="Scenario__section">
+      <label className="Scenario__pseudo-label"
+        htmlFor="submodel">Osamalli</label>
+      <div className="Submodel_select">
+        <select id="submodel" disabled={longDistDemandForecastIsCalc()}
+          value={scenario.submodel} onChange={e => updateScenario({ ...scenario, submodel: e.target.value })}>
+          <option key={"submodel_select"} value={""}>--- valitse ---</option>
+          {submodels && submodels.map((submodel) =>
+            <option key={submodel.id} value={submodel.id}>{submodel.name}</option>)
+          }
+        </select>
+      </div></div>)}
+      {/*Submodel and stored speed assignment inputs*/}
+      {isPassengerTransportScenario && (<Fragment>
+        <div className="Scenario__section flexContainer space_after">
+          <div>
+            {submodelAndStoredSpeedAssignmentInput(0, SUBMODELS.ITA_SUOMI)}
+            {submodelAndStoredSpeedAssignmentInput(1, SUBMODELS.LOUNAIS_SUOMI)}
+            {submodelAndStoredSpeedAssignmentInput(2, SUBMODELS.POHJOIS_SUOMI)}
+            {submodelAndStoredSpeedAssignmentInput(3, SUBMODELS.UUSIMAA)}
+            {submodelAndStoredSpeedAssignmentInput(4, SUBMODELS.KOKO_SUOMI)}
+          </div>
+        </div>
+        <div>{!!showFirstScenarioIdError ? <span className="Scenario-error">Tarkista valittujen mallien --first-scenario-id</span> : ""}</div>
+        </Fragment>
+      )}
+  
+
+
       <div className="Scenario__section Scenario__title">
         Lisävalinnat
       </div>
-
       {/* Choice whether to use stored speed assignment */}
-      {isPassengerTransportScenario && <div className="Scenario__section">
-        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline"
+      {isPassengerTransportScenario && <div  className="space_after">
+        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline gray"
           htmlFor="stored_speed_assignment">
           <input id="stored_speed_assignment"
             type="checkbox"
@@ -442,21 +460,9 @@ const Scenario: React.FC<ScenarioProps> = ({
         </label>
       </div>}
 
-      {/*Stored speed assignment inputs*/}
-      {isPassengerTransportScenario && scenario.stored_speed_assignment && scenario.storedSpeedAssignmentInputs && (
-        <div className="Scenario__section flexContainer space_after">
-          <div>
-            {storedSpeedAssignmentInput(0, "ita_suomi", scenario.storedSpeedAssignmentInputs[0])}
-            {storedSpeedAssignmentInput(1, "lounais_suomi", scenario.storedSpeedAssignmentInputs[1])}
-            {storedSpeedAssignmentInput(2, "pohjois_suomi", scenario.storedSpeedAssignmentInputs[2])}
-            {storedSpeedAssignmentInput(3, "uusimaa", scenario.storedSpeedAssignmentInputs[3])}
-          </div>
-        </div>
-      )}
-
       {/* Choice whether to delete strategy files at the end of a model run */}
       <div className="Scenario__section">
-        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline"
+        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline gray"
           htmlFor="delete-strategy-files">
           <input id="delete-strategy-files"
             type="checkbox"
@@ -472,7 +478,7 @@ const Scenario: React.FC<ScenarioProps> = ({
 
       {/* Choice whether to save matrices in Emme */}
       {isPassengerTransportScenario && <div className="Scenario__section">
-        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline"
+        <label className="Scenario__pseudo-label Scenario__pseudo-label--inline gray"
           htmlFor="separate-emme-scenarios">
           <input id="separate-emme-scenarios"
             type="checkbox"
@@ -488,7 +494,7 @@ const Scenario: React.FC<ScenarioProps> = ({
 
       {/* Choice whether to save matrices in Emme */}
       <div className="Scenario__section">
-        {isPassengerTransportScenario && <label className="Scenario__pseudo-label Scenario__pseudo-label--inline"
+        {isPassengerTransportScenario && <label className="Scenario__pseudo-label Scenario__pseudo-label--inline gray"
           htmlFor="save-matrices-in-emme">
           <input id="save-matrices-in-emme"
             type="checkbox"
@@ -502,7 +508,7 @@ const Scenario: React.FC<ScenarioProps> = ({
         </label>}
 
         {/* Number of first matrix ID */}
-        {isPassengerTransportScenario && <div className="Scenario__section Scenario__section--indentation">
+        {isPassengerTransportScenario && <div className="Scenario__section Scenario__section--indentation gray">
           <label className="Scenario__pseudo-label"
             style={{ color: scenario.save_matrices_in_emme == false ? "#666666" : "inherit" }}
             htmlFor="first-matrix-id">Matriisit tallennetaan numeroille</label>
@@ -530,7 +536,7 @@ const Scenario: React.FC<ScenarioProps> = ({
             <div>
               {/* File path to EMME project reference-file (generally same in all scenarios of a given VLEM project) */}
               <div className="Scenario__section">
-                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline project-override-setting">
+                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline">
                   <span className="inline-element override-setting">Projektikansio</span>
                   {scenario.overriddenProjectSettings.projectFolder &&
                     <label className="inline-element override-reset-button" onClick={(event) => {
@@ -560,7 +566,7 @@ const Scenario: React.FC<ScenarioProps> = ({
                 </label>
               </div>
               <div className="Scenario__section">
-                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline project-override-setting">
+                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline">
                   <span className="inline-element override-setting">EMME Python polku</span>
                   {scenario.overriddenProjectSettings.emmePythonPath &&
                     <label className="inline-element override-reset-button" onClick={(event) => {
@@ -624,7 +630,7 @@ const Scenario: React.FC<ScenarioProps> = ({
                 </label>
               </div>
               <div className="Scenario__section">
-                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline project-override-setting">
+                <label className="Scenario__pseudo-label Scenario__pseudo-label--inline">
                   <span className="inline-element override-setting">Lähtödatakansion polku</span>
                   {scenario.overriddenProjectSettings.baseDataFolder &&
                     <label className="inline-element override-reset-button" onClick={(event) => {

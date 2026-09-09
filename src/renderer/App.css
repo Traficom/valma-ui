@@ -42,6 +42,7 @@
     --color-brand-base: #002c74;
     --color-blue-base: #0058b1;
     --color-brand-light3: #6f86af;
+    --error-red: #d13e4a;
     min-width: 900px;
 }
 
