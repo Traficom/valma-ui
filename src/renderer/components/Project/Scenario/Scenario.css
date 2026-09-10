@@ -75,8 +75,13 @@
     font-size: 15px;
     line-height: 30px;
     letter-spacing: -0.3px;
+}
+
+.gray {
     color: #333333;
 }
+
+
 .Scenario__pseudo-label--inline input {
     display: block;
     float: left;
@@ -212,23 +217,29 @@ span.Scenario__inline {
     display: flex;
 }
 
+.validation_failure {
+    border-color: var(--error-red) !important;
+}
 .stored_speed_assignment_fields {
     display: flex;
+    vertical-align: bottom;
+    margin-top: 4px;
 }
 
 .stored_speed_assignment_labels {
     flex: 1;
     display: flex;
     max-width: 80%;
-    margin-left: 45px;
-    padding-top: 15px;
-    padding-right: 7px;
+    margin-left: 15px;
+    margin-top: 8px;
+    padding-bottom: 0;
+    padding-right: 15px;
 }
+
 
 .stored_speed_assignment_id_input {
     max-width: 17%;
     padding: 5px 0px 5px 10px;
-    margin-top: 4px;
     background: #ffffff;
     border: 1px solid var(--medium-grey);
     box-sizing: border-box;
@@ -236,8 +247,19 @@ span.Scenario__inline {
     font-size: 15px;
     font-weight: 325;
     cursor: pointer;
+    vertical-align: bottom;
+    height: 35px;
+}
+
+.submodel_input {
+    margin-top: 2px;
+}
+
+.stored_speed_assignment_fields:last-child input {
+    margin-top: 17px;
 }
 
 .space_after {
     margin-bottom: 15px;
 }
+

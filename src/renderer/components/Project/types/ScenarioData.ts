@@ -1,5 +1,6 @@
 import { RunStatus } from './RunStatus';
 import { SubScenarioData } from './SubScenarioData';
+import { _deprecated } from 'chart.js/helpers';
 
 export interface ScenarioData {
   id: string;
@@ -25,7 +26,7 @@ export interface ScenarioData {
   end_assignment_only?: boolean;
 
   stored_speed_assignment?: boolean;
-  storedSpeedAssignmentInputs?: (StoredSpeedAssignmentInput | null)[];
+  submodels?: Record<string, SubmodelData>;
 
   delete_strategy_files?: boolean | null;
   separate_emme_scenarios?: boolean;
@@ -51,7 +52,7 @@ export interface OverriddenProjectSettings {
 }
 
 
-export interface StoredSpeedAssignmentInput {
-  submodel: string;
-  firstScenarioId: number;
+export interface SubmodelData {
+  selected?: boolean;
+  firstScenarioId?: number;
 }
