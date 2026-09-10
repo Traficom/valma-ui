@@ -1,1 +1,1 @@
-export const STORED_SPEED_ASSIGNMENT_PREFIX: string = "SSA_";
+export const SUBMODEL_PREFIX: string = "SBM_";
