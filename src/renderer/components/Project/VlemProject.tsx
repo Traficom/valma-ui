@@ -10,7 +10,7 @@ import SubScenario from './SubScenario/SubScenario';
 import RunLog from './RunLog/RunLog'
 import { SubScenarioData } from './types/SubScenarioData';
 import './VlemProject.css';
-import { STORED_SPEED_ASSIGNMENT_PREFIX } from '../../../constants';
+import { SUBMODEL_PREFIX } from '../../../constants';
 import { SCENARIO_TYPES, SORT_TYPES, SortType } from '../../../enums';
 import { LoggableEvent } from './types/RunLog';
 import vex from '../../main'
@@ -533,13 +533,14 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   }
 
   function createRunnableSubmodelScenario(scenario: ScenarioData, [key, submodel]: [string, SubmodelData], scenarioIndex: number, subModelIndex: number,) {
+    const submodelScenarioIndex = scenarioIndex + ((1 + subModelIndex) / 10000);
     return {
       ...scenario,
-      id: STORED_SPEED_ASSIGNMENT_PREFIX + subModelIndex + "_" + scenario.id,
-      runIndex: scenarioIndex + ((1 + subModelIndex) / 10000),
+      id: SUBMODEL_PREFIX + submodelScenarioIndex + "_" + scenario.id,
+      runIndex: submodelScenarioIndex,
       first_scenario_id: submodel.firstScenarioId,
       submodel: key,
-      stored_speed_assignment: scenario.stored_speed_assignment && isSet(submodel.firstScenarioId)
+      stored_speed_assignment: scenario.stored_speed_assignment && isSet(scenario.stored_speed_assignment)
     }
   }
 
@@ -547,7 +548,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     if (scenario.parentScenarioId) {
       return scenario.parentScenarioId;
     }
-    if (scenario.id.includes(STORED_SPEED_ASSIGNMENT_PREFIX)) {
+    if (scenario.id.includes(SUBMODEL_PREFIX)) {
       return scenario.id.split("_").pop();
     }
     return scenario.id;
@@ -591,8 +592,9 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         alert(`Liikenteen hintadata-tiedostoa ei ole valittu skenaariossa "${scenario.name}"`);
         return;
       }
-      if (!isSet(scenario.first_scenario_id)) {
-        alert("Skenaarion " + scenario.name + ' ei ole asetettu skenaarion id:tä');
+      if (SCENARIO_TYPES.PASSENGER_TRANSPORT == scenario.scenarioType && !isSet(scenario.first_scenario_id)) {
+        alert("Skenaarion " + scenario.name + ' ' + scenario.submodel + '-alimallille ' + ' ei ole asetettu skenaarion id:tä');
+        return;
       }
     }
 
@@ -601,7 +603,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     setLogContents([
       {
         level: "UI-event",
-        message: `Initializing run of scenarios: ${scenariosToRun.filter(s => !s.id.includes(STORED_SPEED_ASSIGNMENT_PREFIX)).map(s => s.name).join(", ")}`
+        message: `Initializing run of scenarios: ${scenariosToRun.filter(s => !s.id.includes(SUBMODEL_PREFIX)).map(s => s.name).join(", ")}`
       }
     ]);
     setLogOpened(true); // Keep log open even after run finishes (or is cancelled)
