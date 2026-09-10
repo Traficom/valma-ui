@@ -540,7 +540,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       runIndex: submodelScenarioIndex,
       first_scenario_id: submodel.firstScenarioId,
       submodel: key,
-      stored_speed_assignment: scenario.stored_speed_assignment && isSet(scenario.stored_speed_assignment)
+      stored_speed_assignment: SUBMODELS.KOKO_SUOMI == key ? true : isSet(scenario.stored_speed_assignment) && scenario.stored_speed_assignment
     }
   }
 
