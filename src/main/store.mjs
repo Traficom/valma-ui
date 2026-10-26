@@ -1,4 +1,4 @@
-const Store = require('electron-store').default;
+import Store from 'electron-store';
 
 const store = new Store();
 
@@ -21,8 +21,13 @@ function migrateSettingsIfNeeded() {
 // Run migration immediately on load
 migrateSettingsIfNeeded();
 
-module.exports = {
-  get: (key) => store.get(key),
-  set: (key, value) => store.set(key, value),
-  delete: (key) => store.delete(key),
+export const get = (key) => store.get(key);
+export const getAll = () => store.store;
+export const set = (key, value) => store.set(key, value);
+export const del = (key) => store.delete(key);
+
+export default {
+  get,
+  set,
+  delete: del,
 };

@@ -10,6 +10,7 @@ declare global {
     /** Simple key–value store */
     store: {
       get<T = unknown>(key: string): Promise<T>;
+      getAll<T = unknown>(): Promise<T>;
       set<T = unknown>(key: string, value: T): Promise<void>;
       delete(key: string): Promise<void>;
     };
@@ -34,6 +35,7 @@ declare global {
       renameSync(oldPath: string, newPath: string): void;
       writeFileSync(file, data): void;
       existsSync(path: string) : boolean;
+      createReadStream(path: string): NodeJS.ReadableStream;
     };
 
     /** OS path helpers */
