@@ -137,11 +137,9 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         if (!fileName.endsWith(".json")) return;
 
         const raw = window.fsHelpers.readFileSync(fsHelpers.join(projectFilepath, fileName));
-        const obj = JSON.parse(
-          typeof raw === "string" ? raw : raw.toString("utf8")
-        );
+        const obj = JSON.parse(raw);
 
-        if ("id" in obj && "name" in obj && "iterations" in obj) {
+        if ("id" in obj && "name" in obj && "scenarioType" in obj && obj.scenarioType != SCENARIO_TYPES.LONG_DISTANCE) {
           addSubmodels(obj);
           foundScenarios.push(
             obj.runStatus ? obj : addRunStatusProperties(obj)
@@ -187,7 +185,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       Object.values(submodels).forEach(model => {
         const submodelIsSelected = (isSet(scenario.submodel) && model.id == scenario.submodel) 
                                     || SUBMODELS.KOKO_SUOMI == model.id; // selects koko_suomi by default to new scenario
-        scenarioSubmodels[model.id] = { selected: submodelIsSelected, firstScenarioId: submodelIsSelected ? scenario.first_scenario_id : 0, runIndex: model.index};
+        scenarioSubmodels[model.id] = { selected: submodelIsSelected, firstScenarioId: submodelIsSelected ? scenario.first_scenario_id : 0};
       });
       scenario.submodels = scenarioSubmodels;
     }
@@ -212,7 +210,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
   const _createScenario = (newScenarioName, scenarioType) => {
     // Generate new (unique) ID for new scenario
     const newId = uuidv4();
-    const isLongDistanceScenario = scenarioType == SCENARIO_TYPES.LONG_DISTANCE;
     const newScenario: ScenarioData = {
       id: newId,
       scenarioType: scenarioType,
@@ -226,7 +223,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       first_matrix_id: 100,
       long_dist_demand_forecast: "base",
       end_assignment_only: false,
-      iterations: isLongDistanceScenario ? 1 : 15,
+      iterations: 15,
       last_run: null,
       subScenarios: [],
       overriddenProjectSettings: {
