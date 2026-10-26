@@ -2,11 +2,11 @@
 const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const { exec } = require('child_process');
 const { download } = require('electron-dl');
-const decompress = require('decompress');
+const unzipper = require('unzipper');
 
 const { deleteAsync } = require('del');
 
-const store = require('./store.cjs');
+const store = require('./store.mjs');
 const fsHelpers = require('./fsHelpers.cjs');
 
 const squirrelStartup = require('electron-squirrel-startup');
@@ -150,9 +150,14 @@ ipcMain.handle(
 );
 
 // Store APIs
-ipcMain.handle('store:get', (_e, { key }) => store.get(key));
-ipcMain.handle('store:set', (_e, { key, value }) => store.set(key, value));
-ipcMain.handle('store:delete', (_e, { key }) => store.delete(key));
+ipcMain.handle('store:get', (_event, key) => store.get(key));
+ipcMain.handle('store:getAll', (_event) => store.getAll());
+ipcMain.handle('store:set', (_event, { key, value }) =>
+  store.set(key, value)
+);
+ipcMain.handle('store:delete', (_event, key) =>
+  store.delete(key)
+);
 
 ipcMain.on('message-from-ui-to-download-model-scripts', (event, args) => {
   const workDir = args.destinationDir;
@@ -166,25 +171,33 @@ ipcMain.on('message-from-ui-to-download-model-scripts', (event, args) => {
       directory: workDir
     }
   )
-    .then((downloadItem) => {
-      const archivePath = downloadItem.getSavePath();
-      // Decompress downloaded archive to tmpDir
-      decompress(archivePath, tmpDir, {strip: 1})
-        .then(() => {
-          // Single-out "/Scripts" folder and move it to destination
-         fsHelpers.renameSync(path.join(tmpDir, "Scripts"), finalDir);
+    .then(async (downloadItem) => {
+      try {
+        const archivePath = downloadItem.getSavePath();
 
-          // Delete archive & tmpDir (del module checks for current working dir, overridable but good sanity check)
-          process.chdir(workDir);
-          deleteAsync(archivePath);
-          deleteAsync(tmpDir);
-          // Notify UI "download (and post-processing) is ready"
-          mainWindow.webContents.send('download-ready', finalDir);
-        })
-        .catch(err => {
-          console.log("Renaming failed");
-          console.error(err);
-        });
+        await fsHelpers.createReadStream(archivePath)
+          .pipe(unzipper.Extract({ path: tmpDir }))
+          .promise();
+
+        const extractedDir = path.join(
+          tmpDir,
+          `valma-model-system-${args.version}`
+        );
+
+        fsHelpers.renameSync(
+          path.join(extractedDir, 'Scripts'),
+          finalDir
+        );
+
+        process.chdir(workDir);
+        await deleteAsync(archivePath);
+        await deleteAsync(tmpDir);
+
+        mainWindow.webContents.send('download-ready', finalDir);
+      } catch (err) {
+        console.error('Extraction failed');
+        console.error(err);
+      }
     });
 });
 

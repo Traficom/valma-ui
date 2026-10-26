@@ -6,6 +6,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 
 import VlemProject from './components/Project/VlemProject';
 import Settings from './components/Settings/Settings';
+import { Config } from './components/Project/Config';
 import LemError from './components/LemError';
 import Loading from './components/Loading';
 import CreateEmmeBank from './components/CreateEmmeBank/CreateEmmeBank';
@@ -180,7 +181,7 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
     if(settingInHandling.id == ""){
       setSettingInHandling(emptySetting);
     }
-    const config = await store.get("config");
+    const config = await window.store.getAll() as Config;
     const id = config?.selected_settings_id;
     setSelectedSettingsId(id);
     setSettingInHandling(findSetting(projectSettings, id));
@@ -393,13 +394,13 @@ const App = ({ VLEMVersion, versions, searchEMMEPython }: any) => {
 
   useEffect(() => {
     const loadConfig = async () => {
-      const config = await store.get("config");
+      const config = await window.store.getAll() as Config;
       const settingsFromStore = config?.settings;
       let selectedSettingsIdFromStore = config?.selected_settings_id;
 
       if (settingsFromStore) {
         if (!selectedSettingsIdFromStore) {
-          selectedSettingsIdFromStore = settingsFromStore[0];
+          selectedSettingsIdFromStore = settingsFromStore[0].id;
         }
         setSettingInHandling(findSetting(settingsFromStore, selectedSettingsIdFromStore));
         setSelectedSettingsId(selectedSettingsIdFromStore);

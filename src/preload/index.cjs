@@ -14,6 +14,7 @@ contextBridge.exposeInMainWorld('system', {
 
 contextBridge.exposeInMainWorld('store', {
   get: (key) => ipcRenderer.invoke('store:get', key),
+  getAll: () => ipcRenderer.invoke('store:getAll'),
   set: (key, value) => ipcRenderer.invoke('store:set', { key, value }),
   delete: (key) => ipcRenderer.invoke('store:delete', key),
 });
