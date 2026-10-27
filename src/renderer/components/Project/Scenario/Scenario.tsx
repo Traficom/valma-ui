@@ -16,6 +16,7 @@ import { cutUnvantedCharacters } from '../../cutUnvantedCharacters';
 import { openFileDialog, openFolderDialog } from '../../Project/Dialog'
 import { isSet } from '../../Common/functions';
 import { color } from 'chart.js/helpers';
+import { LONG_DISTANCE_DEMAND_FORECAST_TYPES } from '../types/LongDistantDemantForecastTypes';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -306,7 +307,7 @@ const Scenario: React.FC<ScenarioProps> = ({
           htmlFor="iterations">Iteraatioiden enimmäismäärä;</label>
 
         <input id="iterations"
-          className="Scenario__number Scenario__inline Scenario__pseudo-file-select numberInput"
+          className="Scenario__number Scenario__inline Scenario__pseudo-file-select"
           type="number"
           min="1"
           max="99"
@@ -375,46 +376,46 @@ const Scenario: React.FC<ScenarioProps> = ({
       {/* Choice how to use long distance demand forecast */}
       {isPassengerTransportScenario && <div className="Scenario__section Scenario_radio_select_section">
         <h4 className="Scenario_radio_label">Työasionti - ja yön yli -matkojen ennuste</h4>
-        <div>
-          <input type="radio" value="base" name="long_dist_demand_forecast"
-            checked={!scenario.long_dist_demand_forecast || scenario.long_dist_demand_forecast == "base"}
+        <div className='space_after'>
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.BASE} name="long_dist_demand_forecast"
+            checked={!scenario.long_dist_demand_forecast || scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.BASE}
             onChange={(e) => {
               updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: "" });
             }} /> Ota projektin lähtödatasta<br />
-          <input type="radio" value="path" name="long_dist_demand_forecast"
-            checked={scenario.long_dist_demand_forecast == "path"}
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH} name="long_dist_demand_forecast"
+            checked={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH}
             onChange={(e) => {
               updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: baseDataFolder });
             }} /> Ota malliajon tuloskansiosta<br />
           <input id="long_dist_demand_forecast_path_input"
             className="Scenario__pseudo-file-select Scenario__inline"
             type="text"
-            disabled={scenario.long_dist_demand_forecast != "path"}
+            disabled={scenario.long_dist_demand_forecast != LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH}
             readOnly={true}
             title={scenario.long_dist_demand_forecast_path}
             value={scenario.long_dist_demand_forecast_path || ""}
-            placeholder={scenario.long_dist_demand_forecast == "path" ? scenario.long_dist_demand_forecast_path : "..."}
+            placeholder={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH ? scenario.long_dist_demand_forecast_path : "..."}
             onClick={async () => {
               const folder = await openFolderDialog(
                 scenario.long_dist_demand_forecast_path ? scenario.long_dist_demand_forecast_path : baseDataFolder
               );
               if (folder) {
-                updateScenario({ ...scenario, long_dist_demand_forecast_path: cutUnvantedCharacters(folder) });
+                updateScenario({ ...scenario, long_dist_demand_forecast_path: cutUnvantedCharacters(folder)});
               }
             }}
           />
-          <input type="radio" value="calc" name="long_dist_demand_forecast"
-            checked={scenario.long_dist_demand_forecast == "calc"}
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC} name="long_dist_demand_forecast"
+            checked={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC}
             onChange={(e) => {
-              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_scenario_number: 1 });
-            }} /> Aja<i className='paddingLeft30'>Emme-scenaario </i>&nbsp;
+              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path : "" });
+            }} /> Aja<i className='paddingLeft'>Emme-skenaario (koko suomi)</i>&nbsp;
           <input id="long_dist_demand_forecast_scenario_number"
-            className="Scenario__number Scenario__inline numberInput"
+            className="Scenario__number Scenario__inline longDistScenarioNumberInput"
             type="number"
             min="1"
             max="99"
             step="1"
-            disabled={scenario.long_dist_demand_forecast != "calc"}
+            disabled={scenario.long_dist_demand_forecast != LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC}
             value={scenario.long_dist_demand_forecast_scenario_number}
             onChange={(e) => {
               updateScenario({ ...scenario, long_dist_demand_forecast_scenario_number: parseInt(e.target.value) });

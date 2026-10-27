@@ -18,12 +18,18 @@
     margin-bottom: 10px;
 }
 
-.paddingLeft30 {
-  padding-left: 45px;
+.paddingLeft {
+  padding-left: 10px;
 }
 
-.numberInput{
-    width: 138px !important;
+.longDistScenarioNumberInput{
+    width: 63px !important;
+    margin-left: 20px;
+    max-height: 38px;
+}
+
+.longDistScenarioNumberInput:disabled{
+   background-color: var(--pale-grey);
 }
 
 .Scenario__heading {

@@ -1,6 +1,6 @@
 const ps = require('python-shell');
 const {ipcRenderer} = require('electron');
-const { getLongDistDemandForecast } = require('./getLongDistDemandForecast.js');
+const { getLongDistDemandForecast } = require('../renderer/components/Common/longDistDemandForecastFunctions.js');
 const { parseLogEvent } = require('./parseLogEvent.js');
 
 module.exports = {
@@ -28,7 +28,7 @@ module.exports = {
         ].concat(["--scenario-name"]).concat(allRunParameters.map(p => p.name))
           .concat(allRunParameters[0].end_assignment_only ? ["--end-assignment-only"] : [])
           .concat(["--emme-project-files"]).concat(allRunParameters.map(p => p.emme_project_file))
-          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(p.scenarioType, p.long_dist_demand_forecast,  p.long_dist_demand_forecast_path)))
+          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(p.long_dist_demand_forecast,  p.long_dist_demand_forecast_path, p.long_dist_demand_forecast_scenario_number)))
           .concat(["--cost-data-file"]).concat(allRunParameters.map(p => p.cost_data_file))
           .concat(["--first-scenario-ids"]).concat(allRunParameters.map(p => p.first_scenario_id))
           .concat(["--zone-data-file"]).concat(allRunParameters.map(p => p.zone_data_file))

@@ -15,6 +15,7 @@ import { SCENARIO_TYPES, SORT_TYPES, SortType } from '../../../enums';
 import { LoggableEvent } from './types/RunLog';
 import vex from '../../main'
 import submodels, { SUBMODELS } from './Scenario/Submodels';
+import { LONG_DISTANCE_DEMAND_FORECAST_TYPES } from './types/LongDistantDemantForecastTypes';
 import { isSet } from '../Common/functions';
 import { _splitKey } from 'chart.js/helpers';
 
@@ -221,7 +222,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       separate_emme_scenarios: false,
       save_matrices_in_emme: false,
       first_matrix_id: 100,
-      long_dist_demand_forecast: "base",
+      long_dist_demand_forecast: LONG_DISTANCE_DEMAND_FORECAST_TYPES.BASE,
       end_assignment_only: false,
       iterations: 15,
       last_run: null,
@@ -501,27 +502,35 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       if (scenarioIDsToRun.includes(scenario.id) && !runnableScenarios.find(s => s.id == scenario.id)) {
         const scenarioRunIndex = scenarioIDsToRun.indexOf(scenario.id) + 1;
 
-        if(SCENARIO_TYPES.PASSENGER_TRANSPORT != scenario.scenarioType){
+        if(SCENARIO_TYPES.GOODS_TRANSPORT == scenario.scenarioType){
           runnableScenarios.push({ ...scenario, runIndex: scenarioRunIndex + 0.001 });
-        }
-
-        if (isSet(scenario.submodels)) {
-          const selectedSubModels = Object.entries(scenario.submodels).filter(([_key, submodel]) => submodel.selected);
-          if (selectedSubModels.length > 0) {
-            selectedSubModels.map(([key, submodel]) => {
-              runnableScenarios.push(createRunnableSubmodelScenario(scenario, [key, submodel], scenarioRunIndex, submodels.find(model => model.id == key).index));
-            });
+        } else {
+          var longDistantForecast = scenario.long_dist_demand_forecast;
+          var calculateLongDistDemandForecast = longDistantForecast && longDistantForecast.length > 0 && LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC == longDistantForecast;
+          
+          // Runs long-distant-demand-forecast first if calc is selected
+          if(calculateLongDistDemandForecast){
+            runnableScenarios.push({ ...scenario, scenarioType: SCENARIO_TYPES.LONG_DISTANCE, runIndex: scenarioRunIndex + 0.001, submodel: SUBMODELS.KOKO_SUOMI, first_scenario_id: scenario.long_dist_demand_forecast_scenario_number });
+          }
+          
+          if (isSet(scenario.submodels)) {
+            const selectedSubModels = Object.entries(scenario.submodels).filter(([_key, submodel]) => submodel.selected);
+            if (selectedSubModels.length > 0) {
+              selectedSubModels.map(([key, submodel]) => {
+                runnableScenarios.push(createRunnableSubmodelScenario(scenario, [key, submodel], scenarioRunIndex, submodels.find(model => model.id == key).index));
+              });
+            }
           }
         }
-      }
 
-      if (scenario.subScenarios && scenario.subScenarios.length > 0) {
-        scenario.subScenarios.forEach(subSenario => {
-          if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
-            const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
-            runnableScenarios.push({ ...scenario, ...subSenario, parentScenarioId: scenario.id, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
-          }
-        })
+        if (scenario.subScenarios && scenario.subScenarios.length > 0) {
+          scenario.subScenarios.forEach(subSenario => {
+            if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
+              const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
+              runnableScenarios.push({ ...scenario, ...subSenario, parentScenarioId: scenario.id, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
+            }
+          })
+        }
       }
     });
 
@@ -529,12 +538,13 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     return sortedRunnableScenarios;
   }
 
-  function createRunnableSubmodelScenario(scenario: ScenarioData, [key, submodel]: [string, SubmodelData], scenarioIndex: number, subModelIndex: number,) {
+  function createRunnableSubmodelScenario(scenario: ScenarioData, [key, submodel]: [string, SubmodelData], calculateLongDistDemandForecast: boolean, scenarioIndex: number, subModelIndex: number,) {
     const submodelScenarioIndex = scenarioIndex + ((1 + subModelIndex) / 10000);
     return {
       ...scenario,
       id: SUBMODEL_PREFIX + submodelScenarioIndex + "_" + scenario.id,
       runIndex: submodelScenarioIndex,
+      long_dist_demand_forecast: calculateLongDistDemandForecast? LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH : scenario.long_dist_demand_forecast,
       first_scenario_id: submodel.firstScenarioId,
       submodel: key,
       stored_speed_assignment: SUBMODELS.KOKO_SUOMI == key ? true : isSet(scenario.stored_speed_assignment) && scenario.stored_speed_assignment
