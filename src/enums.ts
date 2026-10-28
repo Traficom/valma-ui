@@ -10,6 +10,7 @@ export type ScenarioStatusState =
 
 export const SCENARIO_TYPES = {
   GOODS_TRANSPORT: 'goods_transport',
+  /** Deprecated */
   LONG_DISTANCE: 'long_distance',
   PASSENGER_TRANSPORT: 'passenger_transport',
 } as const;

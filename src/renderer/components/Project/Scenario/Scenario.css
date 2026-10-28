@@ -11,11 +11,25 @@
 }
 
 .Scenario_radio_select_section {
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .Scenario_radio_label {
     margin-bottom: 10px;
+}
+
+.paddingLeft {
+  padding-left: 10px;
+}
+
+.longDistScenarioNumberInput{
+    width: 63px !important;
+    margin-left: 20px;
+    max-height: 38px;
+}
+
+.longDistScenarioNumberInput:disabled{
+   background-color: var(--pale-grey);
 }
 
 .Scenario__heading {
@@ -205,12 +219,16 @@ span.Scenario__inline {
 .Submodel_select select{
     width: 240px;
     height: 30px;
-    border: 1px solid var(--medium-grey);
+    border: 1px solid var(--color-brand-base);
+    color: black !important;
     font-size: 16px;
     font-family: open_sans_medium, sans-serif;
-    color: var(--dark-grey);
     border-radius: 2px;
     padding-left: 4px;
+}
+
+.Submodel_select select:disabled{
+    color: var(--medium-grey) !important;
 }
 
 .flexContainer {
@@ -220,6 +238,7 @@ span.Scenario__inline {
 .validation_failure {
     border-color: var(--error-red) !important;
 }
+
 .stored_speed_assignment_fields {
     display: flex;
     vertical-align: bottom;
