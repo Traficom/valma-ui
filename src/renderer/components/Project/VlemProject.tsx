@@ -15,7 +15,7 @@ import { SCENARIO_TYPES, SORT_TYPES, SortType } from '../../../enums';
 import { LoggableEvent } from './types/RunLog';
 import vex from '../../main'
 import submodels, { SUBMODELS } from './Scenario/Submodels';
-import { LONG_DISTANCE_DEMAND_FORECAST_TYPES } from './types/LongDistantDemantForecastTypes';
+import { LONG_DIST_DEMAND_FORECAST_RESULTS_PATH_PLACEHOLDER, LONG_DISTANCE_DEMAND_FORECAST_TYPES } from './types/LongDistantDemantForecastTypes';
 import { isSet } from '../Common/functions';
 import { _splitKey } from 'chart.js/helpers';
 
@@ -399,6 +399,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       cost_data_file: subScenario.cost_data_file,
       last_run: "",
       runSuccess: false,
+      submodel: "",
       runStatus: {
         statusIterationsTotal: null,
         statusIterationsCurrent: 0,
@@ -470,6 +471,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     newSubScenarios[index].name = `${subScenarioEdit.name}`;
     newSubScenarios[index].emmeScenarioNumber = `${subScenarioEdit.emmeScenarioNumber}`;
     newSubScenarios[index].cost_data_file = `${subScenarioEdit.cost_data_file}`;
+    newSubScenarios[index].submodel = `${subScenarioEdit.submodel}`;
     parentScenario.subScenarios = [...newSubScenarios];
     _updateScenario(parentScenario);
   }
@@ -485,6 +487,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       cost_data_file: `${subScenarioEdit.cost_data_file}`,
       lastRun: "",
       runSuccess: false,
+      submodel: `${subScenarioEdit.submodel}`,
       runStatus: subScenarioEdit.runStatus
     }
     parentScenario.subScenarios = [...parentScenario.subScenarios, newSubScenario]
@@ -502,17 +505,17 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       if (scenarioIDsToRun.includes(scenario.id) && !runnableScenarios.find(s => s.id == scenario.id)) {
         const scenarioRunIndex = scenarioIDsToRun.indexOf(scenario.id) + 1;
 
-        if(SCENARIO_TYPES.GOODS_TRANSPORT == scenario.scenarioType){
+        if (SCENARIO_TYPES.GOODS_TRANSPORT == scenario.scenarioType) {
           runnableScenarios.push({ ...scenario, runIndex: scenarioRunIndex + 0.001 });
         } else {
           var longDistantForecast = scenario.long_dist_demand_forecast;
           var calculateLongDistDemandForecast = longDistantForecast && longDistantForecast.length > 0 && LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC == longDistantForecast;
-          
+
           // Runs long-distant-demand-forecast first if calc is selected
-          if(calculateLongDistDemandForecast){
-            runnableScenarios.push({ ...scenario, scenarioType: SCENARIO_TYPES.LONG_DISTANCE, runIndex: scenarioRunIndex + 0.001, submodel: SUBMODELS.KOKO_SUOMI, first_scenario_id: scenario.long_dist_demand_forecast_scenario_number });
+          if (calculateLongDistDemandForecast) {
+            runnableScenarios.push({ ...scenario, scenarioType: SCENARIO_TYPES.LONG_DISTANCE, runIndex: scenarioRunIndex, submodel: SUBMODELS.KOKO_SUOMI, first_scenario_id: scenario.long_dist_demand_forecast_scenario_number });
           }
-          
+
           if (isSet(scenario.submodels)) {
             const selectedSubModels = Object.entries(scenario.submodels).filter(([_key, submodel]) => submodel.selected);
             if (selectedSubModels.length > 0) {
@@ -522,15 +525,15 @@ const VlemProject: React.FC<VlemProjectProps> = ({
             }
           }
         }
+      }
 
-        if (scenario.subScenarios && scenario.subScenarios.length > 0) {
-          scenario.subScenarios.forEach(subSenario => {
-            if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
-              const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
-              runnableScenarios.push({ ...scenario, ...subSenario, parentScenarioId: scenario.id, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
-            }
-          })
-        }
+      if (scenario.subScenarios && scenario.subScenarios.length > 0) {
+        scenario.subScenarios.forEach(subSenario => {
+          if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
+            const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
+            runnableScenarios.push({ ...scenario, ...subSenario, submodel: subSenario.submodel, parentScenarioId: scenario.id, runIndex: scenarioRunIndexForSubScenario + ((scenarioIDsToRun.indexOf(subSenario.id) + 1) / 100) });
+          }
+        })
       }
     });
 
@@ -545,11 +548,23 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       id: SUBMODEL_PREFIX + submodelScenarioIndex + "_" + scenario.id,
       runIndex: submodelScenarioIndex,
       long_dist_demand_forecast: calculateLongDistDemandForecast ? LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH : scenario.long_dist_demand_forecast,
-      long_dist_demand_forecast_path: calculateLongDistDemandForecast == true || LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH == scenario.long_dist_demand_forecast ? scenario.long_dist_demand_forecast_path : "",
+      long_dist_demand_forecast_path: resolveLongDistDemandForecastPath(calculateLongDistDemandForecast, scenario),
       first_scenario_id: submodel.firstScenarioId,
       submodel: key,
       stored_speed_assignment: SUBMODELS.KOKO_SUOMI == key ? true : isSet(scenario.stored_speed_assignment) && scenario.stored_speed_assignment
     }
+  }
+
+  function resolveLongDistDemandForecastPath(calculateLongDistDemandForecast: boolean, scenario: ScenarioData ){
+      if(calculateLongDistDemandForecast == true){
+        return LONG_DIST_DEMAND_FORECAST_RESULTS_PATH_PLACEHOLDER
+      }
+
+      if(LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH == scenario.long_dist_demand_forecast){
+        return scenario.long_dist_demand_forecast_path;
+      }
+
+      return "";
   }
 
   function resolveScenarioId(scenario) {
@@ -624,34 +639,32 @@ const VlemProject: React.FC<VlemProjectProps> = ({
         const scenario = s.parentScenarioId ? scenarios.find(scen => scen.id == s.parentScenarioId) : s;
         // when running subScenario --scenario-name ja --first-scenario-id and scenario-id will be used from it
         const subScenario = s.parentScenarioId ? s : undefined;
-        const name = subScenario ? subScenario.name : scenario.name;
+
         const id = subScenario ? subScenario.id : resolveScenarioId(scenario);
         const first_scenario_id = subScenario ? subScenario.emmeScenarioNumber : scenario.first_scenario_id;
         const end_assignment_only = subScenario ? true : scenario.end_assignment_only
-        const cost_data_file = subScenario && subScenario.cost_data_file ? subScenario.cost_data_file : scenario.cost_data_file;
 
-        const emme_project_path = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
-        const emme_entry_point_file_path = emme_project_path + `\\${projectName}\\${projectName}.emp`
-        const result_data_folder = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
+        const project_path = determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.projectFolder, projectFolder);
+        const emme_entry_point_file_path = project_path + `\\${projectName}\\${projectName}.emp`
         // when running subScenario, base data path is parents result path
-        const base_data_folder = subScenario ? result_data_folder + `\\${scenario.name}\\` : determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.baseDataFolder, baseDataFolder);
+        const base_data_folder = subScenario ? project_path + `\\${scenario.name}\\` : determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.baseDataFolder, baseDataFolder);
+        const long_dist_demand_forecast_path = LONG_DIST_DEMAND_FORECAST_RESULTS_PATH_PLACEHOLDER == scenario.long_dist_demand_forecast_path ? project_path + "\\demand_matrices\\business_and_overnight" : scenario.long_dist_demand_forecast_path;
 
         // Run parameters per each run (enrich with global settings' paths to EMME python & VLEM model system
         return {
-          ...scenario,
+          ...s,
           id: id,
-          name: name,
           first_scenario_id: first_scenario_id,
           emme_project_file: emme_entry_point_file_path,
+          end_assignment_only: end_assignment_only,
           emme_python_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.emmePythonPath, emmePythonPath),
           valma_scripts_path: determinePath(scenario.overriddenProjectSettings, scenario.overriddenProjectSettings.valmaScriptsPath, valmaScriptsPath),
           base_data_folder: base_data_folder,
-          result_data_folder: result_data_folder,
+          result_data_folder: project_path,
           log_level: 'DEBUG',
-          end_assignment_only: end_assignment_only,
-          cost_data_file: cost_data_file,
           mode_dest_calibration_file: modeDestCalibrationFile,
           municipality_calibration_file: municipalityCalibrationFile,
+          long_dist_demand_forecast_path: long_dist_demand_forecast_path
         }
       })
     );

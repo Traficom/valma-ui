@@ -1,8 +1,7 @@
 const ps = require('python-shell');
 const {ipcRenderer} = require('electron');
-const { getLongDistDemandForecast } = require('../renderer/components/Common/longDistDemandForecastFunctions.js');
+const { getLongDistDemandForecast } = require('./getLongDistDemandForecast.js');
 const { parseLogEvent } = require('./parseLogEvent.js');
-
 module.exports = {
 
   runInputValidationPythonShell: function (worker, allRunParameters, onEndCallback) {
@@ -28,7 +27,7 @@ module.exports = {
         ].concat(["--scenario-name"]).concat(allRunParameters.map(p => p.name))
           .concat(allRunParameters[0].end_assignment_only ? ["--end-assignment-only"] : [])
           .concat(["--emme-project-files"]).concat(allRunParameters.map(p => p.emme_project_file))
-          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(p.long_dist_demand_forecast,  p.long_dist_demand_forecast_path, p.long_dist_demand_forecast_scenario_number)))
+          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(allRunParameters[0].result_data_folder, p.long_dist_demand_forecast,  p.long_dist_demand_forecast_path, p.long_dist_demand_forecast_scenario_number)))
           .concat(["--cost-data-file"]).concat(allRunParameters.map(p => p.cost_data_file))
           .concat(["--first-scenario-ids"]).concat(allRunParameters.map(p => p.first_scenario_id))
           .concat(["--zone-data-file"]).concat(allRunParameters.map(p => p.zone_data_file))
@@ -70,7 +69,7 @@ module.exports = {
       return;
     }
 
-    let longDistDemandForecast = getLongDistDemandForecast(runParameters.scenarioType, runParameters.long_dist_demand_forecast,  runParameters.long_dist_demand_forecast_path);
+    let longDistDemandForecast = getLongDistDemandForecast(runParameters.result_data_folder, runParameters.scenarioType, runParameters.long_dist_demand_forecast,  runParameters.long_dist_demand_forecast_path);
     // Start valma-model-system's valma_travel.py in shell with EMME's python interpreter
     worker = new ps.PythonShell(
       `${runParameters.valma_scripts_path}/valma_travel.py`,

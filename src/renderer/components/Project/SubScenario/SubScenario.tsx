@@ -4,6 +4,8 @@ import './SubScenario.css';
 import { openFileDialog } from '../Project/../Dialog'
 import { cutUnvantedCharacters } from '../../cutUnvantedCharacters';
 import ResetIcon from '../../../icons/ResetIcon';
+import submodels from '../Scenario/Submodels';
+import { SUBMODELS } from '../Scenario/Submodels';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                              */
@@ -22,6 +24,7 @@ interface SubScenarioEdit {
   emmeScenarioNumber: number | string;
   cost_data_file: string;
   parentCostDataFile: string;
+  submodel: string;
 }
 
 interface SubScenarioProps {
@@ -137,8 +140,20 @@ const SubScenario: React.FC<SubScenarioProps> = ({
               }
             }}
           />
+          <div className="Scenario__section">
+            <label className="Scenario__pseudo-label"
+              htmlFor="submodel">Osamalli</label>
+            <div className="Submodel_select">
+              <select id="submodel"
+                value={subScenarioEdit.submodel} onChange={e => handleChange({ ...subScenarioEdit, submodel: e.target.value })}>
+                <option key={"submodel_select"} value={""}>--- valitse ---</option>
+                {submodels && submodels.map((submodel) =>
+                  <option key={submodel.id} value={submodel.id}>{submodel.name}</option>)
+                }
+              </select>
+            </div></div>
         </div>
-
+        {!subScenarioEdit.submodel ? <span className="SubScenario_error">Valitse osamalli!</span> : ""}
         <label className="SubScenario_label"
           htmlFor="submodel">Aliskenaarion kysyntämatriisit otetaan skenaariosta <b>{subScenarioEdit.parentScenarioName}</b></label>
 
@@ -146,8 +161,8 @@ const SubScenario: React.FC<SubScenarioProps> = ({
         <div className="SubScenario_buttons">
           <button
             className="SubScenario_btn"
-            disabled={nameIsInValid}
-            onClick={(e) => { !nameIsInValid && handleSave() }}
+            disabled={nameIsInValid || subScenarioEdit.submodel == undefined }
+            onClick={(e) => {( !nameIsInValid || !subScenarioEdit.submodel )  && handleSave() }}
           >
             <span>Tallenna</span>
           </button>

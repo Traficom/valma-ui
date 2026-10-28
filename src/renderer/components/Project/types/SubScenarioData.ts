@@ -8,6 +8,7 @@ export interface SubScenarioData {
   cost_data_file?: string;
   last_run?: string,
   parentCostDataFile?: string;
+  submodel: string;
   runSuccess?: boolean;
   runStatus?: RunStatus | null;
 }
