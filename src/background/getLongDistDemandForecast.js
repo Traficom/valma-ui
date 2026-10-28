@@ -1,12 +1,12 @@
 function getLongDistDemandForecast(
+  result_folder_path,
   scenarioType,
   long_dist_demand_forecast,
   long_dist_demand_forecast_path
 ) {
-  if(scenarioType == "long_distance"){
+  if(scenarioType == "long_distance" || long_dist_demand_forecast == "calc"){
     return "calc"
   }
-  let longDistDemandForecast = "base";
   if (long_dist_demand_forecast && long_dist_demand_forecast.length > 0) {
     if (long_dist_demand_forecast == "path") {
       if (
@@ -16,12 +16,11 @@ function getLongDistDemandForecast(
         alert("Please fill in long dist demand forecast path."); // Should never occur
         return;
       }
-      longDistDemandForecast = long_dist_demand_forecast_path;
-    } else {
-      longDistDemandForecast = long_dist_demand_forecast;
+      return long_dist_demand_forecast_path;
     }
+    return long_dist_demand_forecast;
   }
-  return longDistDemandForecast;
+  return "base";
 }
 
 module.exports = { getLongDistDemandForecast };

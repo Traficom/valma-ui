@@ -15,6 +15,8 @@ import { ScenarioData, SubmodelData } from '../types/ScenarioData'
 import { cutUnvantedCharacters } from '../../cutUnvantedCharacters';
 import { openFileDialog, openFolderDialog } from '../../Project/Dialog'
 import { isSet } from '../../Common/functions';
+import { color } from 'chart.js/helpers';
+import { LONG_DISTANCE_DEMAND_FORECAST_TYPES } from '../types/LongDistantDemantForecastTypes';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -150,7 +152,7 @@ const Scenario: React.FC<ScenarioProps> = ({
         <input id={"submodel_input_" + index}
           className="Scenario__inline"
           type="checkbox"
-          disabled={isPassengerTransportScenario == false || longDistDemandForecastIsCalc()}
+          disabled={isPassengerTransportScenario == false}
           checked={submodel.selected}
           onChange={() => {
             updateSubmodel([submodelName, {...submodel, selected: !!submodel.selected ? false : true}])
@@ -299,40 +301,6 @@ const Scenario: React.FC<ScenarioProps> = ({
         {!scenario.trade_demand_file ? <span className="Scenario-error">{"Vienti- ja tuontidata on pakollinen tieto."}</span> : ""}
       </div>}
 
-      {/* Choice how to use long distance demand forecast */}
-      {isPassengerTransportScenario && <div className="Scenario__section Scenario_radio_select_section">
-        <h4 className="Scenario_radio_label">Pitkien matkojen kysyntäennuste</h4>
-        <div>
-          <input type="radio" value="base" name="long_dist_demand_forecast"
-            checked={!scenario.long_dist_demand_forecast || scenario.long_dist_demand_forecast == "base"}
-            onChange={(e) => {
-              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: "" });
-            }} /> Ota projektin lähtödatasta<br />
-          <input type="radio" value="path" name="long_dist_demand_forecast"
-            checked={scenario.long_dist_demand_forecast == "path"}
-            onChange={(e) => {
-              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: baseDataFolder });
-            }} /> Ota malliajon tuloskansiosta<br />
-          <input id="long_dist_demand_forecast_path_input"
-            className="Scenario__pseudo-file-select Scenario__inline"
-            type="text"
-            disabled={scenario.long_dist_demand_forecast != "path"}
-            readOnly={true}
-            title={scenario.long_dist_demand_forecast_path}
-            value={scenario.long_dist_demand_forecast_path || ""}
-            placeholder={scenario.long_dist_demand_forecast == "path" ? scenario.long_dist_demand_forecast_path : "..."}
-            onClick={async () => {
-              const folder = await openFolderDialog(
-                scenario.long_dist_demand_forecast_path ? scenario.long_dist_demand_forecast_path : baseDataFolder
-              );
-              if (folder) {
-                updateScenario({ ...scenario, long_dist_demand_forecast_path: cutUnvantedCharacters(folder) });
-              }
-            }}
-          />
-        </div>
-      </div>}
-
       {isPassengerTransportScenario && <div className="Scenario__section">
         {/* Number of iterations to run */}
         <label className="Scenario__pseudo-label"
@@ -344,7 +312,7 @@ const Scenario: React.FC<ScenarioProps> = ({
           min="1"
           max="99"
           step="1"
-          disabled={scenario.end_assignment_only || longDistDemandForecastIsCalc()}
+          disabled={scenario.end_assignment_only}
           value={scenario.iterations}
           onChange={(e) => {
             updateScenario({ ...scenario, iterations: parseInt(e.target.value) });
@@ -368,7 +336,6 @@ const Scenario: React.FC<ScenarioProps> = ({
       {/* Choice for goods transport freight matrix path */}
       {isPassengerTransportScenario && <div className="Scenario__section Scenario_radio_select_section">
         <h4 className="Scenario_radio_label">Tavaraliikenteen kysyntäennuste</h4>
-        <div>
           <input type="radio" value="base" name="freight_matrix_path"
             checked={goodsTransportFreightMatrixSource == "base"}
             onChange={(e) => {
@@ -404,6 +371,56 @@ const Scenario: React.FC<ScenarioProps> = ({
               }
             }}
           />
+      </div>}
+      
+      {/* Choice how to use long distance demand forecast */}
+      {isPassengerTransportScenario && <div className="Scenario__section Scenario_radio_select_section">
+        <h4 className="Scenario_radio_label">Työasionti - ja yön yli -matkojen ennuste</h4>
+        <div className='space_after'>
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.BASE} name="long_dist_demand_forecast"
+            checked={!scenario.long_dist_demand_forecast || scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.BASE}
+            onChange={(e) => {
+              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: "" });
+            }} /> Ota projektin lähtödatasta<br />
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH} name="long_dist_demand_forecast"
+            checked={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH}
+            onChange={(e) => {
+              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path: baseDataFolder });
+            }} /> Ota malliajon tuloskansiosta<br />
+          <input id="long_dist_demand_forecast_path_input"
+            className="Scenario__pseudo-file-select Scenario__inline"
+            type="text"
+            disabled={scenario.long_dist_demand_forecast != LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH}
+            readOnly={true}
+            title={scenario.long_dist_demand_forecast_path}
+            value={scenario.long_dist_demand_forecast_path || ""}
+            placeholder={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH ? scenario.long_dist_demand_forecast_path : "..."}
+            onClick={async () => {
+              const folder = await openFolderDialog(
+                scenario.long_dist_demand_forecast_path ? scenario.long_dist_demand_forecast_path : baseDataFolder
+              );
+              if (folder) {
+                updateScenario({ ...scenario, long_dist_demand_forecast_path: cutUnvantedCharacters(folder)});
+              }
+            }}
+          />
+          <input type="radio" value={LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC} name="long_dist_demand_forecast"
+            checked={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC}
+            onChange={(e) => {
+              updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path : "" });
+            }} /> Aja<i className='paddingLeft'>Emme-skenaario (koko suomi)</i>&nbsp;
+          <input id="long_dist_demand_forecast_scenario_number"
+            className="Scenario__number Scenario__inline longDistScenarioNumberInput"
+            type="number"
+            min="1"
+            max="99"
+            step="1"
+            disabled={scenario.long_dist_demand_forecast != LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC}
+            value={scenario.long_dist_demand_forecast_scenario_number}
+            onChange={(e) => {
+              updateScenario({ ...scenario, long_dist_demand_forecast_scenario_number: parseInt(e.target.value) });
+            }}
+          />
         </div>
       </div>}
 
@@ -421,7 +438,7 @@ const Scenario: React.FC<ScenarioProps> = ({
           value={scenario.submodel} onChange={e => updateScenario({ ...scenario, submodel: e.target.value })}>
           <option key={"submodel_select"} value={""}>--- valitse ---</option>
           {submodels && submodels.map((submodel) =>
-            <option key={submodel.id} value={submodel.id}>{submodel.name}</option>)
+            <option  key={submodel.id} value={submodel.id}>{submodel.name}</option>)
           }
         </select>
       </div></div>)}
@@ -440,8 +457,6 @@ const Scenario: React.FC<ScenarioProps> = ({
         </Fragment>
       )}
   
-
-
       <div className="Scenario__section Scenario__title">
         Lisävalinnat
       </div>

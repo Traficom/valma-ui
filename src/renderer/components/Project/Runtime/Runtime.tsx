@@ -238,12 +238,6 @@ const Runtime: React.FC<RuntimeProps> = ({
           <button
             className="Runtime__button"
             disabled={runningScenarioID != null}
-            onClick={e => handleClickNewScenario(SCENARIO_TYPES.LONG_DISTANCE)}>
-            <PlusLabel label='Uusi pitkien matkojen skenaario' />
-          </button>
-          <button
-            className="Runtime__button"
-            disabled={runningScenarioID != null}
             onClick={e => handleClickNewScenario(SCENARIO_TYPES.GOODS_TRANSPORT)}>
             <PlusLabel label='Uusi tavaraliikenteen skenaario' />
           </button>

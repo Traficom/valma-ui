@@ -69,6 +69,14 @@ const SubScenarioRow: React.FC<SubScenarioRowProps> = ({
     }
   };
 
+  function handleClickSubScenarioToActive(id: string){
+    if(!subScenario.submodel){
+      alert("Aliskenaariolle ei ole valittu osamallia, sitä ei voi valita ajoon");
+    }else{
+       handleClickScenarioToActive(id);
+    }
+  }
+
   return (
     <tr id="my-sub-tooltip-anchor" className="Runtime__sub_scenario" key={"tooltip_wrapper_" + subScenario.id}>
       <td>
@@ -82,7 +90,7 @@ const SubScenarioRow: React.FC<SubScenarioRowProps> = ({
           type="checkbox"
           checked={scenarioIDsToRun.includes(subScenario.id)}
           disabled={!parentScenarioIsRunOrSelectedForRunning || runningScenarioID == subScenario.id}
-          onChange={e => handleClickScenarioToActive(subScenario.id)}
+          onChange={e => handleClickSubScenarioToActive(subScenario.id)}
         />
       </td>
       <td data-tooltip-id="scenario-tooltip"

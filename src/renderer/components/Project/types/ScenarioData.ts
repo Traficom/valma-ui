@@ -22,6 +22,7 @@ export interface ScenarioData {
 
   long_dist_demand_forecast?: string;
   long_dist_demand_forecast_path?: string;
+  long_dist_demand_forecast_scenario_number?: number;
 
   end_assignment_only?: boolean;
 
