@@ -517,7 +517,7 @@ const VlemProject: React.FC<VlemProjectProps> = ({
             const selectedSubModels = Object.entries(scenario.submodels).filter(([_key, submodel]) => submodel.selected);
             if (selectedSubModels.length > 0) {
               selectedSubModels.map(([key, submodel]) => {
-                runnableScenarios.push(createRunnableSubmodelScenario(scenario, [key, submodel], scenarioRunIndex, submodels.find(model => model.id == key).index));
+                runnableScenarios.push(createRunnableSubmodelScenario(scenario, [key, submodel], calculateLongDistDemandForecast, scenarioRunIndex, submodels.find(model => model.id == key).index));
               });
             }
           }
@@ -544,7 +544,8 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       ...scenario,
       id: SUBMODEL_PREFIX + submodelScenarioIndex + "_" + scenario.id,
       runIndex: submodelScenarioIndex,
-      long_dist_demand_forecast: calculateLongDistDemandForecast? LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH : scenario.long_dist_demand_forecast,
+      long_dist_demand_forecast: calculateLongDistDemandForecast ? LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH : scenario.long_dist_demand_forecast,
+      long_dist_demand_forecast_path: calculateLongDistDemandForecast == true || LONG_DISTANCE_DEMAND_FORECAST_TYPES.PATH == scenario.long_dist_demand_forecast ? scenario.long_dist_demand_forecast_path : "",
       first_scenario_id: submodel.firstScenarioId,
       submodel: key,
       stored_speed_assignment: SUBMODELS.KOKO_SUOMI == key ? true : isSet(scenario.stored_speed_assignment) && scenario.stored_speed_assignment
