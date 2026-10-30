@@ -546,7 +546,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
     });
 
     const sortedRunnableScenarios = runnableScenarios.sort((a, b) => a.runIndex - b.runIndex);
-    console.log(sortedRunnableScenarios);
     return sortedRunnableScenarios;
   }
 
