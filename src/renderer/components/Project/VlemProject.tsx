@@ -527,7 +527,6 @@ const VlemProject: React.FC<VlemProjectProps> = ({
       }
 
       if (scenario.subScenarios && scenario.subScenarios.length > 0) {
-        console.log(calculateLongDistDemandForecast);
         scenario.subScenarios.forEach(subSenario => {
           if (scenarioIDsToRun.includes(subSenario.id) && !runnableScenarios.find(s => s.id == subSenario.id)) {
             const scenarioRunIndexForSubScenario = scenarioIDsToRun.includes(scenario.id) ? scenarioIDsToRun.indexOf(scenario.id) + 1 : scenarioIDsToRun.indexOf(subSenario.id) + 1;
