@@ -159,7 +159,7 @@ const Scenario: React.FC<ScenarioProps> = ({
           }}
         /></span>
         <label className='stored_speed_assignment_labels' style={{ whiteSpace: 'pre-line' }}>
-          {submodels.filter(model => model.id == submodelName)[0].name}{SUBMODELS.KOKO_SUOMI == submodelName ? '\n Tallennetun nopeuden sijoittelu' : ' Emme skenaario'}
+          {submodels.filter(model => model.id == submodelName)[0].name}{SUBMODELS.KOKO_SUOMI == submodelName ? 'Emme-skenaario\n Tallennetun nopeuden sijoittelu' : ' Emme-skenaario'}
         </label>
         <input id={"stored_speed_assignment_input_" + index}
           className={(!!submodel.selected && !isSet(submodel.firstScenarioId)) ? 
