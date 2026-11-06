@@ -229,7 +229,7 @@ const Scenario: React.FC<ScenarioProps> = ({
 
       {/* Folder path to variable input data (input data with variables sent to EMME) */}
       <div className="Scenario__section">
-        <span className="Scenario__pseudo-label">Syöttötiedot</span>
+        <span className="Scenario__pseudo-label">Aluetiedot (.gpkg)</span>
         <label className="Scenario__pseudo-file-select" htmlFor="data-folder-select" title={scenario.zone_data_file}>
           {scenario.zone_data_file ? path.basename(scenario.zone_data_file) : "Valitse.."}
         </label>
@@ -249,7 +249,7 @@ const Scenario: React.FC<ScenarioProps> = ({
             }
           }}
         />
-        {!scenario.zone_data_file ? <span className="Scenario-error">{"Syöttötiedot on pakollinen tieto."}</span> : ""}
+        {!scenario.zone_data_file ? <span className="Scenario-error">{"Aluetiedot on pakollinen tieto."}</span> : ""}
       </div>
 
       {/* File path to cost data */}
@@ -278,7 +278,7 @@ const Scenario: React.FC<ScenarioProps> = ({
 
       {/* Import and export data */}
       {isFreightScenario && <div className="Scenario__section">
-        <span className="Scenario__pseudo-label">Vienti- ja tuontidata</span>
+        <span className="Scenario__pseudo-label">Viennin ja tuonnin kysyntädata (.omx)</span>
         <label className="Scenario__pseudo-file-select" htmlFor="import-and-export-data-file-select" title={scenario.trade_demand_file}>
           {scenario.trade_demand_file ? path.basename(scenario.trade_demand_file) : "Valitse.."}
         </label>
@@ -408,7 +408,7 @@ const Scenario: React.FC<ScenarioProps> = ({
             checked={scenario.long_dist_demand_forecast == LONG_DISTANCE_DEMAND_FORECAST_TYPES.CALC}
             onChange={(e) => {
               updateScenario({ ...scenario, long_dist_demand_forecast: e.target.value, long_dist_demand_forecast_path : "" });
-            }} /> Aja<i className='paddingLeft'>Emme-skenaario (koko suomi)</i>&nbsp;
+            }} /> Aja<i className='paddingLeft'>Emme-skenaario (koko Suomi)</i>&nbsp;
           <input id="long_dist_demand_forecast_scenario_number"
             className="Scenario__number Scenario__inline longDistScenarioNumberInput"
             type="number"
