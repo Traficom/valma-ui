@@ -233,7 +233,7 @@ const Runtime: React.FC<RuntimeProps> = ({
             className="Runtime__button"
             disabled={runningScenarioID != null}
             onClick={e => handleClickNewScenario(SCENARIO_TYPES.PASSENGER_TRANSPORT)}>
-            <PlusLabel label='Uusi lyhyiden matkojen skenaario' />
+            <PlusLabel label='Uusi henkilöliikenteen skenaario' />
           </button>
           <button
             className="Runtime__button"
