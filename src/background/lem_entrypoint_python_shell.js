@@ -27,7 +27,7 @@ module.exports = {
         ].concat(["--scenario-name"]).concat(allRunParameters.map(p => p.name))
           .concat(allRunParameters[0].end_assignment_only ? ["--end-assignment-only"] : [])
           .concat(["--emme-project-files"]).concat(allRunParameters.map(p => p.emme_project_file))
-          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(allRunParameters[0].result_data_folder, p.long_dist_demand_forecast,  p.long_dist_demand_forecast_path, p.long_dist_demand_forecast_scenario_number)))
+          .concat(["--long-dist-demand-forecast"]).concat(allRunParameters.map(p => getLongDistDemandForecast(p.result_data_folder, p.scenarioType,  p.long_dist_demand_forecast, p.long_dist_demand_forecast_path)))
           .concat(["--cost-data-file"]).concat(allRunParameters.map(p => p.cost_data_file))
           .concat(["--first-scenario-ids"]).concat(allRunParameters.map(p => p.first_scenario_id))
           .concat(["--zone-data-file"]).concat(allRunParameters.map(p => p.zone_data_file))
